@@ -1,0 +1,15 @@
+PyYAML
+matplotlib
+ipywidgets
+ipykernel
+setuptools
+langchain
+langchain-community
+langchain-experimental
+langchain-openai
+langchain-ollama
+langgraph
+
+langchain-azure-ai[opentelemetry]
+autogen
+autogen_core

@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=78.1.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+dynamic = ["dependencies"]
+name = "frank"
+version = "0.1.0"
+description = "TODO: add description"
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.12.3"
+authors = [
+    { name = "eiingeeel", email = "aangel.maragones@outlook.com" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+keywords = ["LLM", "azure", "langgraph", "autogen", "langchain", "azure-ai-foundry", "azure-ai-search"]
+
+[project.urls]
+homepage = "https://github.com/eiingeeel/frankenst-ai"
+issues = "https://github.com/eiingeeel/frankenst-ai/issues"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+[tool.setuptools.packages.find]
+where = ["src", "services"]  # list of folders that contain the packages (["."] by default)
+include = ["**"]  # package names should match these glob patterns (["*"] by default)
+namespaces = false  # to disable scanning PEP 420 namespaces (true by default)

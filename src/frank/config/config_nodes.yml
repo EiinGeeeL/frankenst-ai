@@ -1,0 +1,17 @@
+OAKLANG_NODE:
+  name: OakLangAgent
+  type: enhancer
+  description: This is the main node. With bind tools of summarization to creare a resume of a chat. This is not a supervisors.
+
+OAKTOOLS_NODE:
+  name: OakTools
+  type: tools
+  description: Main tools for being used by $(OAKLANG_NODE.name).
+
+HUMAN_REVIEW_NODE:
+  name: human_review
+  type: commander
+  route: 
+    enhancer: $(OAKLANG_NODE.name)
+    tools: $(OAKTOOLS_NODE.name)
+  description: This is a command node that routes to an enhancer and tools node modifying the state for human in the loop.

@@ -1,0 +1,16 @@
+logging:
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  datefmt: '%Y-%m-%d %H:%M:%S'
+  log_file: 'cheese.log'
+
+ollama:
+  model: llama3.2:1b
+  temperature: 0
+
+azureopenai:
+  temperature: 0
+
+launch:
+  model: azureai
+  embeddings: None
+  turbo_model: None
