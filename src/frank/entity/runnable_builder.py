@@ -41,7 +41,14 @@ class RunnableBuilder(ABC):
         Invoke the chain.
         """
         return self._get_chain.invoke(message)
-        
+
+
+    def ainvoke(self, message: str) -> str:
+        """
+        Ainvoke the chain.
+        """
+        return self._get_chain.ainvoke(message)
+    
     def get(self) -> Runnable:
         """
         Return the configured chain.

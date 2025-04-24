@@ -4,7 +4,7 @@ from langchain_core.messages import AnyMessage
 from frank.entity.statehandler import StateEvaluator
 
 
-# NOTE: this is a class from langgraph.prebuilt import tools_condition
+# NOTE: this is a class 'from langgraph.prebuilt import tools_condition'
 class RouteToolCondition(StateEvaluator):
     def evaluate(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel], messages_key: str = "messages") -> Literal["end", "tools"]:
         if isinstance(state, list):

@@ -9,7 +9,7 @@ OAKTOOLS_NODE:
   description: Main tools for being used by $(OAKLANG_NODE.name).
 
 HUMAN_REVIEW_NODE:
-  name: human_review
+  name: HumanReview
   type: commander
   route: 
     enhancer: $(OAKLANG_NODE.name)

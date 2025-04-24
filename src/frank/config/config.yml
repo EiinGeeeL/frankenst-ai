@@ -1,7 +1,7 @@
 logging:
   format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
   datefmt: '%Y-%m-%d %H:%M:%S'
-  log_file: 'cheese.log'
+  log_file: 'graph.log'
 
 ollama:
   model: llama3.2:1b
