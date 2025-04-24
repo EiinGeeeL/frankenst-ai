@@ -33,7 +33,7 @@ class HumanReviewSensitiveToolCall(StateCommander):
 
         # Interrupt and ask human for feedback
         human_review = interrupt({
-            "question": "Is this correct?",
+            "question": f"Are you sure you want to proceed with this sensitive action for {tool_call["args"]}?",
             "tool_call": tool_call,
         })
 
