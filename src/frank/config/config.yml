@@ -12,5 +12,5 @@ azureopenai:
 
 launch:
   model: azureai
-  embeddings: None
+  embeddings: azureai
   turbo_model: None

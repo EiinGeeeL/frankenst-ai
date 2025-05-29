@@ -1,0 +1,3 @@
+TODO: implementar uv
+TODO: cambiar nombre del proyecto de frank
+TODO: darle una vuelta a los llms como servicios, en base a funcionalidad, generador, evaluador, embeddigs...

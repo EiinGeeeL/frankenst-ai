@@ -14,4 +14,4 @@ HUMAN_REVIEW_NODE:
   route: 
     enhancer: $(OAKLANG_NODE.name)
     tools: $(OAKTOOLS_NODE.name)
-  description: This is a command node that routes to an enhancer and tools node modifying the state for human in the loop.
+  description: This is a command node that routes to an enhancer node and tools node modifying the state for human in the loop.
