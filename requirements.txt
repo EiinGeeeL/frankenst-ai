@@ -3,11 +3,13 @@ matplotlib
 ipywidgets
 ipykernel
 setuptools
-unstructured
+unstructured[local-inference]
+unstructured[all-docs]
+tenacity
 langchain
 langchain-community
 langchain-experimental
-langchain-openai
+langchain-chroma
 langchain-ollama
 langchain-azure-ai[opentelemetry]
 langgraph

@@ -30,6 +30,11 @@ The Graph has the following architecture captured by each run:
     ```python3 -m pip install -e .```
 
 
+NOTE: make install
+- sudo apt-get install poppler-utils
+- sudo apt update
+- sudo apt install tesseract-ocr
+
 ## Running the Project
 
 To run the project:
