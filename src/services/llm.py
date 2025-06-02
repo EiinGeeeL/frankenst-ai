@@ -38,10 +38,11 @@ class LLMServices:
 
     @classmethod
     def _load_ollama_model(cls):
-        return ChatOllama(
-            model=cls._get_config('ollama', 'model'),
-            temperature=cls._get_config('ollama', 'temperature'),
-        )
+        vars = {
+            "model": cls._get_config('ollama', 'model'),
+            "temperature": cls._get_config('ollama', 'temperature'),
+        }
+        return ChatOllama(**vars)
 
     @classmethod
     def _load_azureai_model(cls):
@@ -51,6 +52,8 @@ class LLMServices:
             model_name="AZURE_INFERENCE_MODEL_NAME",
             api_version="AZURE_INFERENCE_API_VERSION",
         )
+
+        vars["temperature"]=0
         return AzureAIChatCompletionsModel(**vars)
 
     @classmethod
@@ -66,7 +69,11 @@ class LLMServices:
 
     @classmethod
     def _load_ollama_embeddings(cls):
-        return OllamaEmbeddings(model=cls._get_config('ollama', 'embeddings'))
+        vars = {
+            "model": cls._get_config('ollama', 'embeddings'),
+            "temperature": 0,
+        }
+        return OllamaEmbeddings(**vars)
 
     @classmethod
     def _load_azureai_embeddings(cls):
@@ -76,6 +83,7 @@ class LLMServices:
             model_name="AZURE_EMBEDDINGS_MODEL_NAME",
             api_version="AZURE_EMBEDDINGS_API_VERSION",
         )
+        vars["temperature"]=0
         return AzureAIEmbeddingsModel(**vars)
 
     @classmethod
