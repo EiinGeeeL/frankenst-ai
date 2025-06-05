@@ -50,8 +50,6 @@ class OakLangAgent(RunnableBuilder):
             restrictions=restrictions
         )
 
-        system_prompt='you are profesor oak'
-
         self.logger.info(system_prompt)
 
         # Build the prompt template
