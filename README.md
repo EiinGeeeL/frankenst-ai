@@ -72,7 +72,8 @@ cheese-chatter/
 ├── .env                   # Environment variables for configuration
 ├── README.md              # Project documentation
 ├── src/
-│   └── cheese/
+│   ├── services/      # Contains services
+│   └── frank/
 │       ├── components/
 │       │   ├── nodes/
 │       │   ├── edges/
@@ -89,7 +90,6 @@ cheese-chatter/
 │       │   ├── subgraphs/           # Contain subgraphs to be implemented as nodes
 │       │   └── runnables/           # Contains prompts and LLM configuration
 │       ├── managers/      # Contains manager classes
-│       ├── services/      # Contains services
 │       ├── entity/
 │       │   ├── models/              # Contains structural models
 │       │   ├── graph_layout.py      # Initialize the Graph Layout with a Config Graph dataclass

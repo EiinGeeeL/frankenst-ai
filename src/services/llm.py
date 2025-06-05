@@ -53,7 +53,7 @@ class LLMServices:
             api_version="AZURE_INFERENCE_API_VERSION",
         )
 
-        vars["temperature"]=0
+        vars["temperature"] = 0
         return AzureAIChatCompletionsModel(**vars)
 
     @classmethod
@@ -83,7 +83,7 @@ class LLMServices:
             model_name="AZURE_EMBEDDINGS_MODEL_NAME",
             api_version="AZURE_EMBEDDINGS_API_VERSION",
         )
-        vars["temperature"]=0
+        vars["temperature"] = 0
         return AzureAIEmbeddingsModel(**vars)
 
     @classmethod

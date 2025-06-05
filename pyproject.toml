@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 dynamic = ["dependencies"]
 name = "frank"
 version = "0.1.0"
-description = "TODO: add description"
+description = "Frank builds your agent flows with LangGraph and Autogen-Core/SemanticKernel integration"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.12.3"
 authors = [
@@ -17,7 +17,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent"
 ]
-keywords = ["LLM", "azure", "langgraph", "autogen", "langchain", "azure-ai-foundry", "azure-ai-search"]
+keywords = ["LLM", "azure", "langgraph", "autogen", "langchain", "azure-ai-foundry", "unstructured", "multimodal"]
 
 [project.urls]
 homepage = "https://github.com/eiingeeel/frankenst-ai"
