@@ -23,7 +23,7 @@ class OakLangAgent(RunnableBuilder):
     def __init__(self, model: BaseLanguageModel, tools: List[BaseTool]):
         super().__init__(model=model, tools=tools)
     
-        self.logger.info("OakLang_Agent initialized")
+        self.logger.info("OakLangAgent initialized")
 
     def _build_prompt(self) -> ChatPromptTemplate:
         # Prepare the few_shot_prompt
@@ -64,7 +64,7 @@ class OakLangAgent(RunnableBuilder):
             MessagesPlaceholder(variable_name="messages"),
         ])
 
-    def _configure_chain(self) -> Runnable:
+    def _configure_runnable(self) -> Runnable:
         prompt_template = self._build_prompt()
         model_with_tools = self.model.bind_tools(self.tools)
 

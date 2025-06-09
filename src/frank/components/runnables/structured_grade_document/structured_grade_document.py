@@ -1,6 +1,7 @@
 import logging
 from typing import Dict
 from pydantic import BaseModel
+from langchain_core.runnables import Runnable
 from langchain_core.runnables import RunnableLambda
 from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
@@ -42,7 +43,7 @@ class StructuredGradeDocument(RunnableBuilder):
             HumanMessage(content=prompt_content)
         ])
 
-    def _configure_chain(self):
+    def _configure_runnable(self) -> Runnable:
         structured_grade_document_chain = {
             "context": RunnableLambda(lambda kwargs: kwargs["context"]),
             "question": RunnableLambda(lambda kwargs: kwargs["question"]),
