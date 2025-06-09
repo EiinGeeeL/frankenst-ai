@@ -1,0 +1,4 @@
+{context}
+Here is the retrieved document: {retrieved_context}
+Here is the user question: {question}
+{instructions}

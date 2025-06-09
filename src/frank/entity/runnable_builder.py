@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
+from pydantic import BaseModel
 from langchain_core.runnables import Runnable
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
@@ -12,17 +13,19 @@ class RunnableBuilder(ABC):
         self,
         model: BaseLanguageModel,
         vectordb: Optional[VectorStore] = None,
-        tools: Optional[List[BaseTool]] = None
+        tools: Optional[List[BaseTool]] = None,
+        structured_output_schema: Optional[BaseModel] = None,
     ):
         self.model = model
         self.vectordb = vectordb
         self.tools = tools
+        self.structured_output_schema = structured_output_schema
 
         # Start the chain
         self._chain: Runnable = None
     
     @abstractmethod
-    def _build_prompt(self, **kwargs) -> ChatPromptTemplate:
+    def _build_prompt(self) -> ChatPromptTemplate:
         """
         Build the prompt chain and return it.
         """

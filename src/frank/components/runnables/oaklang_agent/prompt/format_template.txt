@@ -1,4 +1,3 @@
-system_template ="""
 <context>
 {context}
 </context>
@@ -18,4 +17,3 @@ system_template ="""
 <restrictions>
 {restrictions}
 </restrictions>
-"""
