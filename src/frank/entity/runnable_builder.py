@@ -1,16 +1,18 @@
 from abc import ABC, abstractmethod
-from typing import List, Any
+from typing import List, Optional
 from langchain_core.runnables import Runnable
+from langchain_core.language_models import BaseLanguageModel
+from langchain_core.prompts import ChatPromptTemplate
+from langchain.vectorstores import VectorStore
 from langchain_core.tools import BaseTool
-from services.llm import LLMServices
 
 
 class RunnableBuilder(ABC):
     def __init__(
         self,
-        model: LLMServices,
-        vectordb: Any, # TODO define class 
-        tools: List[BaseTool]
+        model: BaseLanguageModel,
+        vectordb: Optional[VectorStore] = None,
+        tools: Optional[List[BaseTool]] = None
     ):
         self.model = model
         self.vectordb = vectordb
@@ -18,6 +20,13 @@ class RunnableBuilder(ABC):
 
         # Start the chain
         self._chain: Runnable = None
+    
+    @abstractmethod
+    def _build_prompt(self, **kwargs) -> ChatPromptTemplate:
+        """
+        Build the prompt chain and return it.
+        """
+        pass
 
     @abstractmethod
     def _configure_chain(self) -> Runnable:

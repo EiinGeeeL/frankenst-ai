@@ -1,6 +1,5 @@
 import os
 from langchain_ollama import ChatOllama, OllamaEmbeddings
-from langchain_openai import AzureChatOpenAI
 from langchain_azure_ai.chat_models import AzureAIChatCompletionsModel
 from langchain_azure_ai.embeddings import AzureAIEmbeddingsModel
 from langchain_core.runnables import Runnable
