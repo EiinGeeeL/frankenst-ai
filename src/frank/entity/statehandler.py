@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Literal, Any
+from typing import Literal, Any, Optional
 from langgraph.graph import StateGraph
 from langgraph.types import Command
 from frank.entity.runnable_builder import RunnableBuilder
@@ -8,11 +8,16 @@ from frank.constants import *
 
 
 class StateEvaluator(ABC):
+    def __init__(
+        self,
+        runnable_builder: Optional[RunnableBuilder] = None
+    ):
+        self.runnable = runnable_builder.get() if runnable_builder else None
+
     @abstractmethod
-    async def evaluate(self, state: StateGraph) -> str: 
+    async def evaluate(self, state: StateGraph) -> str:
         """
-        Returns a str to generate a conditional path_map to rotute the StateGraph 
-       
+        Returns a str to generate a conditional path_map to route the StateGraph.
         """
         pass
 
@@ -25,7 +30,7 @@ class StateEnhancer(ABC):
         self.runnable = runnable_builder.get()
         
     @abstractmethod
-    async def enhance(self, state: StateGraph) -> dict[Literal["message"]: list]:
+    async def enhance(self, state: StateGraph) -> dict[Literal[str]: list]:
         """
         Returns StateGraph with modifications made by a Runnable.
         """

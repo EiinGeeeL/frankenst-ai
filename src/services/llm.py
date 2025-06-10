@@ -1,8 +1,10 @@
 import os
 from langchain_ollama import ChatOllama, OllamaEmbeddings
+from langchain.vectorstores import VectorStore
 from langchain_azure_ai.chat_models import AzureAIChatCompletionsModel
 from langchain_azure_ai.embeddings import AzureAIEmbeddingsModel
 from langchain_core.runnables import Runnable
+from langchain_chroma import Chroma
 from frank.utils.common import read_yaml
 from frank.constants import *
 
@@ -11,6 +13,7 @@ class LLMServices:
     model: Runnable = None
     embeddings: Runnable = None
     turbo_model: Runnable = None
+    vectorstore: VectorStore = None 
 
     @classmethod
     def _get_config(cls, provider: str, key: str = None):
@@ -51,7 +54,6 @@ class LLMServices:
             model_name="AZURE_INFERENCE_MODEL_NAME",
             api_version="AZURE_INFERENCE_API_VERSION",
         )
-
         vars["temperature"] = 0
         return AzureAIChatCompletionsModel(**vars)
 
@@ -97,7 +99,16 @@ class LLMServices:
             raise ValueError(f"Unsupported embedding type: {embedding_name}")
 
     @classmethod
+    def _load_vectorstore(cls):
+        return Chroma(
+            collection_name="pokemon_series",
+            embedding_function=cls.embeddings,
+            persist_directory=None  # Puedes modificar esto si deseas persistencia
+        )
+
+    @classmethod
     def launch(cls):
         cls.model = cls._load_model(cls._get_config('launch', 'model'))
         cls.embeddings = cls._load_embeddings(cls._get_config('launch', 'embeddings'))
         cls.turbo_model = None
+        cls.vectorstore = cls._load_vectorstore()

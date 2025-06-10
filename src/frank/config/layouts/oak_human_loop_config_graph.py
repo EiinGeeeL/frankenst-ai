@@ -16,6 +16,9 @@ from frank.constants import *
 
 @dataclass(frozen=True)
 class OakHumanLoopConfigGraph:
+    ## Initializate LLMServices
+    LLMServices.launch()
+
     ## RUNNABLES BUILDERS
     OAKLANG_AGENT = OakLangAgent(model=LLMServices.model,
                                tools=[GetEvolutionTool(), RandomMovementsTool(), DominatePokemonTool()])

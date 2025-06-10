@@ -16,4 +16,19 @@ HUMAN_REVIEW_NODE:
     tools: $(OAKTOOLS_NODE.name)
   description: This is a command node that routes to an enhancer node and tools node modifying the state for human in the loop.
 
-#####################RAG NODES CONFIG########################
+#####################RAG NODES########################
+
+GENERATION_NODE:
+  name: GenerationNode
+  type: enhancer
+  description: This is the generation node of the RAG.
+
+RETRIEVER_NODE:
+  name: RetrieverNode
+  type: enhancer
+  description: This is the retriever node of the RAG.
+
+REWRITE_NODE:
+  name: RewriteNode
+  type: enhancer
+  description: This is the a node that improve and rewrite a question.
