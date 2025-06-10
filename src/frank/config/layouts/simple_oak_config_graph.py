@@ -4,7 +4,7 @@ from langgraph.prebuilt import ToolNode
 from services.llm import LLMServices
 from frank.components.runnables.oaklang_agent.oaklang_agent import OakLangAgent
 from frank.components.edges.evaluators.route_tool_condition import RouteToolCondition
-from frank.components.nodes.enhancers.simple_ainvoke import SimpleAsyncInvoke
+from frank.components.nodes.enhancers.simple_messages_ainvoke import SimpleMessagesAsyncInvoke
 from frank.components.tools.get_evolution_tool import GetEvolutionTool
 from frank.components.tools.random_movements_tool import RandomMovementsTool
 from frank.entity.edge import ConditionalEdge, SimpleEdge
@@ -23,7 +23,7 @@ class SimpleOakConfigGraph:
     ## NODES
     CONFIG_NODES = read_yaml(CONFIG_NODES_FILE_PATH)
 
-    OAKLANG_NODE = SimpleNode(enhancer=SimpleAsyncInvoke(OAKLANG_AGENT),
+    OAKLANG_NODE = SimpleNode(enhancer=SimpleMessagesAsyncInvoke(OAKLANG_AGENT),
                          name=CONFIG_NODES['OAKLANG_NODE']['name'])
      
     OAKTOOLS_NODE = ToolNode(tools=OAKLANG_AGENT.tools,
