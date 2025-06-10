@@ -3,4 +3,4 @@ Here is the initial question:
 -------
 {question}
 -------
-Formulate an improved question:
+Formulate an improved question with no comments:

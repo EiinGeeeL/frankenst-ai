@@ -1,6 +1,6 @@
 import logging
 from typing import Dict
-from langchain_core.runnables import RunnableLambda
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.language_models import BaseLanguageModel
@@ -35,7 +35,7 @@ class RewriteQuestion(RunnableBuilder):
 
     def _configure_runnable(self) -> Runnable:
         rewrite_chain = {
-            "question": RunnableLambda(lambda kwargs: kwargs["question"]),
+            "question": RunnablePassthrough(),
         } | RunnableLambda(self._build_prompt) | self.model
 
         return rewrite_chain
