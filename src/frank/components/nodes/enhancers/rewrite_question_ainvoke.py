@@ -9,11 +9,8 @@ class RewriteQuestionAsyncInvoke(StateEnhancer):
         question = state[ "question"]
         response = await self.runnable.ainvoke(question)
         better_question = response.content
-
-        if "iterations" in state:
-            current_iterations = state.get("iterations", 0) # default value: 0
+        
+        current_iterations = state.get("iterations", 0) # default value: 0
             
-            return {"messages": [response], "question": better_question, "iterations": current_iterations + 1}
-        else:
-
-            return {"messages": [response], "question": better_question}
+        return {"messages": [response], "question": better_question, "iterations": current_iterations + 1}
+        
