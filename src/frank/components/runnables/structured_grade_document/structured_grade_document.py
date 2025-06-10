@@ -24,10 +24,10 @@ class StructuredGradeDocument(RunnableBuilder):
         question = kwargs["question"]
 
         # Prepare the human_prompt
-        context = load_and_clean_text_file('src/frank/components/runnables/structured_grade_document_chain/prompt/context.txt')
-        instructions = load_and_clean_text_file('src/frank/components/runnables/structured_grade_document_chain/prompt/instructions.txt')
+        context = load_and_clean_text_file('src/frank/components/runnables/structured_grade_document/prompt/context.txt')
+        instructions = load_and_clean_text_file('src/frank/components/runnables/structured_grade_document/prompt/instructions.txt')
 
-        format_template = load_and_clean_text_file('src/frank/components/runnables/structured_grade_document_chain/prompt/format_template.txt')
+        format_template = load_and_clean_text_file('src/frank/components/runnables/structured_grade_document/prompt/format_template.txt')
 
         prompt_template = format_template.format(
             context=context,
