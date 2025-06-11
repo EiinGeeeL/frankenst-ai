@@ -3,6 +3,8 @@ import os
 from pathlib import Path
 from typing import Dict, Optional
 
+from langgraph.graph.state import CompiledStateGraph
+from langgraph.types import RunnableConfig
 
 def _parse_yaml(data: Dict) -> Dict:
     """
@@ -126,3 +128,8 @@ def save_text_to_artifact(content: str, filename: str = None) -> None:
     # Save the string to the file
     with open(file_path, 'w', encoding='utf-8') as f:
         f.write(content)
+
+async def print_process_astream(graph: CompiledStateGraph, message_input: dict, runnable_config: RunnableConfig):
+    async for event in graph.astream(message_input, runnable_config, stream_mode="updates"):
+        print(event)
+        print("\n")
