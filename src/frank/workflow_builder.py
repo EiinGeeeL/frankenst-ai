@@ -22,7 +22,7 @@ class WorkflowBuilder:
         self.edge_manager: EdgeManager = EdgeManager()
         self.node_manager: NodeManager = NodeManager()
         
-        self.logger.info("WorkFlowBuilder initialized")
+        self.logger.info(f"WorkFlowBuilder initialized for GraphLayout {config.__name__}")
 
     def compile(self) -> CompiledStateGraph:
         self._configure_workflow()

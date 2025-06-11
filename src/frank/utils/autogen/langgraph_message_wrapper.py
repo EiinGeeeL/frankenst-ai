@@ -12,7 +12,7 @@ class MessageWrapperAutogenState(BaseModel):
 
 
 class LangGraphToolUseAgent(RoutedAgent):
-    def __init__(self, description: str, graph: CompiledStateGraph, runnable_config: RunnableConfig) -> None:
+    def __init__(self, description: str, graph: CompiledStateGraph, runnable_config: Optional[RunnableConfig] = None) -> None:
         super().__init__(description)
         self._app = graph
         self.runnable_config = runnable_config
