@@ -6,9 +6,9 @@ from frank.entity.statehandler import StateEnhancer, StateCommander
 
 class NodeManager:
     logger: logging.Logger = logging.getLogger(__name__.split('.')[-1])
-    nodes: Set[Union[SimpleNode, ToolNode]] = set()
     
     def __init__(self):
+        self.nodes : Set[Union[SimpleNode, ToolNode]] = set()
         self.logger.info("NodeManager initialized")
     
     def _get_node_value(self, node: Union[ToolNode, SimpleNode, CommandNode]) -> Union[StateEnhancer.enhance, StateCommander.command, ToolNode]:

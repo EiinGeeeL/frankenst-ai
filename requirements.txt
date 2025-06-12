@@ -15,3 +15,4 @@ langchain-azure-ai[opentelemetry]
 langgraph
 autogen
 autogen_core
+mcp

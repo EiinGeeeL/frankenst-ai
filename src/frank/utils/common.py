@@ -130,6 +130,10 @@ def save_text_to_artifact(content: str, filename: str = None) -> None:
         f.write(content)
 
 async def print_process_astream(graph: CompiledStateGraph, message_input: dict, runnable_config: Optional[RunnableConfig] = None):
+    events = []
     async for event in graph.astream(message_input, runnable_config, stream_mode="updates"):
+        events.append(event)
         print(event)
         print("\n")
+
+    return events[-1]
