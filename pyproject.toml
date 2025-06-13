@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 dynamic = ["dependencies"]
 name = "frank"
 version = "0.1.0"
-description = "Frank builds your agent flows with LangGraph and Autogen-Core/SemanticKernel integration"
+description = "Frank brings order and helps you build complex workflows using scalable, testable, and reusable components."
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.12.3"
 authors = [
