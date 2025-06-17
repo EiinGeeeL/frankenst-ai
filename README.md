@@ -18,6 +18,7 @@ The project has been designed with the following goals:
 - Python 3.12.5
 - Ollama 4.0 or higher (free); or an Azure AI Foundry Deployment (payment)
 - pip (Python package manager)
+- uv (install with pip)
 
 ## Installation
 
@@ -35,7 +36,7 @@ The project has been designed with the following goals:
 
 4. Install the project:
 
-    ```python3 -m pip install -e .```
+    ```python3 -m uv pip install -e .```
 
 5. (Optional) Install extra dependencies for unstructured:
     ```bash
