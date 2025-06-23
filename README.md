@@ -1,7 +1,7 @@
 # 🧟 Frankenst-AI | LangGraph Patterns
-**Frankenst-AI** is a project that introduces a **modular and scalable architecture** based on design patterns and coding best practices applied to **LangGraph**.
+**Frankenst-AI** is a project that introduces a **modular and scalable architecture** based on design patterns and coding best practices, applied to **LangGraph**.
 
-This project aims to improve **scalability**, **reusability**, **testing**, and **maintainability** through an architectural approach based on reusable, configurable, and highly decoupled components, which are used to build complex workflows.
+This project aims to improve **scalability**, **reusability**, **testability**, and **maintainability** through an architectural approach built on reusable, configurable, and highly decoupled components, designed to build complex workflows for LLMs.
 
 By leveraging a well-organized and highly scalable structure, the project enables the creation of composable, configurable, and extensible AI systems (Agent patterns, RAG patterns, MCPs, etc.).
 
