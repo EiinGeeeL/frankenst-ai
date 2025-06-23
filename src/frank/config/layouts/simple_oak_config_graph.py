@@ -43,7 +43,7 @@ class SimpleOakConfigGraph:
     
     _EDGE_3 = ConditionalEdge(evaluator=RouteToolCondition(),
                               map_dict={
-                                  "__end__": END, # If last call `tools`, then end.
+                                  "end": END, # If last call `tools`, then end.
                                   "tools": OAKTOOLS_NODE.name, # Node in the loop.
                                   },
                               node_source=OAKLANG_NODE.name,)

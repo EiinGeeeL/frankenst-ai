@@ -64,7 +64,7 @@ To run the project:
     ```cp .env.example .env```
 2. Compile Graphs Layouts with Workflow Builder
 
-    You can check ```research/...ipynb``` for more information.
+    You can check ```research/demo...ipynb``` for more information.
 
 ## Repository Structure
 
