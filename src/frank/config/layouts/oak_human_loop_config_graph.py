@@ -32,7 +32,7 @@ class OakHumanLoopConfigGraph:
     OAKTOOLS_NODE = ToolNode(tools=OAKLANG_AGENT.tools,
                        name=CONFIG_NODES['OAKTOOLS_NODE']['name'])
 
-    HUMAN_REVIEW_NODE = CommandNode(commander=HumanReviewSensitiveToolCall,
+    HUMAN_REVIEW_NODE = CommandNode(commander=HumanReviewSensitiveToolCall(sensitive_tools=[DominatePokemonTool()]),
                                     name=CONFIG_NODES['HUMAN_REVIEW_NODE']['name'])
 
     ## EDGES

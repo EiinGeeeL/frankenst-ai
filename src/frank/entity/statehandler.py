@@ -41,7 +41,7 @@ class StateCommander:
     config_nodes: dict = read_yaml(CONFIG_NODES_FILE_PATH)
 
     @staticmethod
-    def command(state: StateGraph(state_schema=Any)) -> Command[Literal[...]]: # type: ignore
+    def command(state: StateGraph(state_schema=Any)) -> Command[Literal[config_nodes, ...]]: # type: ignore
         """
         Modify the StateGraph and also route with Command[Literal] to nodes. 
         No need edges or conditional edges, the command method contain the logic routing.
