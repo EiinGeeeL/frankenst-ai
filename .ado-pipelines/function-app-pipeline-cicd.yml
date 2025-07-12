@@ -1,0 +1,56 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+parameters:
+- name: environment
+  displayName: Environment name
+  type: string
+  values:
+  - DEV
+  - PRE
+  - PRO
+  default: DEV
+
+variables:
+- template: config-variables.yml
+
+trigger:
+- none
+
+stages:
+- ${{ if eq(parameters.environment, 'DEV') }}:
+  - stage: DeployFunctionAppACR_DEV
+    displayName: Build and Push Fuction App Docker Image
+    variables:
+    - group: ${{ variables.variable_group_dev }}
+    jobs:
+      - template: templates/run-time-trigger-function-app-image-to-acr.yml
+        parameters:
+          capability: ${{ variables.ap_pool_name }}
+          image_name: ${{ variables.acr_image_name }}
+          environment: ${{ parameters.environment }}
+          resource_manager_service_connection: ${{ variables.ado_service_connection_rg_dev }}
+- ${{ if eq(parameters.environment, 'PRE') }}:
+  - stage: DeployFunctionAppACR_PRE
+    displayName: Build and Push Fuction App Docker Image
+    variables:
+    - group: ${{ variables.variable_group_pre }}
+    jobs:
+      - template: templates/run-time-trigger-function-app-image-to-acr.yml
+        parameters:
+          capability: ${{ variables.ap_pool_name }}
+          image_name: ${{ variables.acr_image_name }}
+          environment: ${{ parameters.environment }}
+          resource_manager_service_connection: ${{ variables.ado_service_connection_rg_pre }}
+- ${{ if eq(parameters.environment, 'PRO') }}:
+  - stage: DeployFunctionAppACR_PRO
+    displayName: Build and Push Fuction App Docker Image
+    variables:
+    - group: ${{ variables.variable_group_pro }}
+    jobs:
+      - template: templates/deploy-function-app-image-to-acr.yml
+        parameters:
+          capability: ${{ variables.ap_pool_name }}
+          image_name: ${{ variables.acr_image_name }}
+          environment: ${{ parameters.environment }}
+          resource_manager_service_connection: ${{ variables.ado_service_connection_rg_pro }}

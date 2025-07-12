@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from langgraph.graph import END, START
 from langgraph.prebuilt import ToolNode
-from services.llm import LLMServices
+from services.ai_foundry.llm import LLMServices
 from frank.components.runnables.oaklang_agent.oaklang_agent import OakLangAgent
 from frank.components.edges.evaluators.route_human_node import RouteHumanNode
 from frank.components.nodes.enhancers.simple_messages_ainvoke import SimpleMessagesAsyncInvoke

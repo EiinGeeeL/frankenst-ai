@@ -1,0 +1,48 @@
+parameters:
+  - name: context_path
+    type: string
+  - name: dockerfile
+    type: string
+  - name: image_name
+    type: string
+  - name: resource_manager_service_connection
+    type: string
+
+steps:
+  - task: AzureCLI@2
+    displayName: Build and Push Image to ACR
+    continueOnError: false
+    inputs:
+      azureSubscription: ${{ parameters.resource_manager_service_connection }}
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        imageName=${{ parameters.image_name }}
+        imageTag=$(tag_version)
+        imageDefinition=$imageName:$imageTag
+        containerRegistry=$(azure_container_registry).azurecr.io
+        registry=$containerRegistry
+
+        echo "Building environment: '$imageName' into docker image '$imageDefinition'"
+
+        echo "Listing available images"
+        docker image ls
+
+        echo "Log in against ACR"
+        az acr login --name $containerRegistry
+
+        echo "Building Dockerfile"
+        docker build -f ${{ parameters.dockerfile }} \
+          --build-arg AZURE_KEY_VAULT='$(azure_key_vault)' \
+          --build-arg TIMER_SCHEDULE='$(timer_schedule)' \
+          -t $registry/$imageDefinition \
+          ${{ parameters.context_path }}
+
+        echo "Pushing file to registry"
+        docker image push $registry/$imageDefinition
+
+        echo "Deleting created file"
+        docker rmi $registry/$imageDefinition
+
+        echo "List remaining images after build"
+        docker image ls

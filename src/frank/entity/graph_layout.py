@@ -1,8 +1,7 @@
 import logging
 from langgraph.prebuilt import ToolNode
 from dataclasses import is_dataclass
-from typing import Annotated
-from frank.utils.type_vars import ConfigDataclass
+from typing import Type, Any
 from frank.entity.edge import BaseEdge
 from frank.entity.node import BaseNode
 from frank.entity.runnable_builder import RunnableBuilder
@@ -10,12 +9,17 @@ from frank.entity.runnable_builder import RunnableBuilder
 class GraphLayout:
     logger: logging.Logger = logging.getLogger(__name__.split('.')[-1])
 
-    def __init__(self, config: Annotated[ConfigDataclass, is_dataclass]):
+    def __init__(self, config: Type[Any]):
         """
-        Initialize the Graph Layout with a dataclass instance containing configuration constants like edges and nodes.
+        Initialize the Graph Layout with a dataclass TYPE
+        containing configuration constants like edges and nodes.
+
+        Args:
+            config (Type[Any]): A dataclass type that defines nodes and edges
         """
+        
         if not is_dataclass(config):
-            raise TypeError("Expected a dataclass type for the GraphLayout configuration.")
+            raise TypeError("Expected a dataclass type for the GraphLayout configuration that defines nodes and edges")
         else:
             self.config = config
 

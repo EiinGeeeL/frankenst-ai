@@ -1,6 +1,6 @@
 from frank.workflow_builder import WorkflowBuilder
 from frank.config.layouts.adaptative_rag_config_graph import AdaptativeRAGConfigGraph
-from frank.entity.models.ragstategraph import RAGState
+from frank.models.stategraph.ragstategraph import RAGState
 from frank.utils.common import read_yaml
 from frank.utils.logger import setup_logging
 from frank.constants import *

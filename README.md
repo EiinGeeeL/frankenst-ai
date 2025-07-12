@@ -90,8 +90,8 @@ frank/
 │       │   ├── config.yaml          # Main configuration files for project
 │       │   ├── config_nodes.py      # Contains the definition of graph nodes of your project
 │       │   └── layouts/             # Contains all Config Graph dataclass of your project
+│       ├── models/                  # Contains structural models like, stategraphs, base tools properties, structured output...
 │       ├── entity/
-│       │   ├── models/              # Contains structural models like base tools or structured output
 │       │   ├── graph_layout.py      # Initialize the Graph Layout with a Config Graph dataclass
 │       │   ├── runnable_builder.py  # Builder for LangChain Runnable
 │       │   ├── statehandler.py      # Contains main entities for GraphState handlers

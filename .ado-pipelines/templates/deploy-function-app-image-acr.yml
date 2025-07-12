@@ -1,0 +1,36 @@
+parameters:
+- name: capability
+  displayName: Requested agent capability
+  type: string
+- name: image_name
+  displayName: ACR image name for the deployment of Function App
+  type: string
+- name: environment
+  type: string
+  displayName: Environment name
+- name: resource_manager_service_connection
+  displayName: Resource Manager Service connection name
+  type: string
+
+jobs:
+  - deployment: DeployFunctionAppImageACR
+    environment: ${{ parameters.environment }}
+    pool:
+      name: $(ap_pool_name)
+      # demands: ${{ parameters.capability }}
+    strategy:
+     runOnce:
+       deploy:
+        steps:
+        - checkout: self
+        - template: install-az-cli.yml
+        - template: build-and-push-acr.yml
+          parameters:
+            context_path: '.'
+            dockerfile: 'src/services/functions/Dockerfile'
+            image_name: ${{ parameters.image_name }}
+            resource_manager_service_connection: ${{ parameters.resource_manager_service_connection }}
+        - template: function-app-container-registry.yml
+          parameters:
+            image_name: ${{ parameters.image_name }}
+            resource_manager_service_connection: ${{ parameters.resource_manager_service_connection }}

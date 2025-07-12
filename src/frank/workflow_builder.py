@@ -1,7 +1,5 @@
 import logging
-from dataclasses import is_dataclass
-from typing import Annotated, Type, Any, Optional
-from frank.utils.type_vars import ConfigDataclass
+from typing import Type, Any, Optional
 from IPython.display import Image, display
 from langchain_core.runnables.graph import MermaidDrawMethod
 from langgraph.graph import StateGraph
@@ -15,7 +13,7 @@ from langgraph.checkpoint.base import BaseCheckpointSaver
 class WorkflowBuilder:
     logger: logging.Logger = logging.getLogger(__name__.split('.')[-1])
     
-    def __init__(self, config: Annotated[ConfigDataclass, is_dataclass], state_schema: Type[Any], checkpointer: Optional[BaseCheckpointSaver] = None, input: Optional[Type[Any]] = None, output: Optional[Type[Any]] = None):
+    def __init__(self, config: Type[Any], state_schema: Type[Any], checkpointer: Optional[BaseCheckpointSaver] = None, input: Optional[Type[Any]] = None, output: Optional[Type[Any]] = None):
         self.workflow: StateGraph = StateGraph(state_schema=state_schema, input=input, output=output)
         self.memory: Optional[BaseCheckpointSaver] = checkpointer
         self.config: GraphLayout = GraphLayout(config)

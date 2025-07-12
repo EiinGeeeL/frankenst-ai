@@ -1,0 +1,23 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+parameters:
+  - name: image_name
+    type: string
+  - name: resource_manager_service_connection
+    type: string
+  # - name: docker_registry_server_url
+  #   type: string
+  # - name: docker_registry_server_username
+  #   type: string
+  # - name: docker_registry_server_password
+  #   type: string
+  
+steps:
+  - task: AzureFunctionAppContainer@1
+    displayName: Function App to ACR
+    inputs:
+      azureSubscription: ${{ parameters.resource_manager_service_connection }}
+      appName: $(azure_function_app)
+      imageName: $(azure_container_registry).azurecr.io/${{ parameters.image_name }}:$(tag_version)
+      # appSettings: '-DOCKER_REGISTRY_SERVER_URL $(docker_registry_server_url) -DOCKER_REGISTRY_SERVER_USERNAME $(docker_registry_server_username) -DOCKER_REGISTRY_SERVER_PASSWORD $(docker_registry_server_password)'

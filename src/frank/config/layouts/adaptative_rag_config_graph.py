@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from langgraph.graph import END, START
-from services.llm import LLMServices
+from services.ai_foundry.llm import LLMServices
 
 from frank.components.runnables.multimodal_retriever.multimodal_retriever import MultimodalRetriever
 from frank.components.runnables.multimodal_generation.multimodal_generation import MultimodalGeneration
@@ -11,7 +11,7 @@ from frank.components.nodes.enhancers.generate_answer_ainvoke import GenerateAns
 from frank.components.nodes.enhancers.retrieve_context_ainvoke import RetrieveContextAsyncInvoke
 from frank.components.nodes.enhancers.rewrite_question_ainvoke import RewriteQuestionAsyncInvoke
 
-from frank.entity.models.structured_output.grade_documents import GradeDocuments
+from frank.models.structured_output.grade_documents import GradeDocuments
 from frank.entity.edge import ConditionalEdge, SimpleEdge
 from frank.entity.node import SimpleNode
 from frank.utils.common import read_yaml

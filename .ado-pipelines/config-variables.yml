@@ -1,0 +1,18 @@
+variables:
+
+  # Global
+  ap_vm_image: ubuntu-latest
+  ap_pool_name: Azure Pipeline
+  acr_image_name: function-app
+
+  # Azure DevOps Service Connections
+  ado_service_connection_rg_dev: spn-d-01
+  ado_service_connection_rg_pre: spn-t-01
+  ado_service_connection_rg_pro: spn-p-01
+
+  # Azure DevOps Variable Groups
+  variable_group_dev: function-app.dev.vg
+  variable_group_pre: function-app.pre.vg
+  variable_group_pro: function-app.pro.vg
+
+  AZ_CLI_VERSION: 2.70
