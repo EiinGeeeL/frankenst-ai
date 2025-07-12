@@ -6,8 +6,8 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.runnables import Runnable
 
 from frank.entity.runnable_builder import RunnableBuilder
-from frank.utils.rag.unstructured import MultiVectorDocumentIndexing
-from frank.utils.rag.processing import parse_docs, parse_context
+from core.utils.rag.unstructured import MultiVectorDocumentIndexing
+from core.utils.rag.processing import parse_docs, parse_context
 
 
 class MultimodalRetriever(RunnableBuilder):

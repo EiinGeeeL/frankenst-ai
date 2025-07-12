@@ -5,11 +5,11 @@ mcp = FastMCP("OakLangAgent")
 @mcp.tool()
 async def oaklang_agent_tool(input: str) -> str:
     from frank.workflow_builder import WorkflowBuilder
-    from frank.config.layouts.oak_human_loop_config_graph import OakHumanLoopConfigGraph
-    from frank.models.stategraph.stategraph import SharedState
-    from frank.utils.common import read_yaml
-    from frank.utils.logger import setup_logging
-    from frank.constants import CONFIG_FILE_PATH
+    from core.config.layouts.oak_human_loop_config_graph import OakHumanLoopConfigGraph
+    from core.models.stategraph.stategraph import SharedState
+    from core.utils.common import read_yaml
+    from core.utils.logger import setup_logging
+    from core.constants import CONFIG_FILE_PATH
 
     config = read_yaml(CONFIG_FILE_PATH)
     setup_logging(config)

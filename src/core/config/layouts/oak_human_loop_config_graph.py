@@ -2,17 +2,18 @@ from dataclasses import dataclass
 from langgraph.graph import END, START
 from langgraph.prebuilt import ToolNode
 from services.ai_foundry.llm import LLMServices
-from frank.components.runnables.oaklang_agent.oaklang_agent import OakLangAgent
-from frank.components.edges.evaluators.route_human_node import RouteHumanNode
-from frank.components.nodes.enhancers.simple_messages_ainvoke import SimpleMessagesAsyncInvoke
-from frank.components.nodes.commands.human_review_sensitive_tool_call import HumanReviewSensitiveToolCall
-from frank.components.tools.get_evolution.get_evolution_tool import GetEvolutionTool
-from frank.components.tools.random_movements.random_movements_tool import RandomMovementsTool
-from frank.components.tools.dominate_pokemon.dominate_pokemon_tool import DominatePokemonTool
 from frank.entity.edge import ConditionalEdge, SimpleEdge
 from frank.entity.node import SimpleNode, CommandNode
-from frank.utils.common import read_yaml
-from frank.constants import *
+
+from core.components.runnables.oaklang_agent.oaklang_agent import OakLangAgent
+from core.components.edges.evaluators.route_human_node import RouteHumanNode
+from core.components.nodes.enhancers.simple_messages_ainvoke import SimpleMessagesAsyncInvoke
+from core.components.nodes.commands.human_review_sensitive_tool_call import HumanReviewSensitiveToolCall
+from core.components.tools.get_evolution.get_evolution_tool import GetEvolutionTool
+from core.components.tools.random_movements.random_movements_tool import RandomMovementsTool
+from core.components.tools.dominate_pokemon.dominate_pokemon_tool import DominatePokemonTool
+from core.utils.common import read_yaml
+from core.constants import *
 
 @dataclass(frozen=True)
 class OakHumanLoopConfigGraph:

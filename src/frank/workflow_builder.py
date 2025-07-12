@@ -63,8 +63,3 @@ class WorkflowBuilder:
         Fill the edges in manager.
         """        
         self.edge_manager.add_edges(edges=self.config.get_edges())
-
-  
-
-
-

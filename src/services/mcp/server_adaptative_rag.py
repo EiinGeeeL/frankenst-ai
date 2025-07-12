@@ -1,9 +1,9 @@
 from frank.workflow_builder import WorkflowBuilder
-from frank.config.layouts.adaptative_rag_config_graph import AdaptativeRAGConfigGraph
-from frank.models.stategraph.ragstategraph import RAGState
-from frank.utils.common import read_yaml
-from frank.utils.logger import setup_logging
-from frank.constants import *
+from core.config.layouts.adaptative_rag_config_graph import AdaptativeRAGConfigGraph
+from core.models.stategraph.ragstategraph import RAGState
+from core.utils.common import read_yaml
+from core.utils.logger import setup_logging
+from core.constants import *
 
 ## Read the config.yaml
 config = read_yaml(CONFIG_FILE_PATH)

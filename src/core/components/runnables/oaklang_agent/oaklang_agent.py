@@ -15,7 +15,7 @@ from .history_template import history_template
 from .fewshot_examples import few_shot_examples
 
 from frank.entity.runnable_builder import RunnableBuilder
-from frank.utils.common import load_and_clean_text_file
+from core.utils.common import load_and_clean_text_file
 
 class OakLangAgent(RunnableBuilder):
     logger: logging.Logger = logging.getLogger(__name__.split('.')[-1])
@@ -39,13 +39,13 @@ class OakLangAgent(RunnableBuilder):
         # )
 
         # Prepare the prompt
-        context = load_and_clean_text_file('src/frank/components/runnables/oaklang_agent/prompt/context.txt')
-        instructions = load_and_clean_text_file('src/frank/components/runnables/oaklang_agent/prompt/instructions.txt')
-        input = load_and_clean_text_file('src/frank/components/runnables/oaklang_agent/prompt/input.txt')
-        output_format = load_and_clean_text_file('src/frank/components/runnables/oaklang_agent/prompt/output_format.txt')
-        restrictions = load_and_clean_text_file('src/frank/components/runnables/oaklang_agent/prompt/restrictions.txt')
+        context = load_and_clean_text_file('src/core/components/runnables/oaklang_agent/prompt/context.txt')
+        instructions = load_and_clean_text_file('src/core/components/runnables/oaklang_agent/prompt/instructions.txt')
+        input = load_and_clean_text_file('src/core/components/runnables/oaklang_agent/prompt/input.txt')
+        output_format = load_and_clean_text_file('src/core/components/runnables/oaklang_agent/prompt/output_format.txt')
+        restrictions = load_and_clean_text_file('src/core/components/runnables/oaklang_agent/prompt/restrictions.txt')
                 
-        format_template = load_and_clean_text_file('src/frank/components/runnables/oaklang_agent/prompt/format_template.txt')
+        format_template = load_and_clean_text_file('src/core/components/runnables/oaklang_agent/prompt/format_template.txt')
 
         system_prompt = format_template.format(
             context=context,

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 dynamic = ["dependencies"]
 name = "frank"
-version = "0.1.0"
+version = "0.2"
 description = "Frank brings order and helps you build complex LLM workflows using scalable, testable, and reusable components."
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.12.3"
@@ -26,6 +26,6 @@ issues = "https://github.com/eiingeeel/frankenst-ai/issues"
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
 [tool.setuptools.packages.find]
-where = ["src", "services"]  # list of folders that contain the packages (["."] by default)
+where = ["src"]  # list of folders that contain the packages (["."] by default)
 include = ["**"]  # package names should match these glob patterns (["*"] by default)
 namespaces = false  # to disable scanning PEP 420 namespaces (true by default)

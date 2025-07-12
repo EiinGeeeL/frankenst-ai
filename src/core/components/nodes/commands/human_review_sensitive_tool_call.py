@@ -1,16 +1,16 @@
-from typing import Literal, Any, Union, List
+from typing import Literal, Any, Union
 from pydantic import BaseModel
 from langchain_core.messages import AnyMessage
 from langgraph.types import Command, interrupt
 
 from frank.entity.node import StateCommander
-from frank.utils.common import read_yaml
-from frank.constants import *
+from core.utils.common import read_yaml
+from core.constants import *
 
 
 class HumanReviewSensitiveToolCall(StateCommander):
     config_nodes=read_yaml(CONFIG_NODES_FILE_PATH)
-    def __init__(self, sensitive_tool_names: List[str] = None):
+    def __init__(self, sensitive_tool_names: list[str] = None):
         """
         Load Sensitive tool names list
         """

@@ -5,8 +5,8 @@ from langchain_azure_ai.chat_models import AzureAIChatCompletionsModel
 from langchain_azure_ai.embeddings import AzureAIEmbeddingsModel
 from langchain_core.runnables import Runnable
 from langchain_chroma import Chroma
-from frank.utils.common import read_yaml
-from frank.constants import *
+from core.utils.common import read_yaml
+from core.constants import *
 
 class LLMServices:
     config = read_yaml(CONFIG_FILE_PATH)
