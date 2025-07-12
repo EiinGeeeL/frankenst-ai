@@ -10,19 +10,18 @@ from frank.constants import *
 
 class HumanReviewSensitiveToolCall(StateCommander):
     config_nodes=read_yaml(CONFIG_NODES_FILE_PATH)
-    def __init__(self, sensitive_tools: List[str] = None):
+    def __init__(self, sensitive_tool_names: List[str] = None):
         """
-        Load Sensitive tools list
+        Load Sensitive tool names list
         """
-        self.sensitive_tools = sensitive_tools or []
+        self.sensitive_tool_names = sensitive_tool_names or []
     
     def command(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> Command[Literal[tuple(config_nodes['HUMAN_REVIEW_NODE']['route'].values())]]: # type: ignore
         last_message = state["messages"][-1]
-        sensitive_tool_name = [type(tool).__name__ for tool in self.sensitive_tools]
         # Separate sensitive and non-sensitive tool calls
         sensitive_calls = [
             tool_call for tool_call in last_message.tool_calls
-            if tool_call["name"] in sensitive_tool_name
+            if tool_call["name"] in self.sensitive_tool_names
         ]
         
         # If no sensitive tools, run all tools immediately

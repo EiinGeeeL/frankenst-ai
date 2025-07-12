@@ -3,8 +3,6 @@ from typing import Literal, Any, Optional
 from langgraph.graph import StateGraph
 from langgraph.types import Command
 from frank.entity.runnable_builder import RunnableBuilder
-from frank.utils.common import read_yaml
-from frank.constants import *
 
 
 class StateEvaluator(ABC):
@@ -37,8 +35,8 @@ class StateEnhancer(ABC):
         pass
 
 class StateCommander:
-    # Nodes config to route the command
-    config_nodes: dict = read_yaml(CONFIG_NODES_FILE_PATH)
+    # Nodes config to route the command to node names
+    config_nodes: dict = None
 
     @staticmethod
     def command(state: StateGraph(state_schema=Any)) -> Command[Literal[config_nodes, ...]]: # type: ignore

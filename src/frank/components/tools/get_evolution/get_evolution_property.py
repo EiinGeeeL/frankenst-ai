@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pydantic import BaseModel, Field
 from typing import Type
 
-class GetEvolutionConfig:
+class GetEvolutionProperty:
     @dataclass
     class Input(BaseModel):
         """

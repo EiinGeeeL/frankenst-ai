@@ -1,4 +1,3 @@
-import requests
 import logging
 from typing import Optional, Type
 from langchain_core.tools import (
@@ -10,8 +9,8 @@ from langchain_core.callbacks import (
 )
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, SkipValidation
-from frank.entity.models.basetools.dominate_pokemon_config import DominatePokemonConfig
-
+from .dominate_pokemon_property import DominatePokemonProperty
+from .dominate_pokemon import DominatePokemon
 
 class DominatePokemonTool(BaseTool):
     # BaseTool atributes
@@ -21,7 +20,7 @@ class DominatePokemonTool(BaseTool):
     return_direct: bool = None
 
     # New BaseTool attributes
-    config: SkipValidation[DominatePokemonConfig] = DominatePokemonConfig
+    config: SkipValidation[DominatePokemonProperty] = DominatePokemonProperty
     logger: SkipValidation[logging.Logger] = logging.getLogger(__name__.split('.')[-1])
      
     def __init__(self, **data):
@@ -37,7 +36,5 @@ class DominatePokemonTool(BaseTool):
         Run the tool logic
         """
         self.logger.info(f"Args: {place}")
-
-        url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         
-        return url
+        return DominatePokemon.run(place=place)

@@ -6,9 +6,9 @@ from frank.components.runnables.oaklang_agent.oaklang_agent import OakLangAgent
 from frank.components.edges.evaluators.route_human_node import RouteHumanNode
 from frank.components.nodes.enhancers.simple_messages_ainvoke import SimpleMessagesAsyncInvoke
 from frank.components.nodes.commands.human_review_sensitive_tool_call import HumanReviewSensitiveToolCall
-from frank.components.tools.get_evolution_tool import GetEvolutionTool
-from frank.components.tools.random_movements_tool import RandomMovementsTool
-from frank.components.tools.dominate_pokemon_tool import DominatePokemonTool
+from frank.components.tools.get_evolution.get_evolution_tool import GetEvolutionTool
+from frank.components.tools.random_movements.random_movements_tool import RandomMovementsTool
+from frank.components.tools.dominate_pokemon.dominate_pokemon_tool import DominatePokemonTool
 from frank.entity.edge import ConditionalEdge, SimpleEdge
 from frank.entity.node import SimpleNode, CommandNode
 from frank.utils.common import read_yaml
@@ -32,7 +32,7 @@ class OakHumanLoopConfigGraph:
     OAKTOOLS_NODE = ToolNode(tools=OAKLANG_AGENT.tools,
                        name=CONFIG_NODES['OAKTOOLS_NODE']['name'])
 
-    HUMAN_REVIEW_NODE = CommandNode(commander=HumanReviewSensitiveToolCall(sensitive_tools=[DominatePokemonTool()]),
+    HUMAN_REVIEW_NODE = CommandNode(commander=HumanReviewSensitiveToolCall(sensitive_tool_names=[DominatePokemonTool().name]),
                                     name=CONFIG_NODES['HUMAN_REVIEW_NODE']['name'])
 
     ## EDGES

@@ -3,7 +3,7 @@ from langgraph.prebuilt import ToolNode
 from dataclasses import is_dataclass
 from typing import Annotated
 from frank.utils.type_vars import ConfigDataclass
-from frank.entity.edge import ConditionalEdge, SimpleEdge
+from frank.entity.edge import BaseEdge
 from frank.entity.node import BaseNode
 from frank.entity.runnable_builder import RunnableBuilder
 
@@ -38,7 +38,7 @@ class GraphLayout:
         return [
             attr_value 
             for attr_value in self.config.__dict__.values() 
-            if isinstance(attr_value, (SimpleEdge, ConditionalEdge))
+            if isinstance(attr_value, (BaseEdge))
         ]
 
     def get_runnable_builders(self):
