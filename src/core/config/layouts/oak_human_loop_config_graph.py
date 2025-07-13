@@ -15,6 +15,9 @@ from core.components.tools.dominate_pokemon.dominate_pokemon_tool import Dominat
 from core.utils.common import read_yaml
 from core.constants import *
 
+
+# NOTE: This is an example implementation for illustration purposes
+# NOTE: Here you can add other subgraphs as nodes
 @dataclass(frozen=True)
 class OakHumanLoopConfigGraph:
     ## Initializate LLMServices

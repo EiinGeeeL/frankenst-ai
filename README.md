@@ -45,7 +45,7 @@ The project has been designed with the following goals:
     sudo apt install tesseract-ocr
     ```
 
-## Running the Project
+## Running the Project Locally
 
 To run the project:
 
@@ -62,49 +62,49 @@ To run the project:
     Config all your model variables in your ```.env```
 
     ```cp .env.example .env```
-2. Compile Graphs Layouts with Workflow Builder
-
-    You can check ```research/demo...ipynb``` for more information.
+2. Compile Graph Layouts with Workflow Builder
+    
+    For additional information, please refer to ```research/demo...ipynb``` notebooks.
 
 ## Repository Structure
 
 ```bash
-frank/
-├── main.py                # Main file to run the project
-├── app.py                 # Main file to assemble the app
-├── requirements.txt       # Project dependency list
-├── .env                   # Environment variables for configuration
-├── README.md              # Project documentation
+frankenst-ai/
+├── main.py                  # Entry point to run the project
+├── app.py                   # Main application assembly script
+├── requirements.txt         # Python dependencies for the project
+├── .env                     # Environment variables for local configuration; .env.example for reference
+├── README.md                # Main project documentation
 ├── src/
-│   ├── services/          # Contains services
-│   └── frank/
-│       ├── components/
-│       │   ├── nodes/
-│       │   │   ├── enhancers/       # Contains StateEnhancers for simple nodes to modifications with runnables
-│       │   │   └── commands/        # Contains StateCommander for simple nodes. Commands for LangGraph method can route and modificate the state.
-│       │   ├── edges/
-│       │   │   └── evaluators/      # Contains StateEvaluator for conditional edges
-│       │   ├── tools/               
-│       │   └── runnables/           # Contains executable invoke files of RunnableBuilders
-│       ├── config/    
-│       │   ├── config.yaml          # Main configuration files for project
-│       │   ├── config_nodes.py      # Contains the definition of graph nodes of your project
-│       │   └── layouts/             # Contains all Config Graph dataclass of your project
-│       ├── models/                  # Contains structural models like, stategraphs, base tools properties, structured output...
+│   ├── services/            # Service modules
+│   ├── core/                # Custom LangGraph implementation for illustration purposes
+│   │   ├── components/
+│   │   │   ├── nodes/
+│   │   │   │   ├── enhancers/        # StateEnhancers for simple node logic modifying StateGraph via runnables
+│   │   │   │   └── commands/         # StateCommander for routing and modifying state through LangGraph commands
+│   │   │   ├── edges/
+│   │   │   │   └── evaluators/       # StateEvaluator for conditional edge logic
+│   │   │   ├── tools/                # Tool definitions and integrations
+│   │   │   └── runnables/            # Executable LangChain RunnableBuilder modules
+│   │   ├── config/
+│   │   │   ├── config.yaml           # Main configuration file for the project
+│   │   │   ├── config_nodes.py       # Contains all the graph nodes definition of your project
+│   │   │   └── layouts/              # Contains ConfigGraph dataclass examples
+│   │   ├── constants/           
+│   │   ├── models/                   # Structural models: StateGraph, tool properties, structured outputs, etc.
+│   │   └── utils/                  
+│   └── frank/               # Frank utilities for assembling, refactoring, and compiling LangGraph
 │       ├── entity/
-│       │   ├── graph_layout.py      # Initialize the Graph Layout with a Config Graph dataclass
-│       │   ├── runnable_builder.py  # Builder for LangChain Runnable
-│       │   ├── statehandler.py      # Contains main entities for GraphState handlers
-│       │   ├── node.py              # Contains main entities related to nodes
-│       │   └── edge.py              # Contains main entities related to edges
-│       ├── managers/                
-│       ├── utils/
-│       └── constants/
-│           └── __init__.py          # Contains project constants
-├── research/              
-├── tests/                 
-│   ├── integration_test/
-│   └── unit_test/
-├── artifacts/             
-└── logs/                  
-```
+│       │   ├── graph_layout.py       # Initializes the GraphLayout using a ConfigGraph dataclass
+│       │   ├── runnable_builder.py   # Builder class for LangChain Runnable objects
+│       │   ├── statehandler.py       # Core entities for handling StateGraph
+│       │   ├── node.py               # Core node-related entities 
+│       │   └── edge.py               # Core edge-related entities
+│       ├── managers/               
+│       └── workflow_builder.py       # Workflow Builder to compile the LangGraph using a ConfigGraph dataclass
+├── research/                # Research, demos and experimental resources
+├── tests/
+│   ├── integration_test/      
+│   └── unit_test/              
+├── artifacts/               # Generated artifacts, static files and outputs
+└── logs/                    # Log files and runtime logs

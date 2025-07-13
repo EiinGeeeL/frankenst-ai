@@ -13,8 +13,9 @@ from core.components.tools.random_movements.random_movements_tool import RandomM
 from core.utils.common import read_yaml
 from core.constants import *
 
-# TODO Here you can add another subgraphs as nodes
 
+# NOTE: This is an example implementation for illustration purposes
+# NOTE: Here you can add other subgraphs as nodes
 @dataclass(frozen=True)
 class SimpleOakConfigGraph:
     ## Initializate LLMServices
