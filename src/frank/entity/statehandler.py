@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Literal, Any, Optional, Union, Tuple
+from typing import Literal, Any, Optional, Union
 from pydantic import BaseModel
 from langchain_core.messages import AnyMessage
 from langgraph.types import Command
@@ -36,11 +36,21 @@ class StateEnhancer(ABC):
         pass
 
 class StateCommander:
-    # Nodes config to route the command to node names
-    config_nodes: dict[str, str] = None
+    # Example config_node.yml read structure to route the command to node names
+    config_nodes: dict[str, dict[str, dict[str, str]]] = {
+        "current_node": {
+            "name" : "current_node_name",
+            "type" : "commander",
+            "route": {
+                "tools": "some_tool_node_name",
+                "enhancer_b": "other_node_name",
+                "enhancer_c": "another_node_name",
+            }
+        }
+    }
 
     @staticmethod
-    def command(state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> Command[Literal[config_nodes, config_nodes]]: # type: ignore
+    def command(state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> Command[Literal[tuple(config_nodes['current_node']['route'].values())]]: # type: ignore
         """
         Modify the StateGraph and also route with Command[Literal] to nodes. 
         No need edges or conditional edges, the command method contain the logic routing.
@@ -49,3 +59,5 @@ class StateCommander:
 
     # Implementation would go here
         pass
+
+        return Command(goto=StateCommander.config_nodes['current_node']['route']['tools'])

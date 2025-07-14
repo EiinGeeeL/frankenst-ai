@@ -9,7 +9,8 @@ from core.constants import *
 
 
 class HumanReviewSensitiveToolCall(StateCommander):
-    config_nodes=read_yaml(CONFIG_NODES_FILE_PATH)
+    config_nodes: dict[str, dict[str, dict[str, str]]] = read_yaml(CONFIG_NODES_FILE_PATH)
+    
     def __init__(self, sensitive_tool_names: list[str] = None):
         """
         Load Sensitive tool names list
