@@ -21,7 +21,7 @@ from langchain.retrievers.multi_vector import MultiVectorRetriever
 # TODO: load folder and more than one file
 # TODO: externalizate the context
 # TODO: add the logic in the slip to exclude small images (icons)
-class MultiVectorDocumentIndexing:
+class LangChainMultiVectorDocumentIndexing:
     """
     A class to process PDFs (local or cloud), split content into chunks (texts, tables, images),
     summarize them, embed and store them in a retriever with multi-vector capability.

@@ -1,5 +1,5 @@
 from frank.workflow_builder import WorkflowBuilder
-from core.config.layouts.adaptative_rag_config_graph import AdaptativeRAGConfigGraph
+from core.config.layouts.local_vectorstore_adaptative_rag_config_graph import LocalVectorStoreAdaptativeRAGConfigGraph
 from core.models.stategraph.ragstategraph import RAGState
 from core.utils.common import read_yaml
 from core.utils.logger import setup_logging
@@ -13,7 +13,7 @@ setup_logging(config)
 
 ## Workflow Configuration for the main graph
 workflow_builder = WorkflowBuilder(
-    config=AdaptativeRAGConfigGraph, 
+    config=LocalVectorStoreAdaptativeRAGConfigGraph, 
     state_schema=RAGState,
 )
 ADAPTATIVE_RAG_GRAPH = workflow_builder.compile() # compile the graph

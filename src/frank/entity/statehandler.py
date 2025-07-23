@@ -8,9 +8,14 @@ from frank.entity.runnable_builder import RunnableBuilder
 class StateEvaluator(ABC):
     def __init__(
         self,
-        runnable_builder: Optional[RunnableBuilder] = None
-    ):
+        runnable_builder: Optional[RunnableBuilder] = None,
+        **kwargs
+
+        ):
         self.runnable = runnable_builder.get() if runnable_builder else None
+         
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     @abstractmethod
     async def evaluate(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> str:
@@ -23,9 +28,16 @@ class StateEvaluator(ABC):
 class StateEnhancer(ABC): 
     def __init__(
             self,
-            runnable_builder: Optional[RunnableBuilder] = None
+            runnable_builder: Optional[RunnableBuilder] = None,
+            **kwargs
         ):
+        
         self.runnable = runnable_builder.get() if runnable_builder else None
+         
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+        
         
     @abstractmethod
     async def enhance(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> dict[Literal[str]: list]:

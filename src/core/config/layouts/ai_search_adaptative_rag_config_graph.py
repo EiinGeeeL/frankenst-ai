@@ -10,7 +10,7 @@ from core.components.runnables.structured_grade_document.structured_grade_docume
 from core.components.runnables.rewrite_question.rewrite_question import RewriteQuestion
 from core.components.edges.evaluators.grade_rewrite_generate import GradeRewriteGenerate
 from core.components.nodes.enhancers.generate_answer_ainvoke import GenerateAnswerAsyncInvoke
-from core.components.nodes.enhancers.retrieve_context_ainvoke import RetrieveContextAsyncInvoke
+from core.components.nodes.enhancers.retrieve_context_ai_search import RetrieveContextAISearch
 from core.components.nodes.enhancers.rewrite_question_ainvoke import RewriteQuestionAsyncInvoke
 from core.models.structured_output.grade_documents import GradeDocuments
 from core.utils.common import read_yaml
@@ -20,7 +20,7 @@ from core.constants import *
 # NOTE: This is an example implementation for illustration purposes
 # NOTE: Here you can add other subgraphs as nodes
 @dataclass(frozen=True)
-class AdaptativeRAGConfigGraph:
+class AISearchAdaptativeRAGConfigGraph:
     ## Initializate LLMServices
     LLMServices.launch()
 
@@ -41,7 +41,7 @@ class AdaptativeRAGConfigGraph:
     GENERATION_NODE = SimpleNode(enhancer=GenerateAnswerAsyncInvoke(GENERARION_CHAIN),
                          name=CONFIG_NODES['GENERATION_NODE']['name'])
     
-    RETRIEVER_NODE = SimpleNode(enhancer=RetrieveContextAsyncInvoke(RETRIEVER_CHAIN),
+    RETRIEVER_NODE = SimpleNode(enhancer=RetrieveContextAISearch(embeddings=LLMServices.embeddings),
                         name=CONFIG_NODES['RETRIEVER_NODE']['name'])
     
     REWRITE_NODE = SimpleNode(enhancer=RewriteQuestionAsyncInvoke(REWRITE_CHAIN),
