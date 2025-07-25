@@ -66,6 +66,24 @@ To run the project:
     
     For additional information, please refer to ```research/demo...ipynb``` notebooks.
 
+# Local Functions Apps Container 
+- Start your Function App Container recipes: 
+```bash 
+docker build <build args -> build-and-push-acr.yml> mylocalfunction:0.1 . docker run -d -p 8080:80 
+mylocalfunction:0.1 docker logs <container_id>  
+```
+
+- Docker deep debug recipes: 
+```bash 
+docker exec -it <container_id> /bin/bash 
+apt-get update 
+apt-get install azure-functions-core-tools-4 
+apt-get install azure-cli 
+cd /home/site/wwwroot 
+az login 
+func start --verbose
+```
+
 ## Repository Structure
 
 ```bash
