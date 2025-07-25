@@ -417,22 +417,31 @@ class AISearchMultiVectorRetriever:
             search_text=None,
             vector_queries=[vector_query],
             select=["type", "content", "metadata"],
-            include_total_count=True
+            include_total_count=True,
+            top=k # max documents retrievers
         )
 
         return list(results)
 
-    def _parse_results(self, results: List[dict]) -> Dict[str, List[str]]:
-        """Groups documents by type."""
+    def _parse_results(self, results: List[dict], metadata_as_content: bool = False) -> Dict[str, List[str]]:
+        """Groups documents by type, optionally appending metadata to content."""
         grouped = {"texts": [], "images": []}
-        for res in results:
-            t = res.get("type")
-            c = res.get("content", "")
+        for doc in results:
+            t = doc.get("type")
+            c = doc.get("content", "")
+            
+            if metadata_as_content:
+                metadata = doc.get("metadata")
+                if metadata:
+                    c += f"\n\nMetadata: {metadata}"
+
             if t == "texts" or t == "tables":
                 grouped["texts"].append(c)
             elif t == "images":
                 grouped["images"].append(c)
+
         return grouped
+
 
     def get_context(self, query: str, k: int = 5) -> Dict[str, object]:
         """
