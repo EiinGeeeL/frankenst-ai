@@ -66,7 +66,7 @@ To run the project:
     
     For additional information, please refer to ```research/demo...ipynb``` notebooks.
 
-# Local Functions Apps Container 
+## Local Functions Apps Container 
 - Start your Function App Container recipes: 
 ```bash 
 docker build <build args -> build-and-push-acr.yml> mylocalfunction:0.1 . 
