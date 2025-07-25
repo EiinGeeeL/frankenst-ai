@@ -10,6 +10,6 @@ class RAGState(MessagesState):
         iterations: Loop times of the process grade-rewrite-retrieve-generate
     """
     question: str
-    context: dict[str, list]  # dictionary with keys: "texts" and "images"
+    context: dict[str, list]  # dictionary with keys: "texts" and "images" TODO: add metadata in the context
     generation: str
     iterations: int = 0

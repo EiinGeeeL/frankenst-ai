@@ -4,7 +4,6 @@ from services.ai_foundry.llm import LLMServices
 from frank.entity.edge import ConditionalEdge, SimpleEdge
 from frank.entity.node import SimpleNode
 
-from core.components.runnables.multimodal_retriever.multimodal_retriever import MultimodalRetriever
 from core.components.runnables.multimodal_generation.multimodal_generation import MultimodalGeneration
 from core.components.runnables.structured_grade_document.structured_grade_document import StructuredGradeDocument
 from core.components.runnables.rewrite_question.rewrite_question import RewriteQuestion
@@ -25,8 +24,6 @@ class AISearchAdaptativeRAGConfigGraph:
     LLMServices.launch()
 
     ## RUNNABLES BUILDERS
-
-    RETRIEVER_CHAIN = MultimodalRetriever(model=LLMServices.model, vectordb=LLMServices.vectorstore)
 
     GENERARION_CHAIN = MultimodalGeneration(model=LLMServices.model)
 
