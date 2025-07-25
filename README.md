@@ -69,7 +69,8 @@ To run the project:
 # Local Functions Apps Container 
 - Start your Function App Container recipes: 
 ```bash 
-docker build <build args -> build-and-push-acr.yml> mylocalfunction:0.1 . docker run -d -p 8080:80 
+docker build <build args -> build-and-push-acr.yml> mylocalfunction:0.1 . 
+docker run -d -p 8080:80 
 mylocalfunction:0.1 docker logs <container_id>  
 ```
 
