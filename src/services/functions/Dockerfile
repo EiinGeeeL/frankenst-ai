@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/azure-functions/python:4-python3.11
+FROM mcr.microsoft.com/azure-functions/python:4-python3.12
 
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
     AzureFunctionsJobHost__Logging__Console__IsEnabled=true
@@ -10,11 +10,11 @@ RUN apt-get update -y && \
     && apt-get clean
 
 # Define build arguments
-ARG AZURE_KEY_VAULT
+ARG AZURE_KEY_VAULT_NAME
 ARG TIMER_SCHEDULE
 
 # Set environment variables
-ENV AZURE_KEY_VAULT=$AZURE_KEY_VAULT \
+ENV AZURE_KEY_VAULT=$AZURE_KEY_VAULT_NAME \
     TIMER_SCHEDULE=$TIMER_SCHEDULE
 
 # Install requirements

@@ -4,12 +4,13 @@ from services.ai_foundry.llm import LLMServices
 from frank.entity.edge import ConditionalEdge, SimpleEdge
 from frank.entity.node import SimpleNode
 
+from core.components.runnables.multimodal_retriever.multimodal_retriever import MultimodalRetriever
 from core.components.runnables.multimodal_generation.multimodal_generation import MultimodalGeneration
 from core.components.runnables.structured_grade_document.structured_grade_document import StructuredGradeDocument
 from core.components.runnables.rewrite_question.rewrite_question import RewriteQuestion
 from core.components.edges.evaluators.grade_rewrite_generate import GradeRewriteGenerate
 from core.components.nodes.enhancers.generate_answer_ainvoke import GenerateAnswerAsyncInvoke
-from core.components.nodes.enhancers.retrieve_context_ai_search import RetrieveContextAISearch
+from core.components.nodes.enhancers.retrieve_context_ainvoke import RetrieveContextAsyncInvoke
 from core.components.nodes.enhancers.rewrite_question_ainvoke import RewriteQuestionAsyncInvoke
 from core.models.structured_output.grade_documents import GradeDocuments
 from core.utils.common import read_yaml
@@ -19,11 +20,13 @@ from core.constants import *
 # NOTE: This is an example implementation for illustration purposes
 # NOTE: Here you can add other subgraphs as nodes
 @dataclass(frozen=True)
-class AISearchAdaptativeRAGConfigGraph:
+class LocalVectorStoreAdaptiveRAGConfigGraph:
     ## Initializate LLMServices
     LLMServices.launch()
 
     ## RUNNABLES BUILDERS
+
+    RETRIEVER_CHAIN = MultimodalRetriever(model=LLMServices.model, vectordb=LLMServices.vectorstore)
 
     GENERARION_CHAIN = MultimodalGeneration(model=LLMServices.model)
 
@@ -38,7 +41,7 @@ class AISearchAdaptativeRAGConfigGraph:
     GENERATION_NODE = SimpleNode(enhancer=GenerateAnswerAsyncInvoke(GENERARION_CHAIN),
                          name=CONFIG_NODES['GENERATION_NODE']['name'])
     
-    RETRIEVER_NODE = SimpleNode(enhancer=RetrieveContextAISearch(embeddings=LLMServices.embeddings),
+    RETRIEVER_NODE = SimpleNode(enhancer=RetrieveContextAsyncInvoke(RETRIEVER_CHAIN),
                         name=CONFIG_NODES['RETRIEVER_NODE']['name'])
     
     REWRITE_NODE = SimpleNode(enhancer=RewriteQuestionAsyncInvoke(REWRITE_CHAIN),

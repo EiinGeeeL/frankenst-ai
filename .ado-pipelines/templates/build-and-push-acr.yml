@@ -33,7 +33,7 @@ steps:
 
         echo "Building Dockerfile"
         docker build -f ${{ parameters.dockerfile }} \
-          --build-arg AZURE_KEY_VAULT='$(azure_key_vault)' \
+          --build-arg AZURE_KEY_VAULT_NAME='$(azure_key_vault_name)' \
           --build-arg TIMER_SCHEDULE='$(timer_schedule)' \
           -t $registry/$imageDefinition \
           ${{ parameters.context_path }}

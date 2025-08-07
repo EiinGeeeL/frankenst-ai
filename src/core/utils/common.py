@@ -95,7 +95,10 @@ def read_yaml(path_to_yaml: Path) -> Optional[Dict]:
     
 def load_and_clean_text_file(file_path: str, remove_empty_lines: bool = False) -> str:
     try:
-        with open(file_path, 'r', encoding='utf-8') as file:
+        p = Path(file_path)
+        file_path_found = next((Path(*p.parts[i:]) for i in range(len(p.parts)) if Path(*p.parts[i:]).exists()), p)
+
+        with open(file_path_found, 'r', encoding='utf-8') as file:
             if remove_empty_lines:
                 content = "\n".join(line.strip() for line in file if line.strip())
             else:

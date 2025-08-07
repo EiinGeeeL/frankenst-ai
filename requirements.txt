@@ -1,3 +1,7 @@
+azure-functions
+azure-keyvault-secrets
+azure-identity
+azure-search-documents
 PyYAML
 matplotlib
 ipywidgets
@@ -18,5 +22,3 @@ autogen_core
 semantic_kernel
 langchain_mcp_adapters
 mcp
-azure-functions
-azure-search-documents
