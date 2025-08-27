@@ -24,31 +24,29 @@ from langchain_core.embeddings import Embeddings
 from langchain_core.runnables.base import RunnableSequence
 
 class AISearchMultiVectorDocumentIndexing:
-    """
-    A class to process PDFs (local or cloud), split content into chunks (texts, tables, images),
-    summarize them, embed and store them in a retriever with multi-vector capability.
-    Maintains internal state for elements, summaries, and chunks for later retrieval or debugging.
-    """
-
     def __init__(
         self,
-        llm_multimodal: BaseLanguageModel,
-        embeddings: Embeddings,
         search_client: SearchClient,
+        llm_multimodal: Optional[BaseLanguageModel] = None,
+        embeddings: Optional[Embeddings] = None,
     ):
         """
-        Initializes the MultiVectorDocumentIndexing pipeline.
+        Processes and manages documents for Azure AI Search with multi-vector indexing.
+
+        Supports parsing PDFs (local or cloud), chunking content (text, tables, images), summarizing with a multimodal LLM,
+        embedding with vector models, and indexing in Azure Search. Also allows manual upload and deletion of documents.
+
+        Maintains internal state for elements, summaries, and chunks for retrieval or debugging.
 
         Args:
+            search_client (SearchClient, optional): Azure AI Search client used to upload in a index the processed documents.
             llm_multimodal (BaseLanguageModel): Multimodal model for summarizing text, tables and images.
-            embeddings (Embeddings): An embedding model used to generate vectors.
-        search_client (SearchClient): Azure AI Search client used to upload in a index the processed documents.
-
+            embeddings (Embeddings, optional): An embedding model used to generate vectors.
         """
+        self.search_client = search_client
         self.llm_multimodal = llm_multimodal
         self.embeddings = embeddings
-        self.search_client = search_client
-
+        
         # Internal state
         self.file_path: Optional[str] = None
         self.elements: dict[str, list] = {"texts": [], "tables": [], "images": []}
@@ -56,33 +54,28 @@ class AISearchMultiVectorDocumentIndexing:
         self.documents: List[dict] = []
 
 
-    def load_pdf(self, path: str = None, azure_blob: Optional[dict] = None) -> None:
+    def load_pdf(self, path: str = None) -> None:
         """
-        Loads a PDF file from a local path or Azure Blob Storage.
+        Loads a PDF file from a local or temp path to split, embed and store.
 
         Args:
-            path (str): Local file path.
-            azure_blob (dict, optional): Azure blob config.
+            path (str): Local or temp file path.
 
         Raises:
-            ValueError: If neither path nor azure_blob is provided.
+            FileNotFoundError: File not found.
         """
         if path and not os.path.exists(path):
             raise FileNotFoundError(f"File not found: {path}")
         elif path:
             self.file_path = path
-        elif azure_blob:
-            raise NotImplementedError("Azure blob loading is not yet implemented.")
-        else:
-            raise ValueError("Provide a path or azure_blob info.")
 
-    def split_pdf(self, min_image_size_filter: tuple = None):
+    def split_pdf(self, min_image_size_filter: Optional[tuple] = None):
         """
         Splits the loaded PDF into texts, tables, and base64-encoded images.
         Updates internal state.
 
         Args:
-            min_image_size_filter (tuple): (width, height) size below which images will be filtered out.
+            min_image_size_filter (tuple, optional): (width, height) size below which images will be filtered out.
 
         Returns:
             tuple: Lists of texts, tables, and images.
@@ -234,7 +227,7 @@ class AISearchMultiVectorDocumentIndexing:
                             "last_modified": dt.datetime.now(dt.UTC),
                             "page_number": getattr(chunk.metadata, "page_number", 1),
                             "file_directory": getattr(chunk.metadata, "file_directory", None),
-                            "filename": getattr(chunk.metadata, "filename", None),
+                            "filename": os.path.basename(self.file_path),
                             "filetype": getattr(chunk.metadata, "filetype", None),
                             "uri": f"https://www.devops.wiki/{getattr(chunk.metadata, "filename", None)}" # TODO: improve dinamic url
                         }
@@ -257,28 +250,71 @@ class AISearchMultiVectorDocumentIndexing:
 
         return documents
     
-    def upload_documents(self) -> List[IndexingResult]:
-        return self.search_client.upload_documents(documents=self.documents)
+    def upload_documents(self, documents: List[Dict[str, Any]] = None) -> List[IndexingResult]:
+        if documents:
+            return self.search_client.upload_documents(documents=documents)
+        else:
+            return self.search_client.upload_documents(documents=self.documents)
+    
+    def delete_document_by_filename(self, filename: str, filter: str = None):
+        if not filter:
+
+            filter = (
+                f"metadata/filename eq '{filename}'" # TODO: filter and search filename in other index...s
+            )
+
+        results = self.search_client.search(
+            search_text="*",  
+            filter=filter,
+            select=["id"]
+        )
+
+        doc_ids_to_delete = [{"id": doc["id"]} for doc in results]
+
+        if doc_ids_to_delete:
+            self.search_client.delete_documents(documents=doc_ids_to_delete)
+        else:
+            raise Exception(f"No documents found with filename: {filename}")
 
 
 class AISearchIndexManager:
-    """
-    Manages the lifecycle and configuration of an Azure Cognitive Search index, 
-    including creation, updating, deletion, and retrieval of the index definition.
-    """
+    
 
-    def __init__(self, index_name: str, index_client: SearchIndexClient):
+    def __init__(self, index_client: SearchIndexClient, index_name: str):
         """
-        Initializes the AISearchIndexManager.
+        Manages the lifecycle and configuration of an Azure AI Search index, 
+        including creation, updating, deletion, and retrieval of the index definition.
 
         Args:
-            index_name (str): The name of the index to manage.
             index_client (SearchIndexClient): The Azure SearchIndexClient to interact with the service.
+            index_name (str): The name of the index to manage.
         """
-        self.index_name = index_name
         self.index_client = index_client
+        self.index_name = index_name
+    
+    def get_index(self):
+        """
+        Retrieves the definition of the current index.
 
-    def create_index(self, search_field: List[Union[SearchField, SimpleField, SearchableField, ComplexField]] = None):
+        Returns:
+            SearchIndex: The current index definition.
+        """
+        return self.index_client.get_index(name=self.index_name)
+    
+    def index_exists(self) -> bool:
+        """
+        Checks whether the specified search index exists in the Azure Cognitive Search service.
+
+        Returns:
+            bool: True if the index exists, False otherwise.
+        """
+        try:
+            self.index_client.get_index(name=self.index_name)
+            return True
+        except Exception:
+            return False
+    
+    def create_index(self, search_field: Optional[List[Union[SearchField, SimpleField, SearchableField, ComplexField]]] = None):
         """
         Creates a new search index if it does not already exist.
 
@@ -289,7 +325,7 @@ class AISearchIndexManager:
         Raises:
             Exception: If the index already exists.
         """
-        if self.index_name not in [idx.name for idx in self.index_client.list_indexes()]:
+        if not self.index_exists():
             index = SearchIndex(
                 name=self.index_name,
                 fields=self._get_basic_fields() if not search_field else search_field,
@@ -301,16 +337,7 @@ class AISearchIndexManager:
         else:
             raise Exception(f"The index '{self.index_name}' already exists. Please update it instead.")
 
-    def get_index(self):
-        """
-        Retrieves the definition of the current index.
-
-        Returns:
-            SearchIndex: The current index definition.
-        """
-        return self.index_client.get_index(name=self.index_name)
-
-    def update_index(self, search_field: List[Union[SearchField, SimpleField, SearchableField, ComplexField]] = None):
+    def update_index(self, search_field: Optional[List[Union[SearchField, SimpleField, SearchableField, ComplexField]]] = None):
         """
         Updates an existing index with new field definitions or scoring profiles.
 
@@ -344,9 +371,9 @@ class AISearchIndexManager:
         """
         return [
             SimpleField(name="id", type=SearchFieldDataType.String, key=True),
-            SearchableField(name="type", type=SearchFieldDataType.String, filterable=True, sortable=True, searchable=False),
-            SearchableField(name="content", type=SearchFieldDataType.String, searchable=False),
-            SearchableField(name="summary", type=SearchFieldDataType.String, searchable=False),
+            SimpleField(name="type", type=SearchFieldDataType.String, filterable=True, sortable=True),
+            SearchField(name="content", type=SearchFieldDataType.String, searchable=True, analyzer_name="es.lucene"),
+            SimpleField(name="summary", type=SearchFieldDataType.String, filterable=True),
             ComplexField(name="metadata", fields=[
                 SimpleField(name="filetype", type=SearchFieldDataType.String, filterable=True),
                 SimpleField(name="languages", type=SearchFieldDataType.String, filterable=True),
@@ -389,41 +416,44 @@ class AISearchIndexManager:
 class AISearchMultiVectorRetriever:
     def __init__(
         self,
-        embeddings: Embeddings,
-        search_client: SearchClient
+        search_client: SearchClient,
+        embeddings: Optional[Embeddings] = None
     ):
         """
         Args:
-            embeddings: Model used to generate query embeddings.
             search_client: Azure Search client configured with endpoint, index, and credentials.
+            embeddings (Embeddings, optional): Model used to generate query embeddings.
         """
-        self.embeddings = embeddings
         self.search_client = search_client
+        self.embeddings = embeddings
 
-    def _search(self, query: str, k: int = 5) -> List[dict]:
+    def _search(self, query: str, k: int = 5, embed: bool = True) -> List[dict]:
         """Performs a vector search with the given query."""
-        vector = self.embeddings.embed_query(query)
+        if embed:
+            vector = self.embeddings.embed_query(query)
 
-        vector_query = VectorizedQuery(
-            vector=vector,
-            kind="vector",
-            fields="embeddings",
-            k_nearest_neighbors=k,
-            exhaustive=True,
-            weight=0.5,
-        )
+            vector_query = VectorizedQuery(
+                vector=vector,
+                kind="vector",
+                fields="embeddings",
+                k_nearest_neighbors=k,
+                exhaustive=True,
+                weight=0.5, # for hybrid search
+            )
 
-        results = self.search_client.search(
-            search_text=None,
-            vector_queries=[vector_query],
-            select=["type", "content", "metadata"],
-            include_total_count=True,
-            top=k # max documents retrievers
-        )
+            results = self.search_client.search(
+                search_text=None,
+                vector_queries=[vector_query],
+                select=["type", "content", "metadata"],
+                include_total_count=True
+            )
+        else:
+            # TODO: search text 
+            raise NotImplementedError("Text search in progress.")
 
         return list(results)
 
-    def _parse_results(self, results: List[dict], metadata_as_content: bool = False) -> Dict[str, List[str]]:
+    def _parse_results(self, results: List[dict], metadata_as_content: bool = True) -> Dict[str, List[str]]:
         """Groups documents by type, optionally appending metadata to content."""
         grouped = {"texts": [], "images": []}
         for doc in results:
@@ -442,15 +472,14 @@ class AISearchMultiVectorRetriever:
 
         return grouped
 
-
-    def get_context(self, query: str, k: int = 5) -> Dict[str, object]:
+    def get_context(self, query: str, k: int = 5, embed: bool = True) -> Dict[str, object]:
         """
         Performs the search and builds the context.
 
         Returns:
             dict with keys "texts" (concatenated string) and "images" (list of dicts for prompt).
         """
-        results = self._search(query, k)
+        results = self._search(query, k, embed)
         docs_by_type = self._parse_results(results)
 
         context_text = "\n".join(docs_by_type.get("texts", []))

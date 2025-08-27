@@ -2,6 +2,7 @@ azure-functions
 azure-keyvault-secrets
 azure-identity
 azure-search-documents
+azure-storage-blob
 PyYAML
 matplotlib
 ipywidgets
