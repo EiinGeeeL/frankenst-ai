@@ -6,7 +6,7 @@ from langchain_core.embeddings import Embeddings
 from frank.entity.statehandler import StateEnhancer
 from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
-from core.utils.rag.ai_search_unstructured import AISearchMultiVectorRetriever
+from core.components.retrievers.ai_search_multivector_retriever.ai_search_multivector_retriever import AISearchMultiVectorRetriever
 
 
 class RetrieveContextAISearch(StateEnhancer):

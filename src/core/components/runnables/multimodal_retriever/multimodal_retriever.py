@@ -6,7 +6,7 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.runnables import Runnable
 
 from frank.entity.runnable_builder import RunnableBuilder
-from core.utils.rag.langchain_unstructured import LangChainMultiVectorDocumentIndexing
+from core.components.retrievers.local_multivector_retriever.local_multivector_retriever import LocalMultiVectorRetriever
 from core.utils.rag.processing import parse_docs, parse_context
 
 
@@ -20,16 +20,10 @@ class MultimodalRetriever(RunnableBuilder):
 
     def _build_retriever(self) -> BaseRetriever:
 
-        # Index phase
-        indexing = LangChainMultiVectorDocumentIndexing(llm=self.model, llm_multimodal=self.model, vectorstore=self.vectordb)
+        local_retriever = LocalMultiVectorRetriever(llm=self.model, llm_multimodal=self.model, vectorstore=self.vectordb)
+        local_retriever.indexing_pdf('artifacts/rag_docs/EP003 - Ash Catches a Pokémon.pdf')
 
-        indexing.load_pdf('artifacts/rag_docs/EP003 - Ash Catches a Pokémon.pdf')
-        indexing.split_pdf()
-        indexing.summarize_elements()
-        indexing.embed_store_documents()
-        retriever = indexing.get_retriever()
-
-        return retriever
+        return local_retriever.get_retriever()
 
     def _configure_runnable(self) -> Runnable:
         
