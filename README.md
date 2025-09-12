@@ -104,6 +104,7 @@ frankenst-ai/
 │   │   │   ├── edges/
 │   │   │   │   └── evaluators/       # StateEvaluator for conditional edge logic
 │   │   │   ├── tools/                # Tool definitions and integrations
+│   │   │   ├── retrievers/           # Retrievers definitions, builders and integrations
 │   │   │   └── runnables/            # Executable LangChain RunnableBuilder modules
 │   │   ├── config/
 │   │   │   ├── config.yaml           # Main configuration file for the project
