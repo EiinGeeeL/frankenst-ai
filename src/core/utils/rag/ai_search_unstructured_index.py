@@ -23,7 +23,7 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.embeddings import Embeddings
 from langchain_core.runnables.base import RunnableSequence
 
-class AISearchMultiVectorDocumentIndexing:
+class AISearchMultiVectorDocumentIndexer:
     def __init__(
         self,
         search_client: SearchClient,
