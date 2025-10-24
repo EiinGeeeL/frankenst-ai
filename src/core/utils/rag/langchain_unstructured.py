@@ -7,7 +7,7 @@ from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_excep
 from unstructured.partition.pdf import partition_pdf
 from azure.core.exceptions import HttpResponseError
 from langchain.schema.document import Document
-from langchain.vectorstores import VectorStore
+from langchain_core.vectorstores import VectorStore
 from langchain_core.stores import BaseStore
 from langchain.storage import InMemoryStore
 from langchain_core.language_models import BaseLanguageModel

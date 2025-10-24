@@ -5,7 +5,7 @@ from langchain_core.runnables import Runnable
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.retrievers import BaseRetriever
-from langchain.vectorstores import VectorStore
+from langchain_core.vectorstores import VectorStore
 from langchain_core.tools import BaseTool
 
 

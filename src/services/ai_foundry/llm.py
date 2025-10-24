@@ -1,7 +1,7 @@
 from langchain_ollama import ChatOllama, OllamaEmbeddings
-from langchain.vectorstores import VectorStore
 from langchain_azure_ai.chat_models import AzureAIChatCompletionsModel
 from langchain_azure_ai.embeddings import AzureAIEmbeddingsModel
+from langchain_core.vectorstores import VectorStore
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.embeddings import Embeddings
 from core.utils.common import read_yaml
