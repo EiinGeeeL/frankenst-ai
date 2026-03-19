@@ -1,0 +1,16 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+parameters:
+  - name: image_name
+    type: string
+  - name: service_connection
+    type: string
+
+steps:
+  - task: AzureFunctionAppContainer@1
+    displayName: Function App to ACR
+    inputs:
+      azureSubscription: ${{ parameters.service_connection }}
+      appName: $(azure_function_app_name)
+      imageName: '${{ parameters.image_name }}'

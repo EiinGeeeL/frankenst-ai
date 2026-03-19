@@ -11,11 +11,9 @@ RUN apt-get update -y && \
 
 # Define build arguments
 ARG AZURE_KEY_VAULT_NAME
-ARG TIMER_SCHEDULE
 
 # Set environment variables
-ENV AZURE_KEY_VAULT_NAME=$AZURE_KEY_VAULT_NAME \
-    TIMER_SCHEDULE=$TIMER_SCHEDULE
+ENV AZURE_KEY_VAULT_NAME=$AZURE_KEY_VAULT_NAME
 
 # Install requirements
 COPY requirements.txt /

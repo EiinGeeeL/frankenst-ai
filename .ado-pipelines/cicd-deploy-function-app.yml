@@ -1,0 +1,55 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+parameters:
+- name: environment
+  displayName: Environment name
+  type: string
+  values:
+  - DEV
+  - PRE
+  - PRO
+  default: DEV
+
+variables:
+- template: config-variables.yml
+
+trigger:
+- none
+
+stages:
+- stage: DeployFunctionApp_DEV
+  displayName: '[DEV] Build and Deploy Function App'
+  condition: eq('${{ parameters.environment }}', 'DEV')
+  variables:
+  - group: ${{ variables.variable_group_dev }}
+  jobs:
+  - template: templates/deploy-function-app-container.yml
+    parameters:
+      capability: ${{ variables.ap_pool_name }}
+      image_name: my-mcps-function-app
+      service_connection: ${{ variables.ado_service_connection_rg_dev }}
+
+# - stage: DeployFunctionApp_PRE
+#   displayName: '[PRE] Build and Deploy Function App'
+#   condition: eq('${{ parameters.environment }}', 'PRE')
+#   variables:
+#   - group: ${{ variables.variable_group_pre }}
+#   jobs:
+#   - template: templates/deploy-function-app-container.yml
+#     parameters:
+#       capability: ${{ variables.ap_pool_name }}    
+#       image_name: my-mcps-function-app
+#       service_connection: ${{ variables.ado_service_connection_rg_pre }}
+
+# - stage: DeployFunctionApp_PRO
+#   displayName: '[PRO] Build and Deploy Function App'
+#   condition: eq('${{ parameters.environment }}', 'PRO')
+#   variables:
+#   - group: ${{ variables.variable_group_pro }}
+#   jobs:
+#   - template: templates/deploy-function-app-container.yml
+#     parameters:
+#       capability: ${{ variables.ap_pool_name }}    
+#       image_name: my-mcps-function-app
+#       service_connection: ${{ variables.ado_service_connection_rg_pro }}

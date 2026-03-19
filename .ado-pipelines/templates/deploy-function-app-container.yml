@@ -1,0 +1,36 @@
+parameters:
+- name: capability
+  displayName: Requested agent capability
+  type: string
+- name: image_name
+  displayName: ACR image name for the deployment of Function App
+  type: string
+- name: service_connection
+  displayName: Resource Manager Service Connection Name
+  type: string
+
+jobs:
+  - deployment: DeployFunctionAppImageACR
+    pool:
+      name: ${{ parameters.capability }}
+    strategy:
+     runOnce:
+       deploy:
+        steps:
+        - checkout: self
+        - template: install-az-cli.yml
+        - template: build-and-push-acr.yml
+          parameters:
+            context_path: '.'
+            dockerfile: 'src/services/functions/Dockerfile'
+            image_name: ${{ parameters.image_name }}
+            tag_version: '$(Build.BuildId)'
+            build_args:
+              AZURE_KEY_VAULT_NAME: '$(azure_key_vault_name)'
+              # AZURE_AI_SEARCH_SERVICE_NAME: '$(azure_ai_search_service_name)'
+              # AZURE_AI_FOUNDRY_SERVICE_NAME: '$(azure_ai_foundry_service_name)'
+            service_connection: ${{ parameters.service_connection }}
+        - template: function-app-for-acr.yml
+          parameters:
+            image_name: '$(azure_container_registry_name).azurecr.io/${{ parameters.image_name }}/${{ parameters.image_name }}:$(Build.BuildId)'
+            service_connection: ${{ parameters.service_connection }}

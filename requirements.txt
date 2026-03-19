@@ -18,8 +18,5 @@ langchain-chroma
 langchain-ollama
 langchain-azure-ai[opentelemetry]
 langgraph
-autogen
-autogen_core
-semantic_kernel
 langchain_mcp_adapters
 mcp
