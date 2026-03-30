@@ -4,6 +4,12 @@ from frank.entity.edge import SimpleEdge, ConditionalEdge
 from frank.entity.statehandler import StateEvaluator
 
 class EdgeManager:
+    """Store graph edges and expose them in the format expected by LangGraph.
+
+    The manager keeps both static and conditional edges, and provides separate
+    generators for `StateGraph.add_edge()` and `StateGraph.add_conditional_edges()`.
+    """
+
     logger: logging.Logger = logging.getLogger(__name__.split('.')[-1])
     
     def __init__(self):
@@ -12,7 +18,7 @@ class EdgeManager:
 
     def add_edges(self, edges: List[Union[SimpleEdge, ConditionalEdge]]) -> None:
         """
-        Add one or more edges to the appropriate set based on their type.
+        Add one or more edges to the registry based on their type.
 
         """
 
@@ -24,7 +30,7 @@ class EdgeManager:
 
     def get_edges(self, filter_type: Union[Type[SimpleEdge], Type[ConditionalEdge], None] = None) -> Union[Set[Union[SimpleEdge, ConditionalEdge]], Set[SimpleEdge], Set[ConditionalEdge]]:
         """
-        Retrieve your edges, optionally filtered by type.
+        Retrieve registered edges, optionally filtered by edge class.
         """
         if filter_type is None:
             return self.edges
@@ -35,17 +41,17 @@ class EdgeManager:
 
     def configs_edges(self) -> Tuple[Tuple[str, str]]:
         """
-        Returns a tuple with node source and node path.
+        Return tuples of `(node_source, node_path)` for `StateGraph.add_edge()`.
         """
         return ((edge.node_source, edge.node_path) 
                 for edge in self.edges if type(edge) == SimpleEdge)
     
     def configs_conditional_edges(self) -> Tuple[Tuple[str, Callable[..., StateEvaluator.evaluate], Dict[str, str]]]:
         """
-        Returns a configs containing:
-        - A string representing the source node
-        - A function (any callable) to apply as conditional edge
-        - A dictionary with conditions between the nodes
+        Return tuples for `StateGraph.add_conditional_edges()` containing:
+        - the source node name
+        - the evaluator callable
+        - the path map from routing keys to target nodes
         """
         return ((edge.node_source, edge.evaluator.evaluate, edge.map_dict) 
                 for edge in self.edges if type(edge) != SimpleEdge)

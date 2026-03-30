@@ -20,6 +20,21 @@ from core.constants import *
 # NOTE: Here you can add other subgraphs as nodes
 @dataclass(frozen=True)
 class AISearchAdaptiveRAGConfigGraph:
+    """Adaptive RAG layout backed by Azure AI Search.
+
+    State expectations:
+        - Uses `RAGState` or a compatible schema with `messages`, `question`,
+          `context`, `generation` and `iterations`.
+
+    Flow:
+        START -> Retriever -> (Generation | Rewrite)
+        Rewrite -> Retriever
+        Generation -> END
+
+    Use this layout when retrieval is delegated to Azure AI Search instead of a
+    local vector store.
+    """
+
     ## Initializate LLMServices
     LLMServices.launch()
 

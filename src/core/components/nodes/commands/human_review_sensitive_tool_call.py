@@ -9,15 +9,30 @@ from core.constants import *
 
 
 class HumanReviewSensitiveToolCall(StateCommander):
+    """Commander that inserts a human review step for sensitive tool calls.
+
+    The node inspects the latest assistant message, pauses execution with
+    `interrupt()` when a sensitive tool is detected, and then returns a
+    LangGraph `Command` pointing either to the tool node or back to the agent
+    node with feedback updates.
+    """
+
     config_nodes: dict[str, dict[str, dict[str, str]]] = read_yaml(CONFIG_NODES_FILE_PATH)
     
     def __init__(self, sensitive_tool_names: list[str] = None):
-        """
-        Load Sensitive tool names list
-        """
+        """Load the list of tool names that require explicit review and validation."""
         self.sensitive_tool_names = sensitive_tool_names or []
     
     def command(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> Command[Literal[tuple(config_nodes['HUMAN_REVIEW_NODE']['route'].values())]]: # type: ignore
+        """Return a `Command` based on the human review decision.
+
+        Reads:
+            - `messages`
+
+        Returns:
+            - `Command(goto=...)` to continue directly with tools
+            - `Command(goto=..., update={...})` to send feedback back to the agent
+        """
         last_message = state["messages"][-1]
         # Separate sensitive and non-sensitive tool calls
         sensitive_calls = [

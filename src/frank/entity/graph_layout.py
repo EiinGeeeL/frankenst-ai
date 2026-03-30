@@ -1,21 +1,33 @@
 import logging
-from langgraph.prebuilt import ToolNode
 from dataclasses import is_dataclass
-from typing import Type, Any
+from typing import Any, Type
+
+from langgraph.prebuilt import ToolNode
+
 from frank.entity.edge import BaseEdge
 from frank.entity.node import BaseNode
 from frank.entity.runnable_builder import RunnableBuilder
 
 class GraphLayout:
+    """Introspect a dataclass layout and expose its graph-related attributes.
+
+    Layouts in this project are class-like dataclasses whose attributes declare
+    nodes, edges and optional runnable builders. `WorkflowBuilder` relies on
+    this introspection step instead of manually wiring each component.
+    """
+
     logger: logging.Logger = logging.getLogger(__name__.split('.')[-1])
 
     def __init__(self, config: Type[Any]):
-        """
-        Initialize the Graph Layout with a dataclass TYPE
+        """Initialize the Graph Layout with a dataclass TYPE
         containing configuration constants like edges and nodes.
 
         Args:
-            config (Type[Any]): A dataclass type that defines nodes and edges
+            config (Type[Any]): A dataclass type that defines nodes and edges.
+
+        Notes:
+            The dataclass is expected to expose `BaseNode`, `ToolNode`,
+            `BaseEdge` and optional `RunnableBuilder` instances as attributes.
         """
         
         if not is_dataclass(config):
@@ -26,8 +38,10 @@ class GraphLayout:
         self.logger.info('GraphLayout initialized')
         
     def get_nodes(self):
-        """
-        Returns a list of all nodes defined in the configuration dataclass.
+        """Return nodes declared as class attributes in the layout dataclass.
+
+        Only instances compatible with `BaseNode` or `ToolNode` are returned.
+        Any other helper attributes remain ignored by the graph assembly logic.
         """
         return [
             attr_value 
@@ -36,8 +50,9 @@ class GraphLayout:
         ]
 
     def get_edges(self):
-        """
-        Returns a list of all edges defined in the configuration dataclass.
+        """Return edges declared as class attributes in the layout dataclass.
+
+        Only instances compatible with `BaseEdge` are returned.
         """
         return [
             attr_value 
@@ -46,8 +61,10 @@ class GraphLayout:
         ]
 
     def get_runnable_builders(self):
-        """
-        Returns a list of all runnable builders defined in the configuration dataclass.
+        """Return runnable builders declared in the layout dataclass.
+
+        This helper is mainly useful for inspection and debugging; the workflow
+        builder compiles graphs from nodes and edges.
         """
         return [
             attr_value 

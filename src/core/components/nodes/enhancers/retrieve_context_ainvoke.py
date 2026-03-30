@@ -4,7 +4,17 @@ from langchain_core.messages import AnyMessage
 from frank.entity.statehandler import StateEnhancer
 
 class RetrieveContextAsyncInvoke(StateEnhancer):
-    """Retrieve context."""
+    """Retrieve context from the configured runnable retriever.
+
+    Reads:
+        - `messages` on the first retrieval pass
+        - `question` and `iterations` on subsequent passes
+
+    Returns:
+        - `context`: retrieved multimodal context
+        - `question`: the question that should be used by downstream nodes
+    """
+
     async def enhance(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> dict[str, list]: 
         
         if "iterations" in state and state.get("iterations", 0) > 0:

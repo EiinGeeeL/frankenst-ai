@@ -11,11 +11,11 @@ setuptools
 # unstructured[local-inference] # for complex document parsing
 unstructured[pdf]
 tenacity
+langgraph
 langchain
 langchain-classic
 langchain-chroma
 langchain-ollama
 langchain-azure-ai[opentelemetry]
-langgraph
 langchain_mcp_adapters
 mcp

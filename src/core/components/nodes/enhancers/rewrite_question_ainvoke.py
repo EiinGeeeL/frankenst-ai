@@ -4,7 +4,18 @@ from langchain_core.messages import AnyMessage
 from frank.entity.statehandler import StateEnhancer
 
 class RewriteQuestionAsyncInvoke(StateEnhancer):
-    """Rewrite the original user question."""
+    """Rewrite the current question before another retrieval attempt.
+
+    Reads:
+        - `question`
+        - `iterations`
+
+    Returns:
+        - `messages`: a list containing the rewritten-question response
+        - `question`: the rewritten question text
+        - `iterations`: incremented loop counter
+    """
+
     async def enhance(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> dict[str, list]: 
         question = state[ "question"]
         response = await self.runnable.ainvoke(question)

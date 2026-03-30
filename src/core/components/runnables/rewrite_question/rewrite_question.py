@@ -15,7 +15,7 @@ class RewriteQuestion(RunnableBuilder):
     def __init__(self, model: BaseLanguageModel):
         super().__init__(model=model)
 
-        self.logger.info("RewiteQuestion initialized")
+        self.logger.info("RewriteQuestion initialized")
 
     def _build_prompt(self, kwargs: Dict) -> ChatPromptTemplate:
         question = kwargs["question"]

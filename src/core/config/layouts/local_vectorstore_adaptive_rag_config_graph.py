@@ -22,6 +22,20 @@ from core.constants import *
 # NOTE: Here you can add other subgraphs as nodes
 @dataclass(frozen=True)
 class LocalVectorStoreAdaptiveRAGConfigGraph:
+    """Adaptive RAG layout backed by a local vector store retriever.
+
+    State expectations:
+        - Uses `RAGState` or a compatible schema with `messages`, `question`,
+          `context`, `generation` and `iterations`.
+
+    Flow:
+        START -> Retriever -> (Generation | Rewrite)
+        Rewrite -> Retriever
+        Generation -> END
+
+    This layout is the reference pattern for local multimodal retrieval loops.
+    """
+
     ## Initializate LLMServices
     LLMServices.launch()
 

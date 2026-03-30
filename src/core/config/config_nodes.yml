@@ -1,12 +1,29 @@
+# Node registry consumed by layout dataclasses.
+# `type` is descriptive documentation for the role played in the graph.
+# `route` values are used by StateCommander implementations and may reference
+# other node names through the `$()` placeholder syntax resolved by read_yaml().
+#
+# Schema overview:
+# - `name`: runtime name used in the compiled LangGraph.
+# - `type`: documentation-only role of the node (`enhancer`, `tools`, `commander`).
+# - `description`: short explanation of the node responsibility.
+# - `route`: optional mapping used by commander nodes to resolve `Command.goto`.
+#
+# Placeholder overview:
+# - `$(OAKLANG_NODE.name)` copies the `name` value from another node entry.
+# - Placeholders are expanded before layouts consume this file.
+
+##################### OAKLANG NODES ####################
+
 OAKLANG_NODE:
   name: OakLangAgent
   type: enhancer
-  description: This is the main node. With bind tools of summarization to creare a resume of a chat. This is not a supervisors.
+  description: Main agent node. It binds tools and produces the next assistant message.
 
 OAKTOOLS_NODE:
   name: OakTools
   type: tools
-  description: Main tools for being used by $(OAKLANG_NODE.name).
+  description: ToolNode executed when $(OAKLANG_NODE.name) emits tool calls.
 
 HUMAN_REVIEW_NODE:
   name: HumanReview
@@ -14,21 +31,21 @@ HUMAN_REVIEW_NODE:
   route: 
     enhancer: $(OAKLANG_NODE.name)
     tools: $(OAKTOOLS_NODE.name)
-  description: This is a command node that routes to an enhancer node and tools node modifying the state for human in the loop.
+  description: Command node that routes to tools or back to the enhancer after human review.
 
-#####################RAG NODES########################
+##################### RAG NODES ########################
 
 GENERATION_NODE:
   name: GenerationNode
   type: enhancer
-  description: This is the generation node of the RAG.
+  description: Node that generates the final answer from the current question and retrieved context.
 
 RETRIEVER_NODE:
   name: RetrieverNode
   type: enhancer
-  description: This is the retriever node of the RAG.
+  description: Node that retrieves context for the current question.
 
 REWRITE_NODE:
   name: RewriteNode
   type: enhancer
-  description: This is the a node that improve and rewrite a question.
+  description: Node that rewrites the question before another retrieval iteration.

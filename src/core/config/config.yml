@@ -1,14 +1,22 @@
+# Global runtime configuration shared by notebooks, scripts and services.
+#
+# `launch.model` and `launch.embeddings` select the backend family to use.
+# The provider-specific sections below define the defaults consumed by
+# `LLMServices.launch()`.
+
 logging:
   format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
   datefmt: '%Y-%m-%d %H:%M:%S'
   log_file: 'graph.log'
 
 ollama:
-  model: orieg/gemma3-tools:4b
+  # Example: make sure the selected Ollama model is available locally.
+  model:  ministral-3:8b
   temperature: 0
   embeddings_model: embeddinggemma
 
 launch:
+  # Supported values in the current project are `ollama` and `azureai`.
   model: ollama # azureai
   embeddings: ollama # azureai
   turbo_model: None

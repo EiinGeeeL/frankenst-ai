@@ -10,7 +10,17 @@ from core.components.retrievers.ai_search_multivector_retriever.ai_search_multiv
 
 
 class RetrieveContextAISearch(StateEnhancer):
-    """Retrieve context."""
+    """Retrieve context from Azure AI Search using the current question.
+
+    Reads:
+        - `messages` on the first retrieval pass
+        - `question` and `iterations` on subsequent passes
+
+    Returns:
+        - `context`: retrieved multimodal context from AI Search
+        - `question`: the question that should be used by downstream nodes
+    """
+
     async def enhance(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> dict[str, list]: 
         
         if "iterations" in state and state.get("iterations", 0) > 0:

@@ -6,6 +6,12 @@ from frank.entity.statehandler import StateEvaluator
 
 # NOTE: this is a class 'from langgraph.prebuilt import tools_condition'
 class RouteToolCondition(StateEvaluator):
+    """Route to the tool node when the latest AI message contains tool calls.
+
+    Reads the most recent message from the provided state and returns one of the
+    routing keys expected by the surrounding `ConditionalEdge.map_dict`.
+    """
+
     def evaluate(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel], messages_key: str = "messages") -> Literal["end", "tools"]:
         if isinstance(state, list):
             ai_message = state[-1]

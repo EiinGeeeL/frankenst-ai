@@ -1,13 +1,15 @@
 from typing import Union, Literal, Dict
 from frank.entity.statehandler import StateEvaluator
 
-# Common base for all Edge types
 class BaseEdge():
+    """Base edge definition storing the source node name."""
+
     def __init__(self, node_source: Union[str, Literal["START", "END"]]):
         self.node_source = node_source
 
-# SimpleEdge: follows a static path
 class SimpleEdge(BaseEdge):
+    """Static edge definition used with StateGraph.add_edge."""
+
     def __init__(
         self, 
         node_source: Union[str, Literal["START", "END"]],
@@ -17,8 +19,9 @@ class SimpleEdge(BaseEdge):
         self.node_path = node_path
 
 
-# ConditionalEdge: chooses path dynamically
 class ConditionalEdge(BaseEdge):
+    """Conditional edge definition used with StateGraph.add_conditional_edges."""
+
     def __init__(
         self,
         node_source: Union[str, Literal["START", "END"]],

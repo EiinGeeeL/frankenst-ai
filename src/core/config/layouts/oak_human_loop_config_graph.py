@@ -20,6 +20,21 @@ from core.constants import *
 # NOTE: Here you can add other subgraphs as nodes
 @dataclass(frozen=True)
 class OakHumanLoopConfigGraph:
+    """Tool-calling agent layout with an explicit human review step.
+
+    State expectations:
+        - Uses `SharedState` or another messages-compatible schema.
+        - The command node inspects the latest tool call and may return a
+          LangGraph `Command` with feedback updates.
+
+    Flow:
+        START -> OakLangAgent -> (HumanReview | END)
+        HumanReview -> (OakTools | OakLangAgent)
+        OakTools -> OakLangAgent
+
+    Use this layout as the reference pattern for human-in-the-loop routing.
+    """
+
     ## Initializate LLMServices
     LLMServices.launch()
 

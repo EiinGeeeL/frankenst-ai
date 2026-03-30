@@ -18,6 +18,20 @@ from core.constants import *
 # NOTE: Here you can add other subgraphs as nodes
 @dataclass(frozen=True)
 class SimpleOakConfigGraph:
+    """Minimal agent-with-tools layout.
+
+    State expectations:
+        - Uses `SharedState` or another messages-compatible schema.
+        - The agent node reads `messages` and appends a new assistant message.
+
+    Flow:
+        START -> OakLangAgent -> (OakTools | END)
+        OakTools -> OakLangAgent
+
+    This layout is the simplest starting point when the graph only needs a tool
+    loop and does not require human review or retrieval-specific state.
+    """
+
     ## Initializate LLMServices
     LLMServices.launch()
 

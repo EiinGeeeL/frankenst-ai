@@ -10,6 +10,13 @@ from langchain_core.tools import BaseTool
 
 
 class RunnableBuilder(ABC):
+    """Base helper for creating reusable LangChain runnables.
+
+    Subclasses define how prompts, retrievers or chains are assembled, while
+    this base class handles lazy construction and exposes a small invoke API
+    used by enhancers and evaluators across the project.
+    """
+
     def __init__(
         self,
         model: BaseLanguageModel,
@@ -29,16 +36,21 @@ class RunnableBuilder(ABC):
         self._retriever: Optional[BaseRetriever] = None
     
     def _build_prompt(self) -> ChatPromptTemplate:
+        """Build the prompt runnable chain and return it.
+
+        Subclasses may override this when prompt construction is a distinct
+        step inside `_configure_runnable()`.
         """
-        Build the prompt runnable chain and return it.
-        """
+
         raise NotImplementedError(f"{self.__class__.__name__} does not implement `_build_prompt`.")
     
     def _build_retriever(self, **kwargs: Any) -> BaseRetriever:
+        """Builds and returns a retriever from the vectorstore.
+
+        Subclasses can override this for custom logic. If `self.retriever` is
+        already provided, it takes precedence over `self.vectordb`.
         """
-        Builds and returns a retriever from the vectorstore.
-        Subclasses can override this for custom logic.
-        """
+
         if self.retriever is not None:
             return self.retriever
         if self.vectordb is None:
@@ -47,50 +59,42 @@ class RunnableBuilder(ABC):
 
     @abstractmethod
     def _configure_runnable(self) -> Runnable:
-        """
-        Configure the main runnable and return it. It could be a chain or a retriever.
+        """Configure the main runnable and return it.
+
+        The configured object may be a chain, a retriever or any LangChain
+        runnable compatible with `invoke()` and `ainvoke()`.
         """
         pass
     
     @property
     def _get_runnable(self) -> Runnable:
-        """
-        Lazily initialize and return the configured runnable.
-        """
+        """Lazily initialize and return the configured runnable."""
+
         if self._runnable is None:
             self._runnable = self._configure_runnable()
         return self._runnable
     
     @property
     def _get_retriever(self) -> BaseRetriever:
-        """
-        Lazily initialize and return the configured retriever.
-        """
+        """Lazily initialize and return the configured retriever."""
+
         if self._retriever is None:
             self._retriever = self._build_retriever()
         return self._retriever
 
     def invoke(self, input: Any) -> Any:
-        """
-        Invoke the runnable.
-        """
+        """Invoke the configured runnable synchronously."""
         return self._get_runnable.invoke(input)
 
 
     def ainvoke(self, input: Any) -> Any:
-        """
-        Ainvoke the runnable.
-        """
+        """Invoke the configured runnable asynchronously."""
         return self._get_runnable.ainvoke(input)
     
     def get(self) -> Runnable:
-        """
-        Return the configured runnable.
-        """
+        """Return the lazily configured runnable instance."""
         return self._get_runnable
 
     def get_raw_retriever(self) -> BaseRetriever:
-        """
-        Returns the base retriever
-        """
+        """Return the lazily configured retriever instance."""
         return self._get_retriever

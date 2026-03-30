@@ -5,7 +5,20 @@ from frank.entity.statehandler import StateEvaluator
 from typing import Literal
 
 class GradeRewriteGenerate(StateEvaluator):
-    """Determine whether the retrieved documents are relevant to the question to route to generate or rewrite"""
+    """Choose between answer generation and question rewriting.
+
+    Reads:
+        - `question`
+        - `context`
+        - `iterations`
+
+    Returns:
+        - `"generate"` when the retrieved context is relevant or the graph has
+            already retried enough times
+        - `"rewrite"` when the question should be refined before another
+            retrieval attempt
+    """
+
     async def evaluate(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> Literal["generate", "rewrite"]:
     
         question = state["question"]
