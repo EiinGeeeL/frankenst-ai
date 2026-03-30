@@ -8,12 +8,11 @@ matplotlib
 ipywidgets
 ipykernel
 setuptools
-unstructured[local-inference]
-unstructured[all-docs]
+# unstructured[local-inference] # for complex document parsing
+unstructured[pdf]
 tenacity
 langchain
-langchain-community
-langchain-experimental
+langchain-classic
 langchain-chroma
 langchain-ollama
 langchain-azure-ai[opentelemetry]

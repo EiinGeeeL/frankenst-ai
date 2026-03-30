@@ -1,0 +1,67 @@
+parameters:
+  - name: capability
+    type: string
+    displayName: Requested agent capability
+  - name: requirements_path
+    type: string
+    default: 'requirements.txt'
+    displayName: 'Ruta del archivo requirements.txt'
+  - name: script_path
+    type: string
+    default: 'scripts/myscript.py'
+    displayName: 'Ruta del script Python a ejecutar'
+  - name: script_args
+    type: string
+    default: ''
+    displayName: 'Argumentos para el script Python'
+  - name: env_variables
+    type: object
+    default: {}
+    displayName: 'Variables de entorno para el script'
+  - name: service_connection
+    type: string
+    default: ''
+    displayName: 'Azure service connection (optional, for authentication)'
+
+jobs:
+  - job: RunPythonScript
+    displayName: 'Run Python Script'
+    pool:
+      name: ${{ parameters.capability }}
+    steps:
+    - checkout: self
+ 
+    - task: UsePythonVersion@0
+      displayName: 'Seleccionar versión de Python'
+      inputs:
+        versionSpec: '3.12'
+        addToPath: true
+ 
+    - script: |
+        echo "Instalando dependencias desde ${{ parameters.requirements_path }}..."
+        python -m pip install --upgrade pip
+        pip install -r ${{ parameters.requirements_path }}
+      displayName: 'Instalar dependencias Python'
+ 
+    - ${{ if ne(parameters.service_connection, '') }}:
+      - task: AzureCLI@2
+        displayName: 'Excecute Python Script with Service Connection'
+        inputs:
+          azureSubscription: ${{ parameters.service_connection }}
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            echo "Ejecutando script Python: ${{ parameters.script_path }}"
+            cd src && python -m $(echo "${{ parameters.script_path }}" | sed 's|^src/||' | sed 's|/|.|g' | sed 's|\.py$||') ${{ parameters.script_args }}
+        env:
+          ${{ each var in parameters.env_variables }}:
+            ${{ var.key }}: ${{ var.value }}
+
+    - ${{ if eq(parameters.service_connection, '') }}:
+      - script: |
+          echo "Executing Python script: ${{ parameters.script_path }}"
+          cd src && python -m $(echo "${{ parameters.script_path }}" | sed 's|^src/||' | sed 's|/|.|g' | sed 's|\.py$||') ${{ parameters.script_args }}
+        displayName: 'Ejecutar script Python'
+        env:
+          ${{ each var in parameters.env_variables }}:
+            ${{ var.key }}: ${{ var.value }}

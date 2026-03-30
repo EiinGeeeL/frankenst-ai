@@ -1,7 +1,11 @@
 import os
+import base64
+import io
 import uuid
 import datetime as dt
 from typing import Optional, Any, Dict, List, Union
+
+from PIL import Image
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
 from unstructured.partition.pdf import partition_pdf
 
@@ -69,13 +73,14 @@ class AISearchMultiVectorDocumentIndexer:
         elif path:
             self.file_path = path
 
-    def split_pdf(self, min_image_size_filter: Optional[tuple] = None):
+    def split_pdf(self, min_image_size: Optional[tuple[int, int]] = None):
         """
         Splits the loaded PDF into texts, tables, and base64-encoded images.
         Updates internal state.
 
         Args:
-            min_image_size_filter (tuple, optional): (width, height) size below which images will be filtered out.
+            min_image_size (tuple[int, int], optional): Minimum `(width, height)` for extracted images.
+                Images smaller than this threshold are ignored.
 
         Returns:
             tuple: Lists of texts, tables, and images.
@@ -104,7 +109,9 @@ class AISearchMultiVectorDocumentIndexer:
                     if "Table" in str(type(el)):
                         has_table = True
                     if "Image" in str(type(el)):
-                        images_b64.append(el.metadata.image_base64)
+                        image_base64 = el.metadata.image_base64
+                        if self._should_keep_image(image_base64, min_image_size):
+                            images_b64.append(image_base64)
                 
                 if has_table:
                     tables.append(chunk)
@@ -118,6 +125,31 @@ class AISearchMultiVectorDocumentIndexer:
             }
         
         return texts, tables, images_b64
+
+    def _should_keep_image(
+        self,
+        image_base64: str,
+        min_image_size: Optional[tuple[int, int]],
+    ) -> bool:
+        """Return whether an extracted image should be kept for downstream indexing."""
+
+        if min_image_size is None:
+            return True
+
+        try:
+            width, height = self._get_image_size(image_base64)
+        except Exception:
+            return True
+
+        min_width, min_height = min_image_size
+        return width >= min_width and height >= min_height
+
+    def _get_image_size(self, image_base64: str) -> tuple[int, int]:
+        """Decode a base64 image payload and return its `(width, height)` dimensions."""
+
+        image_bytes = base64.b64decode(image_base64)
+        with Image.open(io.BytesIO(image_bytes)) as image:
+            return image.size
 
     def _get_text_table_summary_chain(self):
         prompt_text = """

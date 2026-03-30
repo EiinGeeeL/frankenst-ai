@@ -175,3 +175,5 @@ cython_debug/
 
 # ChromaDB
 .chroma_db/
+artifacts/.chromadb/
+artifacts/.docstore/

@@ -7,6 +7,4 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-      
-        echo "Instalando AZ CLI..."
         python -m pip install -U --force-reinstall azure-cli==$(AZ_CLI_VERSION)

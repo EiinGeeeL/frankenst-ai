@@ -1,20 +1,21 @@
 import os
-import tempfile
+import base64
+import io
 import uuid
 from typing import Optional, Any
 
+from PIL import Image
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
 from unstructured.partition.pdf import partition_pdf
 from azure.core.exceptions import HttpResponseError
-from langchain.schema.document import Document
+from langchain_core.documents import Document
+from langchain_core.stores import BaseStore, InMemoryStore
 from langchain_core.vectorstores import VectorStore
-from langchain_core.stores import BaseStore
-from langchain.storage import InMemoryStore
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables.base import RunnableSequence
-from langchain.retrievers.multi_vector import MultiVectorRetriever
+from langchain_classic.retrievers.multi_vector import MultiVectorRetriever
 
 # TODO: Async load, split, summary
 # TODO: metadata list to impement unstructured
@@ -33,7 +34,7 @@ class LangChainMultiVectorDocumentIndexer:
         llm: BaseLanguageModel,
         llm_multimodal: BaseLanguageModel,
         vectorstore: VectorStore,
-        store: BaseStore = InMemoryStore(),
+        store: Optional[BaseStore] = None,
         id_key: str = "doc_id",
         metadata_retriever: Optional[dict] = None
     ):
@@ -51,7 +52,7 @@ class LangChainMultiVectorDocumentIndexer:
         self.llm = llm
         self.llm_multimodal = llm_multimodal
         self.vectorstore = vectorstore
-        self.store = store
+        self.store = store or InMemoryStore()
         self.id_key = id_key
         self.metadata_retriever = metadata_retriever
 
@@ -92,13 +93,14 @@ class LangChainMultiVectorDocumentIndexer:
         else:
             raise ValueError("Provide a path or azure_blob info.")
 
-    def split_pdf(self, min_image_size_filter: tuple = None):
+    def split_pdf(self, min_image_size: Optional[tuple[int, int]] = None):
         """
         Splits the loaded PDF into texts, tables, and base64-encoded images.
         Updates internal state.
 
         Args:
-            min_image_size_filter (tuple): (width, height) size below which images will be filtered out.
+            min_image_size (tuple[int, int], optional): Minimum `(width, height)` for extracted images.
+                Images smaller than this threshold are ignored.
 
         Returns:
             tuple: Lists of texts, tables, and images.
@@ -124,7 +126,9 @@ class LangChainMultiVectorDocumentIndexer:
                 texts.append(chunk)
                 for el in chunk.metadata.orig_elements:
                     if "Image" in str(type(el)):
-                        images_b64.append(el.metadata.image_base64)
+                        image_base64 = el.metadata.image_base64
+                        if self._should_keep_image(image_base64, min_image_size):
+                            images_b64.append(image_base64)
 
         self.elements = {
             "texts": texts, 
@@ -133,6 +137,31 @@ class LangChainMultiVectorDocumentIndexer:
             }
         
         return texts, tables, images_b64
+
+    def _should_keep_image(
+        self,
+        image_base64: str,
+        min_image_size: Optional[tuple[int, int]],
+    ) -> bool:
+        """Return whether an extracted image should be kept for downstream indexing."""
+
+        if min_image_size is None:
+            return True
+
+        try:
+            width, height = self._get_image_size(image_base64)
+        except Exception:
+            return True
+
+        min_width, min_height = min_image_size
+        return width >= min_width and height >= min_height
+
+    def _get_image_size(self, image_base64: str) -> tuple[int, int]:
+        """Decode a base64 image payload and return its `(width, height)` dimensions."""
+
+        image_bytes = base64.b64decode(image_base64)
+        with Image.open(io.BytesIO(image_bytes)) as image:
+            return image.size
 
     def _get_text_table_summary_chain(self):
         prompt_text = """
@@ -234,8 +263,24 @@ class LangChainMultiVectorDocumentIndexer:
                     Document(page_content=summaries_list[i], metadata={self.id_key: chunk_ids[i]})
                     for i in range(len(summaries_list))
                 ]
+                parent_docs = [
+                    Document(
+                        page_content=self._serialize_parent_chunk(chunks_list[i], content_type),
+                        metadata={"content_type": content_type},
+                    )
+                    for i in range(len(chunks_list))
+                ]
                 self.retriever.vectorstore.add_documents(summary_docs)
-                self.retriever.docstore.mset(list(zip(chunk_ids, chunks_list)))
+                self.retriever.docstore.mset(list(zip(chunk_ids, parent_docs)))
+
+    def _serialize_parent_chunk(self, chunk: Any, content_type: str) -> str:
+        """Serialize a raw chunk into a persistable Document page_content value."""
+
+        if content_type == "images":
+            return str(chunk)
+        if hasattr(chunk, "text"):
+            return str(chunk.text)
+        return str(chunk)
 
 
     def get_retriever(self) -> MultiVectorRetriever:

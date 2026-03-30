@@ -14,11 +14,13 @@ class RunnableBuilder(ABC):
         self,
         model: BaseLanguageModel,
         vectordb: Optional[VectorStore] = None,
+        retriever: Optional[BaseRetriever] = None,
         tools: Optional[List[BaseTool]] = None,
         structured_output_schema: Optional[BaseModel] = None,
     ):
         self.model = model
         self.vectordb = vectordb
+        self.retriever = retriever
         self.tools = tools
         self.structured_output_schema = structured_output_schema
 
@@ -37,6 +39,8 @@ class RunnableBuilder(ABC):
         Builds and returns a retriever from the vectorstore.
         Subclasses can override this for custom logic.
         """
+        if self.retriever is not None:
+            return self.retriever
         if self.vectordb is None:
             raise ValueError(f"{self.__class__.__name__} cannot build a retriever because `vectordb` is None.")
         return self.vectordb.as_retriever(**kwargs)

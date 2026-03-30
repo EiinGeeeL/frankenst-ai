@@ -1,11 +1,11 @@
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_azure_ai.chat_models import AzureAIChatCompletionsModel
-from langchain_azure_ai.embeddings import AzureAIEmbeddingsModel
-from langchain_core.vectorstores import VectorStore
+from langchain_azure_ai.embeddings import AzureAIOpenAIApiEmbeddingsModel
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.embeddings import Embeddings
 from core.utils.common import read_yaml
 from core.utils.key_vault import get_secret
+from core.utils.ollama.ollama_wsl_proxy import resolve_ollama_base_url
 from core.constants import *
 
 class LLMServices:
@@ -13,7 +13,6 @@ class LLMServices:
     model: BaseLanguageModel = None
     embeddings: Embeddings = None
     turbo_model: BaseLanguageModel = None
-    vectorstore: VectorStore = None 
 
     @classmethod
     def _get_config(cls, provider: str, key: str = None):
@@ -40,9 +39,11 @@ class LLMServices:
 
     @classmethod
     def _load_ollama_model(cls):
+        ollama_config = cls._get_config('ollama')
         vars = {
-            "model": cls._get_config('ollama', 'model'),
-            "temperature": cls._get_config('ollama', 'temperature'),
+            "model": ollama_config['model'],
+            "temperature": ollama_config['temperature'],
+            "base_url": resolve_ollama_base_url(config_host=ollama_config.get('host')),
         }
         return ChatOllama(**vars)
 
@@ -70,9 +71,14 @@ class LLMServices:
 
     @classmethod
     def _load_ollama_embeddings(cls):
+        ollama_config = cls._get_config('ollama')
+        model_name = ollama_config.get('embeddings_model') or ollama_config.get('embeddings')
+        if not model_name:
+            raise RuntimeError("Missing config entry for: ollama.embeddings_model")
+
         vars = {
-            "model": cls._get_config('ollama', 'embeddings'),
-            "temperature": 0,
+            "model": model_name,
+            "base_url": resolve_ollama_base_url(config_host=ollama_config.get('host')),
         }
         return OllamaEmbeddings(**vars)
 
@@ -85,7 +91,7 @@ class LLMServices:
             api_version="AZURE_EMBEDDINGS_API_VERSION",
         )
         vars["temperature"] = 0
-        return AzureAIEmbeddingsModel(**vars)
+        return AzureAIOpenAIApiEmbeddingsModel(**vars)
 
     @classmethod
     def _load_embeddings(cls, embedding_name: str):
@@ -103,4 +109,3 @@ class LLMServices:
         cls.model = cls._load_model(cls._get_config('launch', 'model'))
         cls.embeddings = cls._load_embeddings(cls._get_config('launch', 'embeddings'))
         cls.turbo_model = None
-        cls.vectorstore = None

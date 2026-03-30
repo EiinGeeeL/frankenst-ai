@@ -1,7 +1,7 @@
 from typing import List
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
-from services.ai_foundry.llm import LLMServices
+from services.foundry.llms import LLMServices
 from core.components.retrievers.ai_search_simple_semantic_retriever.ai_search_simple_semantic_retriever import AISearchSimpleSemanticRetriever
 from core.utils.key_vault import get_secret
 

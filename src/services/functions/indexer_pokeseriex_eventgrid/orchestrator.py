@@ -1,8 +1,8 @@
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents import SearchClient
-from services.ai_foundry.llm import LLMServices
-from core.utils.rag.ai_search_unstructured_index import AISearchIndexManager, AISearchMultiVectorDocumentIndexer
+from services.foundry.llms import LLMServices
+from core.utils.rag.ai_search_unstructured_indexer import AISearchIndexManager, AISearchMultiVectorDocumentIndexer
 from core.utils.key_vault import get_secret
 from core.utils.blob_storage import download_pdf_from_blob, parse_blob_subject
 
@@ -62,7 +62,7 @@ class Orchestrator:
         search_client = SearchClient(service_endpoint, index_name, AzureKeyCredential(key))
 
         # Parse the subject
-        blob_path, container_name = parse_blob_subject(subject=subject)
+        blob_path, _ = parse_blob_subject(subject=subject)
         filename = blob_path.split("/")[-1]
 
         # Initialize ai_search_index_manager

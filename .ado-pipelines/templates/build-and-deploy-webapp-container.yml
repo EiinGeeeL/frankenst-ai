@@ -1,0 +1,45 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+parameters:
+  - name: capability
+    displayName: Requested agent capability
+    type: string
+  - name: context_path
+    type: string
+    default: '.'
+  - name: dockerfile
+    type: string
+    default: 'src/Dockerfile'
+  - name: image_name
+    type: string
+  - name: service_connection
+    type: string
+
+jobs:
+  - job: BuildImage
+    displayName: Build and Push Docker Image
+    pool:
+      name: ${{ parameters.capability }}
+    steps:
+    - template: build-and-push-acr.yml
+      parameters:
+        context_path: ${{ parameters.context_path }}
+        dockerfile: ${{ parameters.dockerfile }}
+        image_name: ${{ parameters.image_name }}
+        tag_version: '$(Build.BuildId)'
+        build_args:
+          AZURE_KEY_VAULT_NAME: '$(azure_key_vault_name)'
+        service_connection: ${{ parameters.service_connection }}
+
+  - job: DeployWebApp
+    displayName: Deploy to App Service
+    dependsOn: BuildImage
+    pool:
+      name: ${{ parameters.capability }}
+    steps:
+    - template: webapp-container-deploy.yml
+      parameters:
+        webapp_name: '$(azure_webapp_service_name)'
+        image_name: '${{ parameters.image_name }}/${{ parameters.image_name }}:$(Build.BuildId)'
+        service_connection: ${{ parameters.service_connection }}

@@ -1,0 +1,24 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+parameters:
+  - name: webapp_name
+    displayName: Web App name
+    type: string
+  - name: image_name
+    displayName: ACR image name for the deployment of Web App
+    type: string
+  - name: service_connection
+    displayName: Resource Manager Service connection name
+    type: string
+
+steps:
+  - task: AzureRmWebAppDeployment@5
+    displayName: Azure App Service Deploy
+    continueOnError: false
+    inputs:
+      appType: webAppContainer
+      azureSubscription: ${{ parameters.service_connection }}
+      WebAppName: ${{ parameters.webapp_name }}
+      DockerNamespace: $(azure_container_registry_name).azurecr.io
+      DockerRepository: ${{ parameters.image_name }}

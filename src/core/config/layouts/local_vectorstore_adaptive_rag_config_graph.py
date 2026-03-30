@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from langgraph.graph import END, START
-from services.ai_foundry.llm import LLMServices
+from services.foundry.llms import LLMServices
 from frank.entity.edge import ConditionalEdge, SimpleEdge
 from frank.entity.node import SimpleNode
 
+from core.components.retrievers.langchain_chroma_multivector_retriever.langchain_chroma_multivector_retriever import LangchainChromaMultiVectorRetriever
 from core.components.runnables.multimodal_retriever.multimodal_retriever import MultimodalRetriever
 from core.components.runnables.multimodal_generation.multimodal_generation import MultimodalGeneration
 from core.components.runnables.structured_grade_document.structured_grade_document import StructuredGradeDocument
@@ -24,9 +25,13 @@ class LocalVectorStoreAdaptiveRAGConfigGraph:
     ## Initializate LLMServices
     LLMServices.launch()
 
+    raw_retriever = LangchainChromaMultiVectorRetriever(
+        embeddings=LLMServices.embeddings,
+        ).get_retriever()
+
     ## RUNNABLES BUILDERS
 
-    RETRIEVER_CHAIN = MultimodalRetriever(model=LLMServices.model, vectordb=LLMServices.vectorstore)
+    RETRIEVER_CHAIN = MultimodalRetriever(model=LLMServices.model, retriever=raw_retriever)
 
     GENERARION_CHAIN = MultimodalGeneration(model=LLMServices.model)
 

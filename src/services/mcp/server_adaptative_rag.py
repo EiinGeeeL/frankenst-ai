@@ -13,7 +13,7 @@ setup_logging(config)
 
 ## Workflow Configuration for the main graph
 workflow_builder = WorkflowBuilder(
-    config=LocalVectorStoreAdaptiveRAGConfigGraph, 
+    config=LocalVectorStoreAdaptiveRAGConfigGraph(),
     state_schema=RAGState,
 )
 ADAPTATIVE_RAG_GRAPH = workflow_builder.compile() # compile the graph

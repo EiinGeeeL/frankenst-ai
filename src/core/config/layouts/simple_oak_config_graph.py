@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from langgraph.graph import END, START
 from langgraph.prebuilt import ToolNode
-from services.ai_foundry.llm import LLMServices
+from services.foundry.llms import LLMServices
 from frank.entity.edge import ConditionalEdge, SimpleEdge
 from frank.entity.node import SimpleNode
 

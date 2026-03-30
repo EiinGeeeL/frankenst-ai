@@ -99,13 +99,13 @@ frankenst-ai/
 │   ├── core/                # Custom LangGraph implementation for illustration purposes
 │   │   ├── components/
 │   │   │   ├── nodes/
-│   │   │   │   ├── enhancers/        # StateEnhancers for simple node logic modifying StateGraph via runnables
+│   │   │   │   ├── enhancers/        # StateEnhancers for simple node logic modifying StateGraph via runnables or custom modules
 │   │   │   │   └── commands/         # StateCommander for routing and modifying state through LangGraph commands
 │   │   │   ├── edges/
 │   │   │   │   └── evaluators/       # StateEvaluator for conditional edge logic
 │   │   │   ├── tools/                # Tool definitions and integrations
 │   │   │   ├── retrievers/           # Retrievers definitions, builders and integrations
-│   │   │   └── runnables/            # Executable LangChain RunnableBuilder modules
+│   │   │   └── runnables/            # Executable LangChain RunnableBuilder modules for invoke or ainvoke logic
 │   │   ├── config/
 │   │   │   ├── config.yaml           # Main configuration file for the project
 │   │   │   ├── config_nodes.py       # Contains all the graph nodes definition of your project

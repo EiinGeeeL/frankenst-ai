@@ -27,8 +27,7 @@ jobs:
             tag_version: '$(Build.BuildId)'
             build_args:
               AZURE_KEY_VAULT_NAME: '$(azure_key_vault_name)'
-              # AZURE_AI_SEARCH_SERVICE_NAME: '$(azure_ai_search_service_name)'
-              # AZURE_AI_FOUNDRY_SERVICE_NAME: '$(azure_ai_foundry_service_name)'
+              AZURE_BLOB_STORAGE_NAME: '$(azure_blob_storage_name)'
             service_connection: ${{ parameters.service_connection }}
         - template: function-app-for-acr.yml
           parameters:
