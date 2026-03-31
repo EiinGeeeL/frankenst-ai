@@ -26,10 +26,30 @@ These names are project abstractions, but the compiled graph still relies on
 `StateGraph`, `add_node()`, `add_edge()`, `add_conditional_edges()` and
 `Command` from LangGraph.
 
+## Repository Intent
+
+This repository has three different roles, and it helps to read it that way:
+
+- `src/frank` is the reusable pattern layer. It contains the core abstractions and assembly utilities used to structure LangGraph projects with consistent design rules.
+- `src/core` is a reference template built on top of `src/frank`. It shows one concrete way to organize layouts, state models, components, YAML configuration and service integration in a real project.
+- `research` is exploratory material. The notebooks are useful to understand how layouts are compiled and exercised, but they are not the contractual surface of the framework.
+
+In other words, `src/frank` is the stable architectural idea, while `src/core` demonstrates how that idea can be applied in practice.
+
+## How To Read This Repository
+
+If you are evaluating or reusing Frankenst-AI:
+
+- Read `src/frank` when you want to understand the reusable pattern, the abstractions and the workflow assembly model.
+- Read `src/core` when you want a concrete scaffold showing how to build a real LangGraph project on top of that pattern.
+- Read `research` only as exploratory support material.
+
+The utilities contract and abstraction live in `src/frank`. The rest of the repository exists to demonstrate, apply or experiment with that contract.
+
 ## Prerequisites
 
 - Python 3.12.5
-- Ollama 4.0 or higher (free); or an Azure AI Foundry Deployment (payment)
+- Ollama 4.0 or higher (free); or an Azure Foundry Deployment (payment)
 - pip (Python package manager)
 - uv (install with pip)
 
@@ -77,9 +97,17 @@ To run the project:
     ```cp .env.example .env```
 2. Compile Graph Layouts with Workflow Builder
     
-    For additional information, please refer to ```research/demo...ipynb``` notebooks.
+    The minimal example below uses the reference template under `src/core` to show how `src/frank` is consumed in a real project.
 
-### Minimal WorkflowBuilder Example
+    In that example:
+
+    - `WorkflowBuilder` is part of the reusable pattern in `src/frank`.
+    - `SimpleOakConfigGraph` and `SharedState` are concrete reference classes from `src/core`.
+    - In your own project, those `src/core` imports would be replaced by your own layouts and state schemas.
+
+    For exploratory examples and experimentation, please refer to the `research/demo...ipynb` notebooks.
+
+#### Minimal WorkflowBuilder Example
 
 ```python
 from frank.workflow_builder import WorkflowBuilder
@@ -124,7 +152,7 @@ frankenst-ai/
 ├── README.md                # Main project documentation
 ├── src/
 │   ├── services/            # Service modules
-│   ├── core/                # Custom LangGraph implementation for illustration purposes
+│   ├── core/                # Reference template showing how to structure a real LangGraph project using `frank` utilities
 │   │   ├── components/
 │   │   │   ├── nodes/
 │   │   │   │   ├── enhancers/        # StateEnhancers for simple node logic modifying StateGraph via runnables or custom modules
@@ -150,7 +178,7 @@ frankenst-ai/
 │       │   └── edge.py               # Core edge-related entities
 │       ├── managers/               
 │       └── workflow_builder.py       # Workflow Builder to compile the LangGraph using a ConfigGraph dataclass
-├── research/                # Research, demos and experimental resources
+├── research/                # Exploratory notebooks and experiments; useful as reference
 ├── tests/
 │   ├── integration_test/      
 │   └── unit_test/              
@@ -163,3 +191,4 @@ frankenst-ai/
 - Prefer adding documentation close to the contract it explains: docstrings in `src/frank`, comments in YAML and examples in layout dataclasses.
 - When a component reads or writes new state keys, document that change in the state schema and in the component docstring.
 - Keep project abstractions aligned with official LangGraph terminology to avoid confusion in new layouts.
+- Treat `src/core` as a reference implementation of the project's pattern and `research` as exploratory support material.

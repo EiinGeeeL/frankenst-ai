@@ -38,35 +38,46 @@ class WorkflowBuilder:
         self.config: GraphLayout = GraphLayout(config)
         self.edge_manager: EdgeManager = EdgeManager()
         self.node_manager: NodeManager = NodeManager()
+        self._workflow_configured: bool = False
         
         self.logger.info(f"WorkFlowBuilder initialized for GraphLayout {config.__name__}")
 
     def compile(self) -> CompiledStateGraph:
         """Configure nodes and edges declared in the layout, then compile the graph."""
-        self._configure_workflow()
+        self._ensure_workflow_configured()
         return self.workflow.compile(checkpointer=self.memory)
     
     def display_graph(self, save: bool = False, filepath: str = "graph.png") -> Image:
         """
         Display the compiled graph or save as a PNG image.
         """
-        tmp_graph = self.workflow.compile()
-        img_data = tmp_graph.get_graph().draw_mermaid_png(draw_method=MermaidDrawMethod.API,)
+        temp_graph = self.compile()
+        img_data = temp_graph.get_graph().draw_mermaid_png(draw_method=MermaidDrawMethod.API,)
 
         if save:
             with open(filepath, "wb") as f:
                 f.write(img_data)
         else:
             return display(Image(img_data))
+
+    def _ensure_workflow_configured(self) -> None:
+        """Configure the workflow once before any compile or visualization step."""
+        if not self._workflow_configured:
+            self._configure_workflow()
         
     def _configure_workflow(self) -> None:
         """Assemble the workflow from the nodes and edges discovered in the layout."""
         self._configure_nodes()
-        [self.workflow.add_node(*config) for config in self.node_manager.configs_nodes()]
+        for config in self.node_manager.configs_nodes():
+            self.workflow.add_node(*config)
 
         self._configure_edges()
-        [self.workflow.add_edge(*config) for config in self.edge_manager.configs_edges()]
-        [self.workflow.add_conditional_edges(*config) for config in self.edge_manager.configs_conditional_edges()]  
+        for config in self.edge_manager.configs_edges():
+            self.workflow.add_edge(*config)
+        for config in self.edge_manager.configs_conditional_edges():
+            self.workflow.add_conditional_edges(*config)
+
+        self._workflow_configured = True
     
     def _configure_nodes(self) -> None:
         """Load node definitions from the layout into the node manager."""

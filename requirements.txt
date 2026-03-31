@@ -4,6 +4,7 @@ azure-identity
 azure-search-documents
 azure-storage-blob
 PyYAML
+pytest
 matplotlib
 ipywidgets
 ipykernel
