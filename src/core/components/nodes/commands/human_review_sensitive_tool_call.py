@@ -1,6 +1,7 @@
 from typing import Literal, Any, Union
 from pydantic import BaseModel
 from langchain_core.messages import AnyMessage
+from langchain_core.tools import BaseTool
 from langgraph.types import Command, interrupt
 
 from frank.entity.node import StateCommander
@@ -19,9 +20,9 @@ class HumanReviewSensitiveToolCall(StateCommander):
 
     config_nodes: dict[str, dict[str, dict[str, str]]] = read_yaml(CONFIG_NODES_FILE_PATH)
     
-    def __init__(self, sensitive_tool_names: list[str] = None):
-        """Load the list of tool names that require explicit review and validation."""
-        self.sensitive_tool_names = sensitive_tool_names or []
+    def __init__(self, sensitive_tools: list[BaseTool] | None = None):
+        """Load the list of tool instances that require explicit review and validation."""
+        self.sensitive_tool_names = [tool.name for tool in (sensitive_tools or [])]
     
     def command(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> Command[Literal[tuple(config_nodes['HUMAN_REVIEW_NODE']['route'].values())]]: # type: ignore
         """Return a `Command` based on the human review decision.

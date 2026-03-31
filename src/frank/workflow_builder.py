@@ -1,4 +1,5 @@
 import logging
+import inspect
 from typing import Type, Any, Optional
 from IPython.display import Image, display
 from langchain_core.runnables.graph import MermaidDrawMethod
@@ -10,11 +11,11 @@ from frank.managers.node_manager import NodeManager
 from langgraph.checkpoint.base import BaseCheckpointSaver
 
 class WorkflowBuilder:
-    """Assemble a LangGraph `StateGraph` from a layout dataclass.
+    """Assemble a LangGraph `StateGraph` from a `GraphLayout` subclass.
 
-    The builder expects a layout compatible with `GraphLayout`, a state schema
-    compatible with LangGraph and optional input, output and checkpointing
-    primitives. The public flow is:
+    The builder accepts a layout class that inherits from `GraphLayout`, plus
+    a state schema compatible with LangGraph and optional input, output and
+    checkpointing primitives. The public flow is:
 
     1. Instantiate the builder with a layout and a state schema.
     2. Call `compile()`.
@@ -27,7 +28,7 @@ class WorkflowBuilder:
         """Create a workflow builder for a graph layout.
 
         Args:
-            config: Dataclass layout containing nodes, edges and optional helper builders.
+            config: Layout class inheriting from `GraphLayout`.
             state_schema: LangGraph state schema used by `StateGraph`.
             checkpointer: Optional LangGraph checkpoint saver.
             input_schema: Optional input schema forwarded to `StateGraph`.
@@ -35,7 +36,13 @@ class WorkflowBuilder:
         """
         self.workflow: StateGraph = StateGraph(state_schema=state_schema, input_schema=input_schema, output_schema=output_schema)
         self.memory: Optional[BaseCheckpointSaver] = checkpointer
-        self.config: GraphLayout = GraphLayout(config)
+
+        if not inspect.isclass(config) or not issubclass(config, GraphLayout):
+            raise TypeError(
+                "WorkflowBuilder expects `config` to be a GraphLayout subclass"
+            )
+
+        self.config: GraphLayout = config()
         self.edge_manager: EdgeManager = EdgeManager()
         self.node_manager: NodeManager = NodeManager()
         self._workflow_configured: bool = False

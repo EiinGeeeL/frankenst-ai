@@ -11,7 +11,7 @@ The project has been designed with the following goals:
 
 - Key components like **StateEnhancer**, **StateCommander**, and **StateEvaluator** are designed for be used across multiple workflows.
 
-- Use of YAML, **centralized configurations** based on dataclasses, and managed with builders and managers to define, **modify**, and **scale** different graph architectures **without duplicating logic**.
+- Use of YAML, **centralized configurations**, and explicit layout classes managed with builders and managers to define, **modify**, and **scale** different graph architectures **without duplicating logic**.
 
 ## How Frankenst-AI Maps to LangGraph
 
@@ -99,6 +99,14 @@ To run the project:
     
     The minimal example below uses the reference template under `src/core` to show how `src/frank` is consumed in a real project.
 
+    Reference layouts now follow a two-step contract:
+
+    - `build_runtime()` resolves runtime dependencies such as LLM services, runnable builders, embeddings or retrievers.
+    - The keys returned by `build_runtime()` are projected onto the layout instance and must be declared as annotated attributes in the layout class.
+    - `layout()` declares nodes and edges using those already-resolved attributes on the layout instance.
+
+    This keeps imports side-effect free while preserving the declarative layout style in the layout file itself.
+
     In that example:
 
     - `WorkflowBuilder` is part of the reusable pattern in `src/frank`.
@@ -165,19 +173,19 @@ frankenst-ai/
 │   │   ├── config/
 │   │   │   ├── config.yml            # Main runtime configuration file for the project
 │   │   │   ├── config_nodes.yml      # Node registry used by the example graph layouts
-│   │   │   └── layouts/              # Contains ConfigGraph dataclass examples
+│   │   │   └── layouts/              # Reference GraphLayout subclasses using build_runtime() + layout()
 │   │   ├── constants/           
 │   │   ├── models/                   # Structural models: StateGraph, tool properties, structured outputs, etc.
 │   │   └── utils/                  
 │   └── frank/               # Frank utilities for assembling and compiling LangGraph
 │       ├── entity/
-│       │   ├── graph_layout.py       # Initializes the GraphLayout using a ConfigGraph dataclass
+│       │   ├── graph_layout.py       # Base GraphLayout contract: build runtime first, then declare nodes and edges
 │       │   ├── runnable_builder.py   # Builder class for LangChain Runnable objects
 │       │   ├── statehandler.py       # Core entities for handling StateGraph
 │       │   ├── node.py               # Core node-related entities 
 │       │   └── edge.py               # Core edge-related entities
 │       ├── managers/               
-│       └── workflow_builder.py       # Workflow Builder to compile the LangGraph using a ConfigGraph dataclass
+│       └── workflow_builder.py       # Workflow Builder to compile LangGraph from GraphLayout subclasses
 ├── research/                # Exploratory notebooks and experiments; useful as reference
 ├── tests/
 │   ├── integration_test/      
@@ -188,7 +196,7 @@ frankenst-ai/
 
 ## Notes For Contributors
 
-- Prefer adding documentation close to the contract it explains: docstrings in `src/frank`, comments in YAML and examples in layout dataclasses.
+- Prefer adding documentation close to the contract it explains: docstrings in `src/frank`, comments in YAML and examples in layout classes.
 - When a component reads or writes new state keys, document that change in the state schema and in the component docstring.
 - Keep project abstractions aligned with official LangGraph terminology to avoid confusion in new layouts.
 - Treat `src/core` as a reference implementation of the project's pattern and `research` as exploratory support material.

@@ -1,8 +1,10 @@
-from dataclasses import dataclass
+from typing import Any
+
 from langgraph.graph import END, START
 from langgraph.prebuilt import ToolNode
 from services.foundry.llms import LLMServices
 from frank.entity.edge import ConditionalEdge, SimpleEdge
+from frank.entity.graph_layout import GraphLayout
 from frank.entity.node import SimpleNode
 
 from core.components.runnables.oaklang_agent.oaklang_agent import OakLangAgent
@@ -16,8 +18,7 @@ from core.constants import *
 
 # NOTE: This is an example implementation for illustration purposes
 # NOTE: Here you can add other subgraphs as nodes
-@dataclass(frozen=True)
-class SimpleOakConfigGraph:
+class SimpleOakConfigGraph(GraphLayout):
     """Minimal agent-with-tools layout.
 
     State expectations:
@@ -32,34 +33,42 @@ class SimpleOakConfigGraph:
     loop and does not require human review or retrieval-specific state.
     """
 
-    ## Initializate LLMServices
-    LLMServices.launch()
+    CONFIG_NODES: dict[str, Any]
+    OAKLANG_AGENT: OakLangAgent
 
-    ## RUNNABLES BUILDERS
-    OAKLANG_AGENT = OakLangAgent(model=LLMServices.model,
-                               tools=[GetEvolutionTool(), RandomMovementsTool()])
+    def build_runtime(self) -> dict[str, Any]:
+        LLMServices.launch()
 
-    ## NODES
-    CONFIG_NODES = read_yaml(CONFIG_NODES_FILE_PATH)
+        return {
+            "CONFIG_NODES": read_yaml(CONFIG_NODES_FILE_PATH),
+            "OAKLANG_AGENT": OakLangAgent(
+                model=LLMServices.model,
+                tools=[GetEvolutionTool(), RandomMovementsTool()],
+            ),
+        }
 
-    OAKLANG_NODE = SimpleNode(enhancer=SimpleMessagesAsyncInvoke(OAKLANG_AGENT),
-                         name=CONFIG_NODES['OAKLANG_NODE']['name'])
-     
-    OAKTOOLS_NODE = ToolNode(tools=OAKLANG_AGENT.tools,
-                       name=CONFIG_NODES['OAKTOOLS_NODE']['name'])
+    def layout(self) -> None:
+        ## NODES
+        self.OAKLANG_NODE = SimpleNode(
+            enhancer=SimpleMessagesAsyncInvoke(self.OAKLANG_AGENT),
+            name=self.CONFIG_NODES["OAKLANG_NODE"]["name"],
+        )
+        self.OAKTOOLS_NODE = ToolNode(
+            tools=self.OAKLANG_AGENT.tools,
+            name=self.CONFIG_NODES["OAKTOOLS_NODE"]["name"],
+        )
 
-    ## EDGES
-    _EDGE_1 = SimpleEdge(node_source=START, 
-                         node_path=OAKLANG_NODE.name)
-    
-    
-    _EDGE_2 = SimpleEdge(node_source=OAKTOOLS_NODE.name,
-                         node_path=OAKLANG_NODE.name) 
-
-    
-    _EDGE_3 = ConditionalEdge(evaluator=RouteToolCondition(),
-                              map_dict={
-                                  "end": END, # If last call `tools`, then end.
-                                  "tools": OAKTOOLS_NODE.name, # Node in the loop.
-                                  },
-                              node_source=OAKLANG_NODE.name,)
+        ## EDGES
+        self._EDGE_1 = SimpleEdge(node_source=START, node_path=self.OAKLANG_NODE.name)
+        self._EDGE_2 = SimpleEdge(
+            node_source=self.OAKTOOLS_NODE.name,
+            node_path=self.OAKLANG_NODE.name,
+        )
+        self._EDGE_3 = ConditionalEdge(
+            evaluator=RouteToolCondition(),
+            map_dict={
+                "end": END,
+                "tools": self.OAKTOOLS_NODE.name,
+            },
+            node_source=self.OAKLANG_NODE.name,
+        )

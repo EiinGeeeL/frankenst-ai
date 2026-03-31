@@ -1,7 +1,9 @@
-from dataclasses import dataclass
+from typing import Any
+
 from langgraph.graph import END, START
 from services.foundry.llms import LLMServices
 from frank.entity.edge import ConditionalEdge, SimpleEdge
+from frank.entity.graph_layout import GraphLayout
 from frank.entity.node import SimpleNode
 
 from core.components.runnables.multimodal_generation.multimodal_generation import MultimodalGeneration
@@ -18,8 +20,7 @@ from core.constants import *
 
 # NOTE: This is an example implementation for illustration purposes
 # NOTE: Here you can add other subgraphs as nodes
-@dataclass(frozen=True)
-class AISearchAdaptiveRAGConfigGraph:
+class AISearchAdaptiveRAGConfigGraph(GraphLayout):
     """Adaptive RAG layout backed by Azure AI Search.
 
     State expectations:
@@ -35,44 +36,53 @@ class AISearchAdaptiveRAGConfigGraph:
     local vector store.
     """
 
-    ## Initializate LLMServices
-    LLMServices.launch()
+    CONFIG_NODES: dict[str, Any]
+    GENERARION_CHAIN: MultimodalGeneration
+    GRADE_STRUCTURED_CHAIN: StructuredGradeDocument
+    REWRITE_CHAIN: RewriteQuestion
+    EMBEDDINGS: Any
 
-    ## RUNNABLES BUILDERS
+    def build_runtime(self) -> dict[str, Any]:
+        LLMServices.launch()
 
-    GENERARION_CHAIN = MultimodalGeneration(model=LLMServices.model)
+        return {
+            "CONFIG_NODES": read_yaml(CONFIG_NODES_FILE_PATH),
+            "GENERARION_CHAIN": MultimodalGeneration(model=LLMServices.model),
+            "GRADE_STRUCTURED_CHAIN": StructuredGradeDocument(
+                model=LLMServices.model,
+                structured_output_schema=GradeDocuments,
+            ),
+            "REWRITE_CHAIN": RewriteQuestion(model=LLMServices.model),
+            "EMBEDDINGS": LLMServices.embeddings,
+        }
 
-    GRADE_STRUCTURED_CHAIN = StructuredGradeDocument(model=LLMServices.model, structured_output_schema=GradeDocuments)
+    def layout(self) -> None:
+        ## NODES
+        self.GENERATION_NODE = SimpleNode(
+            enhancer=GenerateAnswerAsyncInvoke(self.GENERARION_CHAIN),
+            name=self.CONFIG_NODES["GENERATION_NODE"]["name"],
+        )
+        self.RETRIEVER_NODE = SimpleNode(
+            enhancer=RetrieveContextAISearch(embeddings=self.EMBEDDINGS),
+            name=self.CONFIG_NODES["RETRIEVER_NODE"]["name"],
+        )
+        self.REWRITE_NODE = SimpleNode(
+            enhancer=RewriteQuestionAsyncInvoke(self.REWRITE_CHAIN),
+            name=self.CONFIG_NODES["REWRITE_NODE"]["name"],
+        )
 
-    REWRITE_CHAIN = RewriteQuestion(model=LLMServices.model)
-
-
-    ## NODES
-    CONFIG_NODES = read_yaml(CONFIG_NODES_FILE_PATH)
-
-    GENERATION_NODE = SimpleNode(enhancer=GenerateAnswerAsyncInvoke(GENERARION_CHAIN),
-                         name=CONFIG_NODES['GENERATION_NODE']['name'])
-    
-    RETRIEVER_NODE = SimpleNode(enhancer=RetrieveContextAISearch(embeddings=LLMServices.embeddings),
-                        name=CONFIG_NODES['RETRIEVER_NODE']['name'])
-    
-    REWRITE_NODE = SimpleNode(enhancer=RewriteQuestionAsyncInvoke(REWRITE_CHAIN),
-                        name=CONFIG_NODES['REWRITE_NODE']['name'])
-
-
-    ## EDGES
-    _EDGE_1 = SimpleEdge(node_source=START, 
-                         node_path=RETRIEVER_NODE.name)
-    
-    _EDGE_2 = ConditionalEdge(evaluator=GradeRewriteGenerate(GRADE_STRUCTURED_CHAIN),
-                              map_dict={
-                                  "generate": GENERATION_NODE.name, 
-                                  "rewrite": REWRITE_NODE.name, 
-                                  },
-                              node_source=RETRIEVER_NODE.name)
-
-    _EDGE_3 = SimpleEdge(node_source=GENERATION_NODE.name,
-                         node_path=END)     
-    
-    _EDGE_4 = SimpleEdge(node_source=REWRITE_NODE.name,
-                         node_path=RETRIEVER_NODE.name) 
+        ## EDGES
+        self._EDGE_1 = SimpleEdge(node_source=START, node_path=self.RETRIEVER_NODE.name)
+        self._EDGE_2 = ConditionalEdge(
+            evaluator=GradeRewriteGenerate(self.GRADE_STRUCTURED_CHAIN),
+            map_dict={
+                "generate": self.GENERATION_NODE.name,
+                "rewrite": self.REWRITE_NODE.name,
+            },
+            node_source=self.RETRIEVER_NODE.name,
+        )
+        self._EDGE_3 = SimpleEdge(node_source=self.GENERATION_NODE.name, node_path=END)
+        self._EDGE_4 = SimpleEdge(
+            node_source=self.REWRITE_NODE.name,
+            node_path=self.RETRIEVER_NODE.name,
+        )

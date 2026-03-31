@@ -1,8 +1,11 @@
-from dataclasses import dataclass
+from typing import Any
+
 from langgraph.graph import END, START
 from langgraph.prebuilt import ToolNode
+from langchain_core.tools import BaseTool
 from services.foundry.llms import LLMServices
 from frank.entity.edge import ConditionalEdge, SimpleEdge
+from frank.entity.graph_layout import GraphLayout
 from frank.entity.node import SimpleNode, CommandNode
 
 from core.components.runnables.oaklang_agent.oaklang_agent import OakLangAgent
@@ -18,8 +21,7 @@ from core.constants import *
 
 # NOTE: This is an example implementation for illustration purposes
 # NOTE: Here you can add other subgraphs as nodes
-@dataclass(frozen=True)
-class OakHumanLoopConfigGraph:
+class OakHumanLoopConfigGraph(GraphLayout):
     """Tool-calling agent layout with an explicit human review step.
 
     State expectations:
@@ -35,37 +37,53 @@ class OakHumanLoopConfigGraph:
     Use this layout as the reference pattern for human-in-the-loop routing.
     """
 
-    ## Initializate LLMServices
-    LLMServices.launch()
+    CONFIG_NODES: dict[str, Any]
+    OAKLANG_AGENT: OakLangAgent
+    SENSITIVE_TOOLS: list[BaseTool]
 
-    ## RUNNABLES BUILDERS
-    OAKLANG_AGENT = OakLangAgent(model=LLMServices.model,
-                               tools=[GetEvolutionTool(), RandomMovementsTool(), DominatePokemonTool()])
+    def build_runtime(self) -> dict[str, Any]:
+        LLMServices.launch()
 
-    ## NODES
-    CONFIG_NODES = read_yaml(CONFIG_NODES_FILE_PATH)
+        dominate_pokemon_tool = DominatePokemonTool()
 
-    OAKLANG_NODE = SimpleNode(enhancer=SimpleMessagesAsyncInvoke(OAKLANG_AGENT),
-                         name=CONFIG_NODES['OAKLANG_NODE']['name'])
-     
-    OAKTOOLS_NODE = ToolNode(tools=OAKLANG_AGENT.tools,
-                       name=CONFIG_NODES['OAKTOOLS_NODE']['name'])
+        return {
+            "CONFIG_NODES": read_yaml(CONFIG_NODES_FILE_PATH),
+            "OAKLANG_AGENT": OakLangAgent(
+                model=LLMServices.model,
+                tools=[GetEvolutionTool(), RandomMovementsTool(), dominate_pokemon_tool],
+            ),
+            "SENSITIVE_TOOLS": [dominate_pokemon_tool],
+        }
 
-    HUMAN_REVIEW_NODE = CommandNode(commander=HumanReviewSensitiveToolCall(sensitive_tool_names=[DominatePokemonTool().name]),
-                                    name=CONFIG_NODES['HUMAN_REVIEW_NODE']['name'])
+    def layout(self) -> None:
+        ## NODES
+        self.OAKLANG_NODE = SimpleNode(
+            enhancer=SimpleMessagesAsyncInvoke(self.OAKLANG_AGENT),
+            name=self.CONFIG_NODES["OAKLANG_NODE"]["name"],
+        )
+        self.OAKTOOLS_NODE = ToolNode(
+            tools=self.OAKLANG_AGENT.tools,
+            name=self.CONFIG_NODES["OAKTOOLS_NODE"]["name"],
+        )
+        self.HUMAN_REVIEW_NODE = CommandNode(
+            commander=HumanReviewSensitiveToolCall(
+                sensitive_tools=self.SENSITIVE_TOOLS
+            ),
+            name=self.CONFIG_NODES["HUMAN_REVIEW_NODE"]["name"],
+        )
 
-    ## EDGES
-    _EDGE_1 = SimpleEdge(node_source=START, 
-                         node_path=OAKLANG_NODE.name)
-    
-    
-    _EDGE_2 = SimpleEdge(node_source=OAKTOOLS_NODE.name,
-                         node_path=OAKLANG_NODE.name) 
-
-    
-    _EDGE_3 = ConditionalEdge(evaluator=RouteHumanNode(),
-                              map_dict={
-                                  "end": END, # If last call `tools`, then end.
-                                  "review": HUMAN_REVIEW_NODE.name, # Human review in the loop.
-                                  },
-                              node_source=OAKLANG_NODE.name,)
+        ## EDGES
+        self._EDGE_1 = SimpleEdge(
+            node_source=START, 
+            node_path=self.OAKLANG_NODE.name)
+        self._EDGE_2 = SimpleEdge(
+            node_source=self.OAKTOOLS_NODE.name, 
+            node_path=self.OAKLANG_NODE.name)
+        self._EDGE_3 = ConditionalEdge(
+            evaluator=RouteHumanNode(),
+            map_dict={
+                "end": END,
+                "review": self.HUMAN_REVIEW_NODE.name,
+            },
+            node_source=self.OAKLANG_NODE.name,
+        )

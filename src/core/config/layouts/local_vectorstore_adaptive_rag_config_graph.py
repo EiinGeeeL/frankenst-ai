@@ -1,7 +1,11 @@
-from dataclasses import dataclass
+from typing import Any
+
+from langchain_core.retrievers import BaseRetriever
+
 from langgraph.graph import END, START
 from services.foundry.llms import LLMServices
 from frank.entity.edge import ConditionalEdge, SimpleEdge
+from frank.entity.graph_layout import GraphLayout
 from frank.entity.node import SimpleNode
 
 from core.components.retrievers.langchain_chroma_multivector_retriever.langchain_chroma_multivector_retriever import LangchainChromaMultiVectorRetriever
@@ -20,8 +24,7 @@ from core.constants import *
 
 # NOTE: This is an example implementation for illustration purposes
 # NOTE: Here you can add other subgraphs as nodes
-@dataclass(frozen=True)
-class LocalVectorStoreAdaptiveRAGConfigGraph:
+class LocalVectorStoreAdaptiveRAGConfigGraph(GraphLayout):
     """Adaptive RAG layout backed by a local vector store retriever.
 
     State expectations:
@@ -36,50 +39,62 @@ class LocalVectorStoreAdaptiveRAGConfigGraph:
     This layout is the reference pattern for local multimodal retrieval loops.
     """
 
-    ## Initializate LLMServices
-    LLMServices.launch()
+    CONFIG_NODES: dict[str, Any]
+    RAW_RETRIEVER: BaseRetriever
+    RETRIEVER_CHAIN: MultimodalRetriever
+    GENERARION_CHAIN: MultimodalGeneration
+    GRADE_STRUCTURED_CHAIN: StructuredGradeDocument
+    REWRITE_CHAIN: RewriteQuestion
 
-    raw_retriever = LangchainChromaMultiVectorRetriever(
-        embeddings=LLMServices.embeddings,
+    def build_runtime(self) -> dict[str, Any]:
+        LLMServices.launch()
+
+        raw_retriever = LangchainChromaMultiVectorRetriever(
+            embeddings=LLMServices.embeddings,
         ).get_retriever()
 
-    ## RUNNABLES BUILDERS
+        return {
+            "CONFIG_NODES": read_yaml(CONFIG_NODES_FILE_PATH),
+            "RAW_RETRIEVER": raw_retriever,
+            "RETRIEVER_CHAIN": MultimodalRetriever(
+                model=LLMServices.model,
+                retriever=raw_retriever,
+            ),
+            "GENERARION_CHAIN": MultimodalGeneration(model=LLMServices.model),
+            "GRADE_STRUCTURED_CHAIN": StructuredGradeDocument(
+                model=LLMServices.model,
+                structured_output_schema=GradeDocuments,
+            ),
+            "REWRITE_CHAIN": RewriteQuestion(model=LLMServices.model),
+        }
 
-    RETRIEVER_CHAIN = MultimodalRetriever(model=LLMServices.model, retriever=raw_retriever)
+    def layout(self) -> None:
+        ## NODES
+        self.GENERATION_NODE = SimpleNode(
+            enhancer=GenerateAnswerAsyncInvoke(self.GENERARION_CHAIN),
+            name=self.CONFIG_NODES["GENERATION_NODE"]["name"],
+        )
+        self.RETRIEVER_NODE = SimpleNode(
+            enhancer=RetrieveContextAsyncInvoke(self.RETRIEVER_CHAIN),
+            name=self.CONFIG_NODES["RETRIEVER_NODE"]["name"],
+        )
+        self.REWRITE_NODE = SimpleNode(
+            enhancer=RewriteQuestionAsyncInvoke(self.REWRITE_CHAIN),
+            name=self.CONFIG_NODES["REWRITE_NODE"]["name"],
+        )
 
-    GENERARION_CHAIN = MultimodalGeneration(model=LLMServices.model)
-
-    GRADE_STRUCTURED_CHAIN = StructuredGradeDocument(model=LLMServices.model, structured_output_schema=GradeDocuments)
-
-    REWRITE_CHAIN = RewriteQuestion(model=LLMServices.model)
-
-
-    ## NODES
-    CONFIG_NODES = read_yaml(CONFIG_NODES_FILE_PATH)
-
-    GENERATION_NODE = SimpleNode(enhancer=GenerateAnswerAsyncInvoke(GENERARION_CHAIN),
-                         name=CONFIG_NODES['GENERATION_NODE']['name'])
-    
-    RETRIEVER_NODE = SimpleNode(enhancer=RetrieveContextAsyncInvoke(RETRIEVER_CHAIN),
-                        name=CONFIG_NODES['RETRIEVER_NODE']['name'])
-    
-    REWRITE_NODE = SimpleNode(enhancer=RewriteQuestionAsyncInvoke(REWRITE_CHAIN),
-                        name=CONFIG_NODES['REWRITE_NODE']['name'])
-
-
-    ## EDGES
-    _EDGE_1 = SimpleEdge(node_source=START, 
-                         node_path=RETRIEVER_NODE.name)
-    
-    _EDGE_2 = ConditionalEdge(evaluator=GradeRewriteGenerate(GRADE_STRUCTURED_CHAIN),
-                              map_dict={
-                                  "generate": GENERATION_NODE.name, 
-                                  "rewrite": REWRITE_NODE.name, 
-                                  },
-                              node_source=RETRIEVER_NODE.name)
-
-    _EDGE_3 = SimpleEdge(node_source=GENERATION_NODE.name,
-                         node_path=END)     
-    
-    _EDGE_4 = SimpleEdge(node_source=REWRITE_NODE.name,
-                         node_path=RETRIEVER_NODE.name) 
+        ## EDGES
+        self._EDGE_1 = SimpleEdge(node_source=START, node_path=self.RETRIEVER_NODE.name)
+        self._EDGE_2 = ConditionalEdge(
+            evaluator=GradeRewriteGenerate(self.GRADE_STRUCTURED_CHAIN),
+            map_dict={
+                "generate": self.GENERATION_NODE.name,
+                "rewrite": self.REWRITE_NODE.name,
+            },
+            node_source=self.RETRIEVER_NODE.name,
+        )
+        self._EDGE_3 = SimpleEdge(node_source=self.GENERATION_NODE.name, node_path=END)
+        self._EDGE_4 = SimpleEdge(
+            node_source=self.REWRITE_NODE.name,
+            node_path=self.RETRIEVER_NODE.name,
+        )
