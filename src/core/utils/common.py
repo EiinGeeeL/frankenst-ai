@@ -93,6 +93,39 @@ def read_yaml(path_to_yaml: Path) -> Optional[Dict]:
     except Exception as e:
         raise Exception(f"An unexpected error occurred {e}")
     
+def load_node_registry(path_to_yaml: Path) -> dict[str, dict]:
+    """Read config_nodes.yml and return a dict keyed by node ``id``.
+
+    The returned structure mirrors the old ``read_yaml`` output so that layout
+    access patterns such as ``CONFIG_NODES["OAKLANG_NODE"]["name"]`` are
+    unchanged.
+
+    Args:
+        path_to_yaml (Path): Path to a node registry YAML file with a top-level
+            ``nodes`` list where each entry has at least an ``id`` field.
+
+    Returns:
+        dict[str, dict]: Mapping from node id to the remaining node fields
+            (``name``, ``type``, ``description``, ``route``, …).
+
+    Raises:
+        FileNotFoundError: If the file does not exist.
+        yaml.YAMLError: If the file cannot be parsed as YAML.
+        KeyError: If any node entry is missing the ``id`` field.
+    """
+    try:
+        with open(path_to_yaml, "r") as f:
+            data = yaml.safe_load(f)
+        return {
+            node["id"]: {k: v for k, v in node.items() if k != "id"}
+            for node in data["nodes"]
+        }
+    except FileNotFoundError:
+        raise FileNotFoundError(f"The configuration file '{path_to_yaml}' does not exist.")
+    except yaml.YAMLError as e:
+        raise yaml.YAMLError(f"Error parsing YAML file {e}")
+
+
 def load_and_clean_text_file(file_path: str, remove_empty_lines: bool = False) -> str:
     try:
         p = Path(file_path)

@@ -15,7 +15,7 @@ from core.components.nodes.commands.human_review_sensitive_tool_call import Huma
 from core.components.tools.get_evolution.get_evolution_tool import GetEvolutionTool
 from core.components.tools.random_movements.random_movements_tool import RandomMovementsTool
 from core.components.tools.dominate_pokemon.dominate_pokemon_tool import DominatePokemonTool
-from core.utils.common import read_yaml
+from core.utils.common import load_node_registry
 from core.constants import *
 
 
@@ -47,7 +47,7 @@ class OakHumanLoopConfigGraph(GraphLayout):
         dominate_pokemon_tool = DominatePokemonTool()
 
         return {
-            "CONFIG_NODES": read_yaml(CONFIG_NODES_FILE_PATH),
+            "CONFIG_NODES": load_node_registry(CONFIG_NODES_FILE_PATH),
             "OAKLANG_AGENT": OakLangAgent(
                 model=LLMServices.model,
                 tools=[GetEvolutionTool(), RandomMovementsTool(), dominate_pokemon_tool],
@@ -60,16 +60,20 @@ class OakHumanLoopConfigGraph(GraphLayout):
         self.OAKLANG_NODE = SimpleNode(
             enhancer=SimpleMessagesAsyncInvoke(self.OAKLANG_AGENT),
             name=self.CONFIG_NODES["OAKLANG_NODE"]["name"],
+            tags=[self.CONFIG_NODES["OAKLANG_NODE"]["description"]],
         )
         self.OAKTOOLS_NODE = ToolNode(
             tools=self.OAKLANG_AGENT.tools,
             name=self.CONFIG_NODES["OAKTOOLS_NODE"]["name"],
+            tags=[self.CONFIG_NODES["OAKTOOLS_NODE"]["description"]],
         )
         self.HUMAN_REVIEW_NODE = CommandNode(
             commander=HumanReviewSensitiveToolCall(
-                sensitive_tools=self.SENSITIVE_TOOLS
+                sensitive_tools=self.SENSITIVE_TOOLS,
+                routes=self.CONFIG_NODES["HUMAN_REVIEW_NODE"]["routes"],
             ),
             name=self.CONFIG_NODES["HUMAN_REVIEW_NODE"]["name"],
+            tags=[self.CONFIG_NODES["HUMAN_REVIEW_NODE"]["description"]],
         )
 
         ## EDGES

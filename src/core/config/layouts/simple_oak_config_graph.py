@@ -12,7 +12,7 @@ from core.components.edges.evaluators.route_tool_condition import RouteToolCondi
 from core.components.nodes.enhancers.simple_messages_ainvoke import SimpleMessagesAsyncInvoke
 from core.components.tools.get_evolution.get_evolution_tool import GetEvolutionTool
 from core.components.tools.random_movements.random_movements_tool import RandomMovementsTool
-from core.utils.common import read_yaml
+from core.utils.common import load_node_registry
 from core.constants import *
 
 
@@ -40,7 +40,7 @@ class SimpleOakConfigGraph(GraphLayout):
         LLMServices.launch()
 
         return {
-            "CONFIG_NODES": read_yaml(CONFIG_NODES_FILE_PATH),
+            "CONFIG_NODES": load_node_registry(CONFIG_NODES_FILE_PATH),
             "OAKLANG_AGENT": OakLangAgent(
                 model=LLMServices.model,
                 tools=[GetEvolutionTool(), RandomMovementsTool()],
@@ -52,10 +52,12 @@ class SimpleOakConfigGraph(GraphLayout):
         self.OAKLANG_NODE = SimpleNode(
             enhancer=SimpleMessagesAsyncInvoke(self.OAKLANG_AGENT),
             name=self.CONFIG_NODES["OAKLANG_NODE"]["name"],
+            tags=[self.CONFIG_NODES["OAKLANG_NODE"]["description"]],
         )
         self.OAKTOOLS_NODE = ToolNode(
             tools=self.OAKLANG_AGENT.tools,
             name=self.CONFIG_NODES["OAKTOOLS_NODE"]["name"],
+            tags=[self.CONFIG_NODES["OAKTOOLS_NODE"]["description"]],
         )
 
         ## EDGES

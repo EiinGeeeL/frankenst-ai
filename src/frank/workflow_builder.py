@@ -75,8 +75,13 @@ class WorkflowBuilder:
     def _configure_workflow(self) -> None:
         """Assemble the workflow from the nodes and edges discovered in the layout."""
         self._configure_nodes()
-        for config in self.node_manager.configs_nodes():
-            self.workflow.add_node(*config)
+        for name, action, tags, destinations in self.node_manager.configs_nodes():
+            self.workflow.add_node(
+                name,
+                action,
+                metadata={"tags": tags} if tags else None, # NOTE: cant be matadata due ToolNode uses tags.
+                destinations=destinations,
+            )
 
         self._configure_edges()
         for config in self.edge_manager.configs_edges():

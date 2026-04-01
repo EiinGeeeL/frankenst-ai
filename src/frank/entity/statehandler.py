@@ -75,7 +75,7 @@ class StateEnhancer(ABC):
         """
         pass
 
-class StateCommander:
+class StateCommander(ABC):
     """Base contract for nodes that route with LangGraph Command.
 
     Use this abstraction only when routing and state updates must happen in the
@@ -84,29 +84,25 @@ class StateCommander:
     Unlike `StateEvaluator`, a commander does not rely on a separate
     `ConditionalEdge`. It returns an official `Command` object with a `goto`
     destination and optional state updates.
+
+    Subclasses must implement `command()` and inject their own routing
+    information (e.g. via constructor arguments) rather than reading the node
+    registry directly.
+
+    Convention — ``routes`` attribute:
+        Subclasses must expose a ``self.routes: dict[str, str]`` attribute
+        mapping semantic keys (e.g. ``"tools"``, ``"enhancer"``) to the
+        ``BaseNode.name`` values of the destination nodes.
+        ``CommandNode`` enforces this at construction time and reads
+        ``routes`` to populate ``StateGraph.add_node(destinations=...)``.
     """
-    # Example config_node.yml read structure used by commander implementations.
-    # This is illustrative documentation, not runtime configuration.
-    config_nodes: dict[str, dict[str, dict[str, str]]] = {
-        "current_node": {
-            "name" : "current_node_name",
-            "type" : "commander",
-            "route": {
-                "tools": "some_tool_node_name",
-                "enhancer_b": "other_node_name",
-                "enhancer_c": "another_node_name",
-            }
-        }
-    }
 
-    @staticmethod
-    def command(state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> Command[Literal[tuple(config_nodes['current_node']['route'].values())]]: # type: ignore
-        """Modify the StateGraph and also route with Command[Literal] to nodes. 
-        No need edges or conditional edges, the command method contain the logic routing.
-        This is usefull for Human in the Loop and Multi-Agent or Agent Supervisors apps.
+    @abstractmethod
+    def command(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> Command[str]:
+        """Return a `Command` that routes the graph and optionally updates state.
+
+        The `goto` value must match a node name registered in the compiled graph.
+        Subclasses receive concrete route names through constructor injection so
+        that this method stays free of YAML or registry reads.
         """
-
-        # Implementation would go here
         pass
-
-        return Command(goto=StateCommander.config_nodes['current_node']['route']['tools'])

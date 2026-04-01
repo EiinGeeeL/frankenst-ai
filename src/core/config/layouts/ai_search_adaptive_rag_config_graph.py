@@ -14,7 +14,7 @@ from core.components.nodes.enhancers.generate_answer_ainvoke import GenerateAnsw
 from core.components.nodes.enhancers.retrieve_context_ai_search import RetrieveContextAISearch
 from core.components.nodes.enhancers.rewrite_question_ainvoke import RewriteQuestionAsyncInvoke
 from core.models.structured_output.grade_documents import GradeDocuments
-from core.utils.common import read_yaml
+from core.utils.common import load_node_registry
 from core.constants import *
 
 
@@ -46,7 +46,7 @@ class AISearchAdaptiveRAGConfigGraph(GraphLayout):
         LLMServices.launch()
 
         return {
-            "CONFIG_NODES": read_yaml(CONFIG_NODES_FILE_PATH),
+            "CONFIG_NODES": load_node_registry(CONFIG_NODES_FILE_PATH),
             "GENERARION_CHAIN": MultimodalGeneration(model=LLMServices.model),
             "GRADE_STRUCTURED_CHAIN": StructuredGradeDocument(
                 model=LLMServices.model,
@@ -61,14 +61,17 @@ class AISearchAdaptiveRAGConfigGraph(GraphLayout):
         self.GENERATION_NODE = SimpleNode(
             enhancer=GenerateAnswerAsyncInvoke(self.GENERARION_CHAIN),
             name=self.CONFIG_NODES["GENERATION_NODE"]["name"],
+            tags=[self.CONFIG_NODES["GENERATION_NODE"]["description"]],
         )
         self.RETRIEVER_NODE = SimpleNode(
             enhancer=RetrieveContextAISearch(embeddings=self.EMBEDDINGS),
             name=self.CONFIG_NODES["RETRIEVER_NODE"]["name"],
+            tags=[self.CONFIG_NODES["RETRIEVER_NODE"]["description"]],
         )
         self.REWRITE_NODE = SimpleNode(
             enhancer=RewriteQuestionAsyncInvoke(self.REWRITE_CHAIN),
             name=self.CONFIG_NODES["REWRITE_NODE"]["name"],
+            tags=[self.CONFIG_NODES["REWRITE_NODE"]["description"]],
         )
 
         ## EDGES

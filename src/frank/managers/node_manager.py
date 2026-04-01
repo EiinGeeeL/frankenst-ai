@@ -1,7 +1,7 @@
 import logging
 from typing import Iterable, Tuple, Union
 from langgraph.prebuilt import ToolNode
-from frank.entity.node import SimpleNode, CommandNode
+from frank.entity.node import BaseNode, SimpleNode, CommandNode
 from frank.entity.statehandler import StateEnhancer, StateCommander
 
 class NodeManager:
@@ -39,6 +39,14 @@ class NodeManager:
         else:
             raise TypeError(f"Unexpected node type: {type(node)}")
 
+    def _get_node_tags(self, node: Union[SimpleNode, CommandNode, ToolNode]) -> list[str] | None:
+        """Return node tags for wrappers or native ToolNode instances.
+
+        Wrapper nodes expose `tags` directly. Native `ToolNode` already uses the
+        same attribute name in LangGraph.
+        """
+        return node.tags if isinstance(node, BaseNode) else getattr(node, "tags", None)
+
     def add_nodes(self, nodes: Union[SimpleNode, CommandNode, ToolNode] | Iterable[Union[SimpleNode, CommandNode, ToolNode]]) -> None:
         """
         Add one or more supported node instances to the internal registry.
@@ -60,12 +68,23 @@ class NodeManager:
         """
         return tuple(self.nodes.values())
 
-    def configs_nodes(self) -> Tuple[Tuple[str, Union[StateEnhancer.enhance, StateCommander.command, ToolNode]], ...]:
+    def configs_nodes(self) -> Tuple[Tuple[str, Union[StateEnhancer.enhance, StateCommander.command, ToolNode], list[str] | None, Union[Tuple[str, ...], None]], ...]:
         """
-        Retrieve deterministic `(name, callable)` tuples compatible with `StateGraph.add_node()`.
+        Retrieve deterministic `(name, callable, tags, destinations)` tuples.
+
+        `tags` are the Frankenst-AI annotation surface. `WorkflowBuilder`
+        forwards them to `StateGraph.add_node(metadata=...)` for wrapper nodes.
+        `destinations` is a tuple of reachable node names for `CommandNode`
+        instances (consumed by `StateGraph.add_node(destinations=...)` for graph
+        rendering). It is `None` for all other node types.
         """
         return tuple(
-            (name, self._get_node_value(node))
+            (
+                name,
+                self._get_node_value(node),
+                self._get_node_tags(node),
+                node.destinations if isinstance(node, CommandNode) else None,
+            )
             for name, node in self.nodes.items()
         )
 

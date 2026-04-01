@@ -1,12 +1,10 @@
-from typing import Literal, Any, Union
+from typing import Any, Union
 from pydantic import BaseModel
 from langchain_core.messages import AnyMessage
 from langchain_core.tools import BaseTool
 from langgraph.types import Command, interrupt
 
 from frank.entity.node import StateCommander
-from core.utils.common import read_yaml
-from core.constants import *
 
 
 class HumanReviewSensitiveToolCall(StateCommander):
@@ -16,15 +14,23 @@ class HumanReviewSensitiveToolCall(StateCommander):
     `interrupt()` when a sensitive tool is detected, and then returns a
     LangGraph `Command` pointing either to the tool node or back to the agent
     node with feedback updates.
+
+    Args:
+        sensitive_tools: Tool instances that require explicit human approval.
+        routes: Mapping of semantic keys to concrete node names. Expected keys
+            are ``"tools"`` and ``"enhancer"``. Injected by the layout so that
+            this class stays free of registry reads.
     """
 
-    config_nodes: dict[str, dict[str, dict[str, str]]] = read_yaml(CONFIG_NODES_FILE_PATH)
-    
-    def __init__(self, sensitive_tools: list[BaseTool] | None = None):
-        """Load the list of tool instances that require explicit review and validation."""
+    def __init__(
+        self,
+        sensitive_tools: list[BaseTool] | None = None,
+        routes: dict[str, str] | None = None,
+    ):
         self.sensitive_tool_names = [tool.name for tool in (sensitive_tools or [])]
-    
-    def command(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> Command[Literal[tuple(config_nodes['HUMAN_REVIEW_NODE']['route'].values())]]: # type: ignore
+        self.routes = routes or {}
+
+    def command(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> Command[str]:
         """Return a `Command` based on the human review decision.
 
         Reads:
@@ -43,7 +49,7 @@ class HumanReviewSensitiveToolCall(StateCommander):
         
         # If no sensitive tools, run all tools immediately
         if not sensitive_calls:
-            return Command(goto=self.config_nodes['HUMAN_REVIEW_NODE']['route']['tools'])
+            return Command(goto=self.routes["tools"])
 
         # Get the *first* sensitive tool call to ask for review and update
         tool_call = sensitive_calls[0]
@@ -58,7 +64,7 @@ class HumanReviewSensitiveToolCall(StateCommander):
         review_data = human_review.get("data")
 
         if review_action == "continue":
-            return Command(goto=self.config_nodes['HUMAN_REVIEW_NODE']['route']['tools'])
+            return Command(goto=self.routes["tools"])
 
         elif review_action == "feedback":
             # ToolMessage for sensitive tool feedback
@@ -84,5 +90,5 @@ class HumanReviewSensitiveToolCall(StateCommander):
                         "tool_call_id": call["id"],
                     })
 
-            return Command(goto=self.config_nodes['HUMAN_REVIEW_NODE']['route']['enhancer'], update={"messages": all_tool_messages})
+            return Command(goto=self.routes["enhancer"], update={"messages": all_tool_messages})
 

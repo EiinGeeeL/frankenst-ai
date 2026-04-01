@@ -1,51 +1,48 @@
-# Node registry consumed by layout dataclasses.
-# `type` is descriptive documentation for the role played in the graph.
-# `route` values are used by StateCommander implementations and may reference
-# other node names through the `$()` placeholder syntax resolved by read_yaml().
+# Node registry consumed by layout dataclasses via load_node_registry().
 #
 # Schema overview:
-# - `name`: runtime name used in the compiled LangGraph.
-# - `type`: documentation-only role of the node (`enhancer`, `tools`, `commander`).
+# - `id`:          registry key used in layouts (e.g. CONFIG_NODES["OAKLANG_NODE"]).
+# - `name`:        runtime name passed to LangGraph node constructors.
+# - `type`:        documentation-only role (`enhancer`, `tools`, `commander`).
 # - `description`: short explanation of the node responsibility.
-# - `route`: optional mapping used by commander nodes to resolve `Command.goto`.
-#
-# Placeholder overview:
-# - `$(OAKLANG_NODE.name)` copies the `name` value from another node entry.
-# - Placeholders are expanded before layouts consume this file.
+# - `route`:       optional mapping used by StateCommander subclasses.
+#                  Values are the literal destination node names — no placeholders.
 
-##################### OAKLANG NODES ####################
+nodes:
 
-OAKLANG_NODE:
-  name: OakLangAgent
-  type: enhancer
-  description: Main agent node. It binds tools and produces the next assistant message.
+  ##################### OAKLANG NODES ####################
 
-OAKTOOLS_NODE:
-  name: OakTools
-  type: tools
-  description: ToolNode executed when $(OAKLANG_NODE.name) emits tool calls.
+  - id: OAKLANG_NODE
+    name: OakLangAgent
+    type: enhancer
+    description: Main agent node. It binds tools and produces the next assistant message.
 
-HUMAN_REVIEW_NODE:
-  name: HumanReview
-  type: commander
-  route: 
-    enhancer: $(OAKLANG_NODE.name)
-    tools: $(OAKTOOLS_NODE.name)
-  description: Command node that routes to tools or back to the enhancer after human review.
+  - id: OAKTOOLS_NODE
+    name: OakTools
+    type: tools
+    description: ToolNode executed when the OakLangAgent node emits tool calls.
 
-##################### RAG NODES ########################
+  - id: HUMAN_REVIEW_NODE
+    name: HumanReview
+    type: commander
+    description: Command node that routes to tools or back to the enhancer after human review.
+    routes:
+      enhancer: OakLangAgent
+      tools: OakTools
 
-GENERATION_NODE:
-  name: GenerationNode
-  type: enhancer
-  description: Node that generates the final answer from the current question and retrieved context.
+  ##################### RAG NODES ########################
 
-RETRIEVER_NODE:
-  name: RetrieverNode
-  type: enhancer
-  description: Node that retrieves context for the current question.
+  - id: GENERATION_NODE
+    name: GenerationNode
+    type: enhancer
+    description: Node that generates the final answer from the current question and retrieved context.
 
-REWRITE_NODE:
-  name: RewriteNode
-  type: enhancer
-  description: Node that rewrites the question before another retrieval iteration.
+  - id: RETRIEVER_NODE
+    name: RetrieverNode
+    type: enhancer
+    description: Node that retrieves context for the current question.
+
+  - id: REWRITE_NODE
+    name: RewriteNode
+    type: enhancer
+    description: Node that rewrites the question before another retrieval iteration.
