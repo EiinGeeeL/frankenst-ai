@@ -49,7 +49,7 @@ The utilities contract and abstraction live in `src/frank`. The rest of the repo
 ## Prerequisites
 
 - Python 3.12.5
-- Ollama 4.0 or higher (free); or an Azure Foundry Deployment (payment)
+- Ollama 0.19.0 or higher (free); or an Azure Foundry Deployment (payment)
 - pip (Python package manager)
 - uv (install with pip)
 

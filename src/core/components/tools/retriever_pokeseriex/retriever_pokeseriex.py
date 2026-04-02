@@ -5,17 +5,17 @@ from services.foundry.llms import LLMServices
 from core.components.retrievers.ai_search_simple_semantic_retriever.ai_search_simple_semantic_retriever import AISearchSimpleSemanticRetriever
 from core.utils.key_vault import get_secret
 
-class RetrieverTeradataSchemas:
+class RetrieverPokeSeriex:
     @staticmethod
     def run(query: str) -> List:
         """
-        Esta herramienta transforma una consulta en lenguaje natural en un vector y recupera contexto del contenido y los esquemas de una base de datos, Teradata.
-    
+        This tool transforms a natural language query into a vector and retrieves context from the content and schemas of a Teradata database.
+
         Args:
-            query (str): Pregunta o consulta en lenguaje natural sobre la base de datos Teradata.
+            query (str): Question or query in natural language about the PokeSeriex database.
 
         Returns:
-            str: Lista con los documentos y esquemas más relevantes que contiene la base de datos Teradata.
+            str: List containing the most relevant documents and schemas within the PokeSeriex database.
         """
         
         LLMServices.launch()
