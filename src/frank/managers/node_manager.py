@@ -1,8 +1,9 @@
 import logging
+from typing import Any
 from typing import Iterable, Tuple, Union
 from langgraph.prebuilt import ToolNode
 from frank.entity.node import BaseNode, SimpleNode, CommandNode
-from frank.entity.statehandler import StateEnhancer, StateCommander
+from frank.entity.statehandler import StateCommander, StateEnhancer
 
 class NodeManager:
     """Store graph node definitions and expose them in `StateGraph` format.
@@ -11,7 +12,7 @@ class NodeManager:
     LangGraph `ToolNode` instances. During configuration it resolves each node
     to the callable consumed by `StateGraph.add_node()`.
 
-    Node names are treated as a framework-level invariant: registration keeps
+    Node names are treated as a Frankenst-AI contract invariant: registration keeps
     insertion order and rejects duplicate names before delegating to LangGraph.
     """
 
@@ -28,7 +29,7 @@ class NodeManager:
 
         return list(nodes)
 
-    def _get_node_value(self, node: Union[SimpleNode, CommandNode, ToolNode]) -> Union[StateEnhancer.enhance, StateCommander.command, ToolNode]:
+    def _get_node_value(self, node: Union[SimpleNode, CommandNode, ToolNode]) -> Any:
         """Resolve a node wrapper to the callable or ToolNode added to the graph."""
         if isinstance(node, ToolNode):
             return node
@@ -68,7 +69,7 @@ class NodeManager:
         """
         return tuple(self.nodes.values())
 
-    def configs_nodes(self) -> Tuple[Tuple[str, Union[StateEnhancer.enhance, StateCommander.command, ToolNode], list[str] | None, Union[Tuple[str, ...], None]], ...]:
+    def configs_nodes(self) -> Tuple[Tuple[str, Any, list[str] | None, Union[Tuple[str, ...], None]], ...]:
         """
         Retrieve deterministic `(name, callable, tags, destinations)` tuples.
 
@@ -77,6 +78,9 @@ class NodeManager:
         `destinations` is a tuple of reachable node names for `CommandNode`
         instances (consumed by `StateGraph.add_node(destinations=...)` for graph
         rendering). It is `None` for all other node types.
+
+        The returned callable may be synchronous or asynchronous. LangGraph
+        accepts both forms for node execution.
         """
         return tuple(
             (

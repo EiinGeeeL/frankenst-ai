@@ -39,7 +39,8 @@ class GraphLayout(ABC):
     def _get_declared_runtime_keys(self) -> set[str]:
         """Return annotated attribute names declared by the concrete layout."""
         hints = get_type_hints(self.__class__)
-        return set(hints.keys())
+        declared_annotations = self.__class__.__dict__.get("__annotations__", {})
+        return {key for key in hints.keys() if key in declared_annotations}
 
     def _build_runtime(self) -> None:
         """Build and project runtime attributes once per layout instance."""
@@ -56,6 +57,12 @@ class GraphLayout(ABC):
             if missing_annotations:
                 raise ValueError(
                     f"{self.__class__.__name__}.build_runtime() returned keys without class annotations: {missing_annotations}"
+                )
+
+            missing_runtime_keys = sorted(declared_keys - runtime_keys)
+            if missing_runtime_keys:
+                raise ValueError(
+                    f"{self.__class__.__name__}.build_runtime() must populate all annotated runtime keys: {missing_runtime_keys}"
                 )
 
             self.runtime = runtime

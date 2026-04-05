@@ -16,7 +16,7 @@ from core.components.tools.get_evolution.get_evolution_tool import GetEvolutionT
 from core.components.tools.random_movements.random_movements_tool import RandomMovementsTool
 from core.components.tools.dominate_pokemon.dominate_pokemon_tool import DominatePokemonTool
 from core.utils.common import load_node_registry
-from core.constants import *
+from core.constants import CONFIG_NODES_FILE_PATH
 
 
 # NOTE: This is an example implementation for illustration purposes

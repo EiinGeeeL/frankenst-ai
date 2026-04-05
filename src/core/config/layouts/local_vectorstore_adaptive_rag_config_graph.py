@@ -19,7 +19,7 @@ from core.components.nodes.enhancers.retrieve_context_ainvoke import RetrieveCon
 from core.components.nodes.enhancers.rewrite_question_ainvoke import RewriteQuestionAsyncInvoke
 from core.models.structured_output.grade_documents import GradeDocuments
 from core.utils.common import load_node_registry
-from core.constants import *
+from core.constants import CONFIG_NODES_FILE_PATH
 
 
 # NOTE: This is an example implementation for illustration purposes

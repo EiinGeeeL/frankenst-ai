@@ -126,12 +126,17 @@ def load_node_registry(path_to_yaml: Path) -> dict[str, dict]:
         raise yaml.YAMLError(f"Error parsing YAML file {e}")
 
 
-def load_and_clean_text_file(file_path: str, remove_empty_lines: bool = False) -> str:
-    try:
-        p = Path(file_path)
-        file_path_found = next((Path(*p.parts[i:]) for i in range(len(p.parts)) if Path(*p.parts[i:]).exists()), p)
+def resolve_path_from_module(module_file: str | Path, *relative_parts: str) -> Path:
+    """Resolve a file path relative to the module file that requests it."""
 
-        with open(file_path_found, 'r', encoding='utf-8') as file:
+    return Path(module_file).resolve().parent.joinpath(*relative_parts)
+
+
+def load_and_clean_text_file(file_path: str | Path, remove_empty_lines: bool = False) -> str:
+    try:
+        path = Path(file_path).expanduser()
+
+        with open(path, 'r', encoding='utf-8') as file:
             if remove_empty_lines:
                 content = "\n".join(line.strip() for line in file if line.strip())
             else:

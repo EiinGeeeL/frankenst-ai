@@ -1,16 +1,17 @@
-import os
 from typing import Any, Union
+
 from pydantic import BaseModel
 from langchain_core.messages import AnyMessage
-from langchain_core.embeddings import Embeddings
+
 from frank.entity.statehandler import StateEnhancer
-from azure.search.documents import SearchClient
-from azure.core.credentials import AzureKeyCredential
-from core.components.retrievers.ai_search_multivector_retriever.ai_search_multivector_retriever import AISearchMultiVectorRetriever
 
 
 class RetrieveContextAISearch(StateEnhancer):
     """Retrieve context from Azure AI Search using the current question.
+
+    The Azure Search retriever must be composed at layout runtime and injected
+    into this enhancer. This keeps node execution focused on state transforms
+    instead of infrastructure setup.
 
     Reads:
         - `messages` on the first retrieval pass
@@ -21,18 +22,15 @@ class RetrieveContextAISearch(StateEnhancer):
         - `question`: the question that should be used by downstream nodes
     """
 
-    async def enhance(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> dict[str, list]: 
-        
+    async def enhance(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> dict[str, Any]:
         if "iterations" in state and state.get("iterations", 0) > 0:
             question = state["question"]
         else:
             question = state["messages"][-1].content
 
-        if not isinstance(self.embeddings, Embeddings):
-            raise TypeError("Expected 'embeddings' to be an instance of langchain_core.embeddings.Embeddings")
-        
-        search_client = SearchClient(endpoint=os.getenv("AZURE_SEARCH_SERVICE_ENDPOINT"), index_name="demo-rag-multimodal-index", credential=AzureKeyCredential(os.getenv("AZURE_SEARCH_API_KEY")))
-        retriever = AISearchMultiVectorRetriever(embeddings=self.embeddings, search_client=search_client)
+        retriever = getattr(self, "retriever", None)
+        if retriever is None or not callable(getattr(retriever, "get_context", None)):
+            raise TypeError("RetrieveContextAISearch expects an injected retriever with a callable get_context(query)")
 
         retrieved_docs_context = retriever.get_context(question)
 

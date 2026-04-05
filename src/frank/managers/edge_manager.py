@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Dict, Iterable, Tuple, Type, Union
+from typing import Any, Dict, Iterable, Tuple, Type, Union
 from frank.entity.edge import SimpleEdge, ConditionalEdge
 from frank.entity.statehandler import StateEvaluator
 
@@ -57,12 +57,14 @@ class EdgeManager:
             for edge in self.edges if isinstance(edge, SimpleEdge)
         )
     
-    def configs_conditional_edges(self) -> Tuple[Tuple[str, Callable[..., StateEvaluator.evaluate], Dict[str, str]], ...]:
+    def configs_conditional_edges(self) -> Tuple[Tuple[str, Any, Dict[str, str]], ...]:
         """
         Return ordered tuples for `StateGraph.add_conditional_edges()` containing:
         - the source node name
         - the evaluator callable
         - the path map from routing keys to target nodes
+
+        The evaluator callable may be synchronous or asynchronous.
         """
         return tuple(
             (edge.node_source, edge.evaluator.evaluate, edge.map_dict)

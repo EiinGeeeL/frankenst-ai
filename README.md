@@ -32,7 +32,7 @@ This repository has three different roles, and it helps to read it that way:
 
 - `src/frank` is the reusable pattern layer. It contains the core abstractions and assembly utilities used to structure LangGraph projects with consistent design rules.
 - `src/core` is a reference template built on top of `src/frank`. It shows one concrete way to organize layouts, state models, components, YAML configuration and service integration in a real project.
-- `research` is exploratory material. The notebooks are useful to understand how layouts are compiled and exercised, but they are not the contractual surface of the framework.
+- `research` is exploratory material. The notebooks are useful to understand how layouts are compiled and exercised, but they are not the contractual surface of the Frankenst-AI patterns.
 
 In other words, `src/frank` is the stable architectural idea, while `src/core` demonstrates how that idea can be applied in practice.
 
@@ -48,8 +48,8 @@ The utilities contract and abstraction live in `src/frank`. The rest of the repo
 
 ## Prerequisites
 
-- Python 3.12.5
-- Ollama 0.19.0 or higher (free); or an Azure Foundry Deployment (payment)
+- Python 3.12.10 or higher
+- Ollama 0.20.2 or higher (free); or an Azure Foundry Deployment (payment)
 - pip (Python package manager)
 - uv (install with pip)
 

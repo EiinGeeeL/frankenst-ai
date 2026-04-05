@@ -1,11 +1,15 @@
 from typing import Any
 
+from azure.core.credentials import AzureKeyCredential
+from azure.search.documents import SearchClient
 from langgraph.graph import END, START
+
 from services.foundry.llms import LLMServices
 from frank.entity.edge import ConditionalEdge, SimpleEdge
 from frank.entity.graph_layout import GraphLayout
 from frank.entity.node import SimpleNode
 
+from core.components.retrievers.ai_search_multivector_retriever.ai_search_multivector_retriever import AISearchMultiVectorRetriever
 from core.components.runnables.multimodal_generation.multimodal_generation import MultimodalGeneration
 from core.components.runnables.structured_grade_document.structured_grade_document import StructuredGradeDocument
 from core.components.runnables.rewrite_question.rewrite_question import RewriteQuestion
@@ -15,7 +19,8 @@ from core.components.nodes.enhancers.retrieve_context_ai_search import RetrieveC
 from core.components.nodes.enhancers.rewrite_question_ainvoke import RewriteQuestionAsyncInvoke
 from core.models.structured_output.grade_documents import GradeDocuments
 from core.utils.common import load_node_registry
-from core.constants import *
+from core.utils.key_vault import get_secret
+from core.constants import CONFIG_NODES_FILE_PATH
 
 
 # NOTE: This is an example implementation for illustration purposes
@@ -40,20 +45,32 @@ class AISearchAdaptiveRAGConfigGraph(GraphLayout):
     GENERARION_CHAIN: MultimodalGeneration
     GRADE_STRUCTURED_CHAIN: StructuredGradeDocument
     REWRITE_CHAIN: RewriteQuestion
-    EMBEDDINGS: Any
+    RAW_RETRIEVER: AISearchMultiVectorRetriever
 
     def build_runtime(self) -> dict[str, Any]:
         LLMServices.launch()
 
+        service_endpoint = get_secret("AZURE_SEARCH_SERVICE_ENDPOINT")
+        key = get_secret("AZURE_SEARCH_API_KEY")
+        search_client = SearchClient(
+            service_endpoint,
+            "demo-rag-multimodal-index",
+            AzureKeyCredential(key),
+        )
+        raw_retriever = AISearchMultiVectorRetriever(
+            embeddings=LLMServices.embeddings,
+            search_client=search_client,
+        )
+
         return {
             "CONFIG_NODES": load_node_registry(CONFIG_NODES_FILE_PATH),
+            "RAW_RETRIEVER": raw_retriever,
             "GENERARION_CHAIN": MultimodalGeneration(model=LLMServices.model),
             "GRADE_STRUCTURED_CHAIN": StructuredGradeDocument(
                 model=LLMServices.model,
                 structured_output_schema=GradeDocuments,
             ),
             "REWRITE_CHAIN": RewriteQuestion(model=LLMServices.model),
-            "EMBEDDINGS": LLMServices.embeddings,
         }
 
     def layout(self) -> None:
@@ -64,7 +81,7 @@ class AISearchAdaptiveRAGConfigGraph(GraphLayout):
             tags=[self.CONFIG_NODES["GENERATION_NODE"]["description"]],
         )
         self.RETRIEVER_NODE = SimpleNode(
-            enhancer=RetrieveContextAISearch(embeddings=self.EMBEDDINGS),
+            enhancer=RetrieveContextAISearch(retriever=self.RAW_RETRIEVER),
             name=self.CONFIG_NODES["RETRIEVER_NODE"]["name"],
             tags=[self.CONFIG_NODES["RETRIEVER_NODE"]["description"]],
         )

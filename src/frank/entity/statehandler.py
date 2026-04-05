@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Literal, Any, Optional, Union
+from typing import Any, Optional, Union
 from pydantic import BaseModel
 from langchain_core.messages import AnyMessage
 from langgraph.types import Command
@@ -17,6 +17,9 @@ class StateEvaluator(ABC):
     - Return a short routing key such as `"tools"`, `"rewrite"` or `"end"`.
 
     This contract mirrors the callable passed to `StateGraph.add_conditional_edges()`.
+    Implementations may be synchronous (`def evaluate`) or asynchronous
+    (`async def evaluate`) depending on whether they rely on `invoke()` or
+    `ainvoke()` semantics from LangChain/LangGraph integrations.
     """
 
     def __init__(
@@ -36,6 +39,11 @@ class StateEvaluator(ABC):
 
         The returned value must match one of the keys declared in the
         `ConditionalEdge.map_dict` for the edge that uses this evaluator.
+
+        Although this abstract signature is declared as async for clarity,
+        concrete evaluators in Frankenst-AI may be implemented as synchronous
+        (`def evaluate`) or asynchronous (`async def evaluate`) handlers
+        depending on whether they use `invoke()` or `ainvoke()`.
         """
         pass
 
@@ -50,6 +58,10 @@ class StateEnhancer(ABC):
     In the example graphs, enhancers commonly append new values to `messages`
     and may also add or update scalar keys required by the graph schema, such as
     `question`, `generation` or `iterations`.
+
+    Implementations may be synchronous (`def enhance`) or asynchronous
+    (`async def enhance`) depending on whether they call `invoke()` or
+    `ainvoke()` on their runnable dependencies.
     """
 
     def __init__(
@@ -72,6 +84,11 @@ class StateEnhancer(ABC):
         The returned mapping is merged by LangGraph into the current state. The
         exact keys must be compatible with the graph state schema used when the
         workflow is compiled.
+
+        Although this abstract signature is declared as async for clarity,
+        concrete enhancers in Frankenst-AI may be implemented as synchronous
+        (`def enhance`) or asynchronous (`async def enhance`) handlers
+        depending on whether they use `invoke()` or `ainvoke()`.
         """
         pass
 

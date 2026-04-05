@@ -11,7 +11,7 @@ logging:
 
 ollama:
   # Example: make sure the selected Ollama model is available locally.
-  model:  ministral-3:8b
+  model: ministral-3:8b # gemma4:e4b
   temperature: 0
   embeddings_model: embeddinggemma
 

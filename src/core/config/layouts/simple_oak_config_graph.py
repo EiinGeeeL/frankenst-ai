@@ -13,7 +13,7 @@ from core.components.nodes.enhancers.simple_messages_ainvoke import SimpleMessag
 from core.components.tools.get_evolution.get_evolution_tool import GetEvolutionTool
 from core.components.tools.random_movements.random_movements_tool import RandomMovementsTool
 from core.utils.common import load_node_registry
-from core.constants import *
+from core.constants import CONFIG_NODES_FILE_PATH
 
 
 # NOTE: This is an example implementation for illustration purposes

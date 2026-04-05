@@ -5,10 +5,10 @@ build-backend = "setuptools.build_meta"
 [project]
 dynamic = ["dependencies"]
 name = "frank"
-version = "0.3"
+version = "0.4.0"
 description = "Frank brings order and helps you build complex LLM workflows using scalable, testable, and reusable components."
 readme = { file = "README.md", content-type = "text/markdown" }
-requires-python = ">=3.12.3"
+requires-python = ">=3.12.10"
 authors = [
     { name = "eiingeeel", email = "aangel.maragones@outlook.com" }
 ]
@@ -25,7 +25,20 @@ issues = "https://github.com/eiingeeel/frankenst-ai/issues"
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
+
 [tool.setuptools.packages.find]
-where = ["src"]  # list of folders that contain the packages (["."] by default)
-include = ["**"]  # package names should match these glob patterns (["*"] by default)
-namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
+where = ["src"]
+include = ["**"]
+namespaces = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unit_test"]
+python_files = ["test_*.py"]
+addopts = "-ra"
+# `tests/unit_test/frank` contains the Frankenst-AI patterns suite.
+# `tests/unit_test/core` contains example/reference tests for layouts and
+# runnable builders built on top of the Frankenst-AI patterns.
+markers = [
+    "unit: fast Frankenst-AI contract tests",
+    "integration: compiled workflows and external services (e.g., FastAPI , Microsoft Foundry)",
+]

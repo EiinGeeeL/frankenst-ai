@@ -7,7 +7,7 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.runnables import Runnable
 
 from frank.entity.runnable_builder import RunnableBuilder
-from core.utils.common import load_and_clean_text_file
+from core.utils.common import load_and_clean_text_file, resolve_path_from_module
 
 class MultimodalGeneration(RunnableBuilder):
     logger: logging.Logger = logging.getLogger(__name__.split('.')[-1])
@@ -22,9 +22,9 @@ class MultimodalGeneration(RunnableBuilder):
         question = kwargs["question"]
 
         # Prepare the human_prompt
-        instructions = load_and_clean_text_file('src/core/components/runnables/multimodal_generation/prompt/instructions.txt')
+        instructions = load_and_clean_text_file(resolve_path_from_module(__file__, 'prompt', 'instructions.txt'))
 
-        format_template = load_and_clean_text_file('src/core/components/runnables/multimodal_generation/prompt/format_template.txt')
+        format_template = load_and_clean_text_file(resolve_path_from_module(__file__, 'prompt', 'format_template.txt'))
 
         prompt_template = format_template.format(
             instructions=instructions,
