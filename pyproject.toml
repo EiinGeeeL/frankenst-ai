@@ -8,7 +8,7 @@ name = "frank"
 version = "0.4.0"
 description = "Frank brings order and helps you build complex LLM workflows using scalable, testable, and reusable components."
 readme = { file = "README.md", content-type = "text/markdown" }
-requires-python = ">=3.12.10"
+requires-python = ">=3.12.3"
 authors = [
     { name = "eiingeeel", email = "aangel.maragones@outlook.com" }
 ]

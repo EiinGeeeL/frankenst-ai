@@ -4,7 +4,7 @@ import pytest
 from langchain_core.messages import HumanMessage
 
 from frank.workflow_builder import WorkflowBuilder
-from tests.support.frank_doubles import (
+from tests.support.frank_doubles.fake import (
     CommandAsyncLayout,
     ConditionalAsyncEvaluatorLayout,
     ConditionalAsyncLayout,

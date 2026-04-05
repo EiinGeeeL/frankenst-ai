@@ -27,7 +27,7 @@ class RetrieverPokeSeriex:
         search_client = SearchClient(service_endpoint, index_name, AzureKeyCredential(key))
         
         # Use the retriever
-        retriever = AISearchSimpleSemanticRetriever(search_client=search_client, emmbeddings=LLMServices.embeddings)
+        retriever = AISearchSimpleSemanticRetriever(search_client=search_client, embeddings=LLMServices.embeddings)
 
         results = retriever.retrieve(query)
         return results

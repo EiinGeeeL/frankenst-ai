@@ -5,7 +5,7 @@ from langgraph.prebuilt import ToolNode
 
 from frank.entity.node import CommandNode, SimpleNode
 from frank.managers.node_manager import NodeManager
-from tests.support.frank_doubles import (
+from tests.support.frank_doubles.stub import (
     MissingRoutesCommander,
     RoutingCommander,
     StaticMessageEnhancer,
