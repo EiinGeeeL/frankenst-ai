@@ -1,30 +1,27 @@
-from frank import WorkflowBuilder
-from core.config.layouts.local_vectorstore_adaptive_rag_config_graph import LocalVectorStoreAdaptiveRAGConfigGraph
-from core.models.stategraph.ragstategraph import RAGState
-from core.utils.common import read_yaml
-from core.utils.logger import setup_logging
-from core.constants import CONFIG_FILE_PATH
-
-## Read the config.yaml
-config = read_yaml(CONFIG_FILE_PATH)
-
-## Setup logging Configuration
-setup_logging(config)
-
-## Workflow Configuration for the main graph
-workflow_builder = WorkflowBuilder(
-    config=LocalVectorStoreAdaptiveRAGConfigGraph,
-    state_schema=RAGState,
-)
-ADAPTATIVE_RAG_GRAPH = workflow_builder.compile() # compile the graph
-
 from mcp.server.fastmcp import FastMCP
+
 
 mcp = FastMCP("AdaptativeRAG")
 
 @mcp.tool()
 async def adaptive_rag_tool(input: str) -> str:
     """Tool to use RAG about Pokémon series questions. The input is a question."""
+    from frank import WorkflowBuilder
+    from core.config.layouts.local_vectorstore_adaptive_rag_config_graph import LocalVectorStoreAdaptiveRAGConfigGraph
+    from core.models.stategraph.ragstategraph import RAGState
+    from core.utils.common import read_yaml
+    from core.utils.logger import setup_logging
+    from core.constants import CONFIG_FILE_PATH
+
+    config = read_yaml(CONFIG_FILE_PATH)
+    setup_logging(config)
+
+    workflow_builder = WorkflowBuilder(
+        config=LocalVectorStoreAdaptiveRAGConfigGraph,
+        state_schema=RAGState,
+    )
+    ADAPTATIVE_RAG_GRAPH = workflow_builder.compile()
+
     message_input = {"messages": [{"role": "human", "content": input}]}
     response = await ADAPTATIVE_RAG_GRAPH.ainvoke(message_input)
     return response['messages'][-1].content

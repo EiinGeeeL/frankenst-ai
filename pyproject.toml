@@ -28,7 +28,7 @@ dependencies = {file = ["requirements.txt"]}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["**"]
+include = ["frank", "frank.*"]
 namespaces = false
 
 [tool.pytest.ini_options]

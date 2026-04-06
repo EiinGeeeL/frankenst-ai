@@ -1,9 +1,11 @@
 from mcp.server.fastmcp import FastMCP
 
+
 mcp = FastMCP("OakLangAgent")
 
 @mcp.tool()
-async def oaklang_agent_tool(input: str) -> str:
+async def handoff_oaklang_agent_tool(input: str) -> str:
+    """Tool to use OakLangAgent about any Pokemon question. The input is a question."""
     from frank import WorkflowBuilder
     from core.config.layouts.oak_human_loop_config_graph import OakHumanLoopConfigGraph
     from core.constants import CONFIG_FILE_PATH
