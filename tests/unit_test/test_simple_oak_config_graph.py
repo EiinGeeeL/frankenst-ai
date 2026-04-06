@@ -8,9 +8,9 @@ from core.components.nodes.enhancers.simple_messages_ainvoke import SimpleMessag
 from core.components.runnables.oaklang_agent.oaklang_agent import OakLangAgent
 from core.config.layouts import simple_oak_config_graph as simple_oak_module
 from core.models.stategraph.stategraph import SharedState
+from frank import WorkflowBuilder
 from frank.entity.edge import ConditionalEdge, SimpleEdge
 from frank.entity.node import SimpleNode
-from frank.workflow_builder import WorkflowBuilder
 from tests.support.core_doubles import ToolBindingFakeModel
 
 

@@ -1,25 +1,29 @@
 FROM mcr.microsoft.com/azure-functions/python:4-python3.12
 
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
-    AzureFunctionsJobHost__Logging__Console__IsEnabled=true
+    AzureFunctionsJobHost__Logging__Console__IsEnabled=true \
+    PATH="/home/.local/bin:$PATH"
 
-# Install system dependencies
-RUN apt-get update -y && \
-    apt-get install -y \
-    unixodbc \
-    && apt-get clean
-
-# Define build arguments
 ARG AZURE_KEY_VAULT_NAME
 
-# Set environment variables
 ENV AZURE_KEY_VAULT_NAME=$AZURE_KEY_VAULT_NAME
 
-# Install requirements
-COPY requirements.txt /
-RUN pip install -r requirements.txt
+# Install system dependencies and uv
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+        unixodbc \
+        curl \
+        ca-certificates && \
+    curl -fsSL https://astral.sh/uv/install.sh | sh && \
+    apt-get purge -y --auto-remove curl && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy the entire project
+# Install Python requirements
+COPY requirements.txt /requirements.txt
+RUN uv pip install --system -r /requirements.txt
+
+# Prepare the function app
+WORKDIR /home/site/wwwroot
 COPY . /home/site/wwwroot
 
 # Move the src modules and the functions app core to the wwwroot and clean up

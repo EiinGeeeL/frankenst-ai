@@ -32,12 +32,15 @@ include = ["**"]
 namespaces = false
 
 [tool.pytest.ini_options]
-testpaths = ["tests/unit_test"]
+testpaths = ["tests/unit_test", "tests/integration_test"]
+pythonpath = ["."]
 python_files = ["test_*.py"]
 addopts = "-ra"
 # `tests/unit_test/frank` contains the Frankenst-AI patterns suite.
 # `tests/unit_test/core` contains example/reference tests for layouts and
 # runnable builders built on top of the Frankenst-AI patterns.
+# `tests/integration_test` contains smoke coverage for compiled workflows and
+# packaging-adjacent execution flows that should run in the default suite.
 markers = [
     "unit: fast Frankenst-AI contract tests",
     "integration: compiled workflows and external services (e.g., FastAPI , Microsoft Foundry)",

@@ -118,7 +118,7 @@ To run the project:
 #### Minimal WorkflowBuilder Example
 
 ```python
-from frank.workflow_builder import WorkflowBuilder
+from frank import WorkflowBuilder
 from core.config.layouts.simple_oak_config_graph import SimpleOakConfigGraph
 from core.models.stategraph.stategraph import SharedState
 
@@ -130,12 +130,22 @@ workflow_builder = WorkflowBuilder(
 graph = workflow_builder.compile()
 ```
 
+## Running Tests
+
+Use the root pytest entrypoint:
+
+```bash
+pytest -q
+```
+
+`python -m pytest -q` should behave the same way, but `pytest -q` is the canonical local and CI command.
+
 ## Local Functions Apps Container 
 - Start your Function App Container recipes: 
 ```bash 
 docker build <build args -> build-and-push-acr.yml> mylocalfunction:0.1 . 
-docker run -d -p 8080:80 
-mylocalfunction:0.1 docker logs <container_id>  
+docker run -d -p 8080:80 mylocalfunction:0.1
+docker logs <container_id>  
 ```
 
 - Docker deep debug recipes: 

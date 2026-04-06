@@ -1,8 +1,6 @@
 import logging
 import inspect
 from typing import Type, Any, Optional
-from IPython.display import Image, display
-from langchain_core.runnables.graph import MermaidDrawMethod
 from langgraph.graph import StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from frank.entity.graph_layout import GraphLayout
@@ -54,18 +52,27 @@ class WorkflowBuilder:
         self._ensure_workflow_configured()
         return self.workflow.compile(checkpointer=self.memory)
     
-    def display_graph(self, save: bool = False, filepath: str = "graph.png") -> Image:
+    def display_graph(self, save: bool = False, filepath: str = "graph.png") -> None:
         """
         Display the compiled graph or save as a PNG image.
         """
+        try:
+            from IPython.display import Image, display
+            from langchain_core.runnables.graph import MermaidDrawMethod
+        except ImportError as exc:
+            raise ImportError(
+                "display_graph() requires notebook dependencies to render Mermaid diagrams."
+            ) from exc
+
         temp_graph = self.compile()
         img_data = temp_graph.get_graph().draw_mermaid_png(draw_method=MermaidDrawMethod.API,)
 
         if save:
             with open(filepath, "wb") as f:
                 f.write(img_data)
-        else:
-            return display(Image(img_data))
+            return
+
+        display(Image(img_data))
 
     def _ensure_workflow_configured(self) -> None:
         """Configure the workflow once before any compile or visualization step."""

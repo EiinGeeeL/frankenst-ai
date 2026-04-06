@@ -1,5 +1,5 @@
 import yaml
-import os
+from importlib import import_module
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -132,6 +132,53 @@ def resolve_path_from_module(module_file: str | Path, *relative_parts: str) -> P
     return Path(module_file).resolve().parent.joinpath(*relative_parts)
 
 
+def _get_core_constants_module():
+    try:
+        return import_module("core.constants")
+    except ImportError:
+        return None
+
+
+def get_project_root_path() -> Path:
+    """Return the configured project root or fall back to the repository root."""
+
+    fallback = Path(__file__).resolve().parents[3]
+    constants_module = _get_core_constants_module()
+    configured_path = getattr(constants_module, "PROJECT_ROOT_PATH", None) if constants_module else None
+
+    return Path(configured_path).expanduser().resolve() if configured_path else fallback
+
+
+def get_default_artifacts_directory() -> Path:
+    """Return the default artifacts directory, using constants only when available."""
+
+    project_root_path = get_project_root_path()
+    constants_module = _get_core_constants_module()
+    configured_path = getattr(constants_module, "ARTIFACTS_DIRECTORY_PATH", None) if constants_module else None
+
+    return Path(configured_path).expanduser().resolve() if configured_path else project_root_path / "artifacts"
+
+
+def get_default_logs_directory() -> Path:
+    """Return the default logs directory, using constants only when available."""
+
+    project_root_path = get_project_root_path()
+    constants_module = _get_core_constants_module()
+    configured_path = getattr(constants_module, "LOGS_DIRECTORY_PATH", None) if constants_module else None
+
+    return Path(configured_path).expanduser().resolve() if configured_path else project_root_path / "logs"
+
+
+def resolve_configured_path(path_value: str | Path, base_dir: str | Path) -> Path:
+    """Resolve an absolute or base-dir-relative path from configuration."""
+
+    path = Path(path_value).expanduser()
+    if path.is_absolute():
+        return path
+
+    return Path(base_dir).expanduser().resolve() / path
+
+
 def load_and_clean_text_file(file_path: str | Path, remove_empty_lines: bool = False) -> str:
     try:
         path = Path(file_path).expanduser()
@@ -145,30 +192,29 @@ def load_and_clean_text_file(file_path: str | Path, remove_empty_lines: bool = F
     except FileNotFoundError:
         raise FileNotFoundError(f"Not found the file <{file_path}>.")
     
-def save_text_to_artifact(content: str, filename: str = None) -> None:
-    # Get the current working directory
-    current_dir = os.getcwd()
+def save_text_to_artifact(
+    content: str,
+    filename: str | None = None,
+    artifacts_dir: str | Path | None = None,
+) -> Path:
+    project_root_path = get_project_root_path()
+    target_dir = resolve_configured_path(
+        artifacts_dir if artifacts_dir is not None else get_default_artifacts_directory(),
+        project_root_path,
+    )
+    target_dir.mkdir(parents=True, exist_ok=True)
 
-    # Create 'artifacts' directory if it doesn't exist
-    artifacts_dir = 'artifacts'
-    os.makedirs(artifacts_dir, exist_ok=True)
-    
-    # Generate a filename if not provided
     if filename is None:
-        # Use only the last part of the directory path
-        safe_dir_name = current_dir.split('\\')[-1].replace(' ', '_')
-        filename = f"artifact_{safe_dir_name}.txt"
-    else:
-        # Ensure the filename ends with .txt
-        if not filename.endswith('.txt'):
-            filename += '.txt'
+        filename = f"artifact_{project_root_path.name}.txt"
+    elif not filename.endswith('.txt'):
+        filename += '.txt'
 
-    # Create the full file path
-    file_path = os.path.join(artifacts_dir, filename)
+    file_path = target_dir / filename
 
-    # Save the string to the file
     with open(file_path, 'w', encoding='utf-8') as f:
         f.write(content)
+
+    return file_path
 
 async def print_process_astream(graph: CompiledStateGraph, message_input: dict, runnable_config: Optional[RunnableConfig] = None):
     events = []

@@ -3,7 +3,7 @@ import asyncio
 import pytest
 from langchain_core.messages import HumanMessage
 
-from frank.workflow_builder import WorkflowBuilder
+from frank import WorkflowBuilder
 from tests.support.frank_doubles.fake import (
     CommandAsyncLayout,
     ConditionalAsyncEvaluatorLayout,
@@ -13,6 +13,11 @@ from tests.support.frank_doubles.fake import (
     LinearSyncLayout,
     ToolLoopLayout,
 )
+
+
+@pytest.mark.unit
+def test_public_api_shortcuts_are_importable() -> None:
+    assert WorkflowBuilder is not None
 
 
 @pytest.mark.unit

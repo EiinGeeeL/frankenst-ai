@@ -1,9 +1,9 @@
-from frank.workflow_builder import WorkflowBuilder
+from frank import WorkflowBuilder
 from core.config.layouts.local_vectorstore_adaptive_rag_config_graph import LocalVectorStoreAdaptiveRAGConfigGraph
 from core.models.stategraph.ragstategraph import RAGState
 from core.utils.common import read_yaml
 from core.utils.logger import setup_logging
-from core.constants import *
+from core.constants import CONFIG_FILE_PATH
 
 ## Read the config.yaml
 config = read_yaml(CONFIG_FILE_PATH)
