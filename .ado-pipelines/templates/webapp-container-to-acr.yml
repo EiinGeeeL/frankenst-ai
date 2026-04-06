@@ -14,7 +14,7 @@ parameters:
 
 steps:
   - task: AzureRmWebAppDeployment@5
-    displayName: Azure App Service Deploy
+    displayName: Azure App Service Deploy to ACR
     continueOnError: false
     inputs:
       appType: webAppContainer

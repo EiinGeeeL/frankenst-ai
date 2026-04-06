@@ -8,11 +8,15 @@ parameters:
   - name: environment
     type: string
     displayName: Environment name
+  - name: context_path
+    type: string
+    default: '.'
+  - name: dockerfile
+    type: string
+    default: 'src/Dockerfile'
   - name: image_name
-    displayName: ACR image image name for the deployment of Function App
     type: string
   - name: service_connection
-    displayName: Resource Manager Service Connection Name
     type: string
 
 jobs:
@@ -21,29 +25,29 @@ jobs:
     pool:
       name: ${{ parameters.capability }}
     steps:
-      - checkout: self
       - template: install-az-cli.yml
       - template: build-and-push-acr.yml
         parameters:
-          context_path: '.'
-          dockerfile: 'src/services/functions/Dockerfile'
+          context_path: ${{ parameters.context_path }}
+          dockerfile: ${{ parameters.dockerfile }}
           image_name: ${{ parameters.image_name }}
           tag_version: '$(Build.BuildId)'
           build_args:
             AZURE_KEY_VAULT_NAME: '$(azure_key_vault_name)'
           service_connection: ${{ parameters.service_connection }}
 
-  - deployment: DeployFunctionAppImage
+  - deployment: DeployWebAppContainer
     dependsOn: BuildImage
     environment: ${{ parameters.environment }}
-    displayName: Deploy Image to Function App
+    displayName: Deploy Image to App Service
     pool:
       name: ${{ parameters.capability }}
     strategy:
       runOnce:
         deploy:
           steps:
-            - template: function-app-to-acr.yml
+            - template: webapp-container-to-acr.yml
               parameters:
-                image_name: '$(azure_container_registry_name).azurecr.io/${{ parameters.image_name }}/${{ parameters.image_name }}:$(Build.BuildId)'
+                webapp_name: '$(azure_webapp_service_name)'
+                image_name: '${{ parameters.image_name }}/${{ parameters.image_name }}:$(Build.BuildId)'
                 service_connection: ${{ parameters.service_connection }}

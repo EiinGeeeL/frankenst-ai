@@ -10,6 +10,7 @@ parameters:
 steps:
   - task: AzureFunctionAppContainer@1
     displayName: Function App to ACR
+    continueOnError: false
     inputs:
       azureSubscription: ${{ parameters.service_connection }}
       appName: $(azure_function_app_name)
