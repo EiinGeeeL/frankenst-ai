@@ -1,0 +1,3 @@
+# Exclude exploratory notebooks from GitHub Linguist language statistics.
+research/*.ipynb linguist-documentation=true
+research/**/*.ipynb linguist-documentation=true
