@@ -3,9 +3,11 @@ import sys
 
 from langchain_core.messages import AIMessage, HumanMessage
 
-from core.components.runnables.oaklang_agent.oaklang_agent import OakLangAgent
-from core.components.tools.get_evolution.get_evolution_tool import GetEvolutionTool
-from core.components.tools.random_movements.random_movements_tool import RandomMovementsTool
+from core_examples.constants import CONFIG_FILE_PATH
+from core_examples.components.runnables.oaklang_agent.oaklang_agent import OakLangAgent
+from core_examples.components.tools.get_evolution.get_evolution_tool import GetEvolutionTool
+from core_examples.components.tools.random_movements.random_movements_tool import RandomMovementsTool
+from core_examples.utils.common import read_yaml, resolve_package_resource, load_and_clean_text_file
 from tests.support.core_doubles import ToolBindingFakeModel
 
 
@@ -42,12 +44,34 @@ def test_oaklang_agent_build_prompt_loads_runtime_prompt_assets_outside_repo_roo
 
 def test_core_config_paths_resolve_outside_repo_root(monkeypatch, tmp_path) -> None:
     monkeypatch.chdir(tmp_path)
-    sys.modules.pop("core.constants", None)
+    sys.modules.pop("core_examples.constants", None)
 
-    core_constants = importlib.import_module("core.constants")
+    core_constants = importlib.import_module("core_examples.constants")
 
     assert core_constants.CONFIG_FILE_PATH.is_file()
     assert core_constants.CONFIG_NODES_FILE_PATH.is_file()
+
+
+def test_core_config_can_be_read_as_package_resource_outside_repo_root(monkeypatch, tmp_path) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    config = read_yaml(CONFIG_FILE_PATH)
+
+    assert config["logging"]["log_file"] == "graph.log"
+
+
+def test_oaklang_prompt_resource_can_be_loaded_without_module_file_paths(monkeypatch, tmp_path) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    context = load_and_clean_text_file(
+        resolve_package_resource(
+            "core_examples.components.runnables.oaklang_agent",
+            "prompt",
+            "context.txt",
+        ),
+    )
+
+    assert "Professor Oak" in context
 
 
 def test_oaklang_agent_binds_tools_and_returns_model_response() -> None:

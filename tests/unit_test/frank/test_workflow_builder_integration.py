@@ -1,9 +1,17 @@
 import asyncio
+import frank
 
 import pytest
 from langchain_core.messages import HumanMessage
 
 from frank import WorkflowBuilder
+from frank.entity.edge import ConditionalEdge, SimpleEdge
+from frank.entity.graph_layout import GraphLayout
+from frank.entity.node import CommandNode, SimpleNode
+from frank.entity.runnable_builder import RunnableBuilder
+from frank.entity.statehandler import StateCommander, StateEnhancer, StateEvaluator
+from frank.managers.edge_manager import EdgeManager
+from frank.managers.node_manager import NodeManager
 from tests.support.frank_doubles.fake import (
     CommandAsyncLayout,
     ConditionalAsyncEvaluatorLayout,
@@ -18,6 +26,32 @@ from tests.support.frank_doubles.fake import (
 @pytest.mark.unit
 def test_public_api_shortcuts_are_importable() -> None:
     assert WorkflowBuilder is not None
+
+
+@pytest.mark.unit
+def test_frank_root_only_exposes_workflow_builder_shortcut() -> None:
+    assert frank.__all__ == ["WorkflowBuilder"]
+    assert frank.WorkflowBuilder is WorkflowBuilder
+    assert not hasattr(frank, "GraphLayout")
+    assert not hasattr(frank, "SimpleNode")
+    assert not hasattr(frank, "SimpleEdge")
+    assert not hasattr(frank, "StateEnhancer")
+    assert not hasattr(frank, "NodeManager")
+
+
+@pytest.mark.unit
+def test_frank_reusable_contracts_are_imported_from_submodules() -> None:
+    assert GraphLayout is not None
+    assert SimpleNode is not None
+    assert CommandNode is not None
+    assert SimpleEdge is not None
+    assert ConditionalEdge is not None
+    assert StateEnhancer is not None
+    assert StateEvaluator is not None
+    assert StateCommander is not None
+    assert RunnableBuilder is not None
+    assert NodeManager is not None
+    assert EdgeManager is not None
 
 
 @pytest.mark.unit

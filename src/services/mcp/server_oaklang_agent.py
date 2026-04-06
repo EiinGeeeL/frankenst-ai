@@ -7,11 +7,11 @@ mcp = FastMCP("OakLangAgent")
 async def handoff_oaklang_agent_tool(input: str) -> str:
     """Tool to use OakLangAgent about any Pokemon question. The input is a question."""
     from frank import WorkflowBuilder
-    from core.config.layouts.oak_human_loop_config_graph import OakHumanLoopConfigGraph
-    from core.constants import CONFIG_FILE_PATH
-    from core.models.stategraph.stategraph import SharedState
-    from core.utils.common import read_yaml
-    from core.utils.logger import setup_logging
+    from core_examples.config.layouts.oak_human_loop_config_graph import OakHumanLoopConfigGraph
+    from core_examples.constants import CONFIG_FILE_PATH
+    from core_examples.models.stategraph.stategraph import SharedState
+    from core_examples.utils.common import read_yaml
+    from core_examples.utils.logger import setup_logging
 
     config = read_yaml(CONFIG_FILE_PATH)
     setup_logging(config)

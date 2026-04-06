@@ -1,4 +1,4 @@
-from core.components.tools.retriever_pokeseriex.retriever_pokeseriex import RetrieverPokeSeriex
+from core_examples.components.tools.retriever_pokeseriex.retriever_pokeseriex import RetrieverPokeSeriex
 
 class Orchestrator:
     def run(query: str):

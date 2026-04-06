@@ -1,0 +1,20 @@
+langchain
+PyYAML
+requests
+azure-functions
+azure-keyvault-secrets
+azure-identity
+azure-search-documents
+azure-storage-blob
+langchain-azure-ai[opentelemetry]
+langchain-chroma
+langchain-classic
+langchain_mcp_adapters
+mcp
+Pillow
+tenacity
+# unstructured[local-inference] # for complex document parsing
+unstructured[pdf]
+ipykernel
+ipywidgets
+matplotlib

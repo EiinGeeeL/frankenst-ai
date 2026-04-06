@@ -1,9 +1,9 @@
 import logging
 from pathlib import Path
 
-import core.utils.common as common_module
-import core.utils.logger as logger_module
-import core.utils.rag.local_chroma as local_chroma_module
+import core_examples.utils.common as common_module
+import core_examples.utils.logger as logger_module
+import core_examples.utils.rag.local_chroma as local_chroma_module
 
 
 def test_resolve_configured_path_uses_base_dir_for_relative_paths(tmp_path: Path) -> None:

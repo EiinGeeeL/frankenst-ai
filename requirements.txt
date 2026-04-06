@@ -1,22 +1,4 @@
-azure-functions
-azure-keyvault-secrets
-azure-identity
-azure-search-documents
-azure-storage-blob
-PyYAML
-pytest
-matplotlib
-ipywidgets
-ipykernel
-setuptools
-# unstructured[local-inference] # for complex document parsing
-unstructured[pdf]
-tenacity
-langgraph
-langchain
-langchain-classic
-langchain-chroma
-langchain-ollama
-langchain-azure-ai[opentelemetry]
-langchain_mcp_adapters
-mcp
+-r requirements-frank-base.txt
+-r requirements-examples-azure.txt
+-r requirements-examples-ollama.txt
+-r requirements-dev.txt

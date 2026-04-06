@@ -1,0 +1,15 @@
+langchain
+PyYAML
+requests
+langchain-ollama
+langchain-chroma
+langchain-classic
+langchain_mcp_adapters
+mcp
+Pillow
+tenacity
+# unstructured[local-inference] # for complex document parsing
+unstructured[pdf]
+ipykernel
+ipywidgets
+matplotlib

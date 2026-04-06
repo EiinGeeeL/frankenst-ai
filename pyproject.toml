@@ -3,9 +3,9 @@ requires = ["setuptools>=78.1.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-dynamic = ["dependencies"]
+dynamic = ["dependencies", "optional-dependencies"]
 name = "frank"
-version = "0.4.0"
+version = "0.5.0"
 description = "Frank brings order and helps you build complex LLM workflows using scalable, testable, and reusable components."
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.12.3"
@@ -24,12 +24,19 @@ homepage = "https://github.com/eiingeeel/frankenst-ai"
 issues = "https://github.com/eiingeeel/frankenst-ai/issues"
 
 [tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
+dependencies = { file = ["requirements-frank-base.txt"] }
+
+[tool.setuptools.dynamic.optional-dependencies]
+examples-azure = { file = ["requirements-examples-azure.txt"] }
+examples-ollama = { file = ["requirements-examples-ollama.txt"] }
+dev = { file = ["requirements-dev.txt"] }
 
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["frank", "frank.*"]
 namespaces = false
+# The published base wheel intentionally contains only `frank`.
+# `core_examples` remains the documented reference package of this repository.
 
 [tool.pytest.ini_options]
 testpaths = ["tests/unit_test", "tests/integration_test"]
@@ -37,7 +44,7 @@ pythonpath = ["."]
 python_files = ["test_*.py"]
 addopts = "-ra"
 # `tests/unit_test/frank` contains the Frankenst-AI patterns suite.
-# `tests/unit_test/core` contains example/reference tests for layouts and
+# `tests/unit_test/core_examples` contains example/reference tests for layouts and
 # runnable builders built on top of the Frankenst-AI patterns.
 # `tests/integration_test` contains smoke coverage for compiled workflows and
 # packaging-adjacent execution flows that should run in the default suite.

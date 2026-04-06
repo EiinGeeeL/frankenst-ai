@@ -7,11 +7,11 @@ mcp = FastMCP("AdaptativeRAG")
 async def adaptive_rag_tool(input: str) -> str:
     """Tool to use RAG about Pokémon series questions. The input is a question."""
     from frank import WorkflowBuilder
-    from core.config.layouts.local_vectorstore_adaptive_rag_config_graph import LocalVectorStoreAdaptiveRAGConfigGraph
-    from core.models.stategraph.ragstategraph import RAGState
-    from core.utils.common import read_yaml
-    from core.utils.logger import setup_logging
-    from core.constants import CONFIG_FILE_PATH
+    from core_examples.config.layouts.local_vectorstore_adaptive_rag_config_graph import LocalVectorStoreAdaptiveRAGConfigGraph
+    from core_examples.models.stategraph.ragstategraph import RAGState
+    from core_examples.utils.common import read_yaml
+    from core_examples.utils.logger import setup_logging
+    from core_examples.constants import CONFIG_FILE_PATH
 
     config = read_yaml(CONFIG_FILE_PATH)
     setup_logging(config)
