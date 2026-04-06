@@ -22,30 +22,34 @@ steps:
       scriptType: bash
       scriptLocation: inlineScript
       inlineScript: |
+        set -euo pipefail
+
         imageName=${{ parameters.image_name }}
         imageTag=${{ parameters.tag_version }}
         imageDefinition=$imageName:$imageTag
-        containerRegistry=$(azure_container_registry_name).azurecr.io
+        registryName=$(azure_container_registry_name)
+        containerRegistry=${registryName}.azurecr.io
         registry=$containerRegistry/$imageName
 
-        echo "Building environment: '$imageName' into docker image '$imageDefinition'"
+        echo "Building environment: '$imageName' into docker image"
 
         echo "Listing available images"
         docker image ls
 
         echo "Log in against ACR"
-        az acr login --name $containerRegistry
+        az acr login --name $registryName
 
         echo "Building Dockerfile"
-        
-        # Build the build-args string dynamically
-        BUILD_ARGS=""
-        ${{ each arg in parameters.build_args }}:
-        BUILD_ARGS="$BUILD_ARGS --build-arg ${{ arg.key }}='${{ arg.value }}'"
-        ${{ end }}
+
+        # Build the build-args array dynamically from injected env
+        BUILD_ARGS=()
+        while IFS='=' read -r env_var value; do
+          arg_key="${env_var#BUILD_ARG_}"
+          BUILD_ARGS+=(--build-arg "${arg_key}=${value}")
+        done < <(env | awk -F= '/^BUILD_ARG_/ { print $0 }' | sort)
         
         docker build -f ${{ parameters.dockerfile }} \
-          $BUILD_ARGS \
+          "${BUILD_ARGS[@]}" \
           -t $registry/$imageDefinition \
           ${{ parameters.context_path }}
 
@@ -57,3 +61,6 @@ steps:
 
         echo "List remaining images after build"
         docker image ls
+    env:
+      ${{ each arg in parameters.build_args }}:
+        BUILD_ARG_${{ arg.key }}: ${{ arg.value }}

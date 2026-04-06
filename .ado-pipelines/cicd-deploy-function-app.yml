@@ -27,6 +27,7 @@ stages:
   - template: templates/deploy-function-app-container.yml
     parameters:
       capability: ${{ variables.ap_pool_name }}
+      environment: ${{ parameters.environment }}
       image_name: my-mcps-function-app
       service_connection: ${{ variables.ado_service_connection_rg_dev }}
 
@@ -38,7 +39,8 @@ stages:
 #   jobs:
 #   - template: templates/deploy-function-app-container.yml
 #     parameters:
-#       capability: ${{ variables.ap_pool_name }}    
+#       capability: ${{ variables.ap_pool_name }}
+#       environment: ${{ parameters.environment }}
 #       image_name: my-mcps-function-app
 #       service_connection: ${{ variables.ado_service_connection_rg_pre }}
 
@@ -50,6 +52,7 @@ stages:
 #   jobs:
 #   - template: templates/deploy-function-app-container.yml
 #     parameters:
-#       capability: ${{ variables.ap_pool_name }}    
+#       capability: ${{ variables.ap_pool_name }}
+#       environment: ${{ parameters.environment }}    
 #       image_name: my-mcps-function-app
 #       service_connection: ${{ variables.ado_service_connection_rg_pro }}

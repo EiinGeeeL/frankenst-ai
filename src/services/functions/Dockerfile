@@ -1,12 +1,12 @@
 FROM mcr.microsoft.com/azure-functions/python:4-python3.12
 
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
-    AzureFunctionsJobHost__Logging__Console__IsEnabled=true \
-    PATH="/home/.local/bin:$PATH"
+    AzureFunctionsJobHost__Logging__Console__IsEnabled=true
 
+# Define build arguments and set environment variables
 ARG AZURE_KEY_VAULT_NAME
 
-ENV AZURE_KEY_VAULT_NAME=$AZURE_KEY_VAULT_NAME
+ENV AZURE_KEY_VAULT_NAME=${AZURE_KEY_VAULT_NAME}
 
 # Install system dependencies and uv
 RUN apt-get update -y && \
@@ -17,16 +17,16 @@ RUN apt-get update -y && \
     curl -fsSL https://astral.sh/uv/install.sh | sh && \
     apt-get purge -y --auto-remove curl && \
     rm -rf /var/lib/apt/lists/*
+ENV PATH="/home/.local/bin:$PATH"
 
 # Install Python requirements
 COPY requirements.txt /requirements.txt
 RUN uv pip install --system -r /requirements.txt
 
-# Prepare the function app
-WORKDIR /home/site/wwwroot
+# Prepare Function App
 COPY . /home/site/wwwroot
 
-# Move the src modules and the functions app core to the wwwroot and clean up
+# Move src modules and Function App core to the wwwroot and clean up
 RUN mv /home/site/wwwroot/src/services/functions/* /home/site/wwwroot/ && \
     mv /home/site/wwwroot/src/* /home/site/wwwroot/ && \
     rm -rf /home/site/wwwroot/src

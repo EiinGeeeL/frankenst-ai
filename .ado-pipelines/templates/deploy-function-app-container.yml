@@ -2,6 +2,9 @@ parameters:
 - name: capability
   displayName: Requested agent capability
   type: string
+- name: environment
+  displayName: Environment name 
+  type: string
 - name: image_name
   displayName: ACR image name for the deployment of Function App
   type: string
@@ -11,6 +14,7 @@ parameters:
 
 jobs:
   - deployment: DeployFunctionAppImageACR
+    environment: ${{ parameters.environment }}
     pool:
       name: ${{ parameters.capability }}
     strategy:
@@ -27,7 +31,6 @@ jobs:
             tag_version: '$(Build.BuildId)'
             build_args:
               AZURE_KEY_VAULT_NAME: '$(azure_key_vault_name)'
-              AZURE_BLOB_STORAGE_NAME: '$(azure_blob_storage_name)'
             service_connection: ${{ parameters.service_connection }}
         - template: function-app-for-acr.yml
           parameters:
