@@ -25,7 +25,7 @@ issues = "https://github.com/eiingeeel/frankenst-ai/issues"
 repository = "https://github.com/eiingeeel/frankenst-ai"
 
 [tool.setuptools.dynamic]
-dependencies = { file = ["requirements-frank-base.txt"] }
+dependencies = { file = ["requirements-frankstate-core.txt"] }
 
 [tool.setuptools.dynamic.optional-dependencies]
 examples = { file = ["requirements-examples.txt"] }
@@ -35,7 +35,7 @@ dev = { file = ["requirements-dev.txt"] }
 where = ["src"]
 include = ["frankstate", "frankstate.*"]
 namespaces = false
-# The published base wheel intentionally contains only `frankstate`.
+# The published core wheel intentionally contains only `frankstate`.
 # `core_examples` remains the documented reference package of this repository.
 
 [tool.pytest.ini_options]
