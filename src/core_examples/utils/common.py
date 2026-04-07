@@ -97,8 +97,10 @@ def read_yaml(path_to_yaml: str | Path | Traversable) -> Optional[Dict]:
         raise FileNotFoundError(f"The configuration file '{path_to_yaml}' does not exist.")
     except yaml.YAMLError as e:
         raise yaml.YAMLError(f"Error parsing YAML file {e}")
-    except Exception as e:
-        raise Exception(f"An unexpected error occurred {e}")
+    except (KeyError, ValueError):
+        raise
+    except OSError as exc:
+        raise RuntimeError(f"Unable to read configuration file '{path_to_yaml}'") from exc
     
 def load_node_registry(path_to_yaml: str | Path | Traversable) -> dict[str, dict]:
     """Read config_nodes.yml and return a dict keyed by node ``id``.
@@ -229,5 +231,8 @@ async def print_process_astream(graph: CompiledStateGraph, message_input: dict, 
         events.append(event)
         print(event)
         print("\n")
+
+    if not events:
+        raise ValueError("Graph stream produced no events.")
 
     return events[-1]

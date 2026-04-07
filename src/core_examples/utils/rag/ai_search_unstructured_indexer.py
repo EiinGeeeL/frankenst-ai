@@ -251,17 +251,20 @@ class AISearchMultiVectorDocumentIndexer:
                     doc_type = content_type
                     summary = summaries_list[i]
                     embeddings_summary = embeddings_summaries_list[i]
+                    metadata: Dict[str, Any] = {}
 
                     # Metadatos opcionales
                     try:
+                        chunk_metadata = getattr(chunk, "metadata", None)
+                        languages = getattr(chunk_metadata, "languages", None) or ["und"]
                         metadata = {
-                            "languages": ",".join(getattr(chunk.metadata, "languages", ["und"])),
+                            "languages": ",".join(languages),
                             "last_modified": dt.datetime.now(dt.UTC),
-                            "page_number": getattr(chunk.metadata, "page_number", 1),
-                            "file_directory": getattr(chunk.metadata, "file_directory", None),
+                            "page_number": getattr(chunk_metadata, "page_number", 1),
+                            "file_directory": getattr(chunk_metadata, "file_directory", None),
                             "filename": os.path.basename(self.file_path),
-                            "filetype": getattr(chunk.metadata, "filetype", None),
-                            "uri": f"https://www.devops.wiki/{getattr(chunk.metadata, "filename", None)}" # TODO: improve dinamic url
+                            "filetype": getattr(chunk_metadata, "filetype", None),
+                            "uri": f"https://www.devops.wiki/{getattr(chunk_metadata, 'filename', None)}" # TODO: improve dinamic url
                         }
                         # Eliminar claves con valor None
                         metadata = {k: v for k, v in metadata.items() if v is not None}

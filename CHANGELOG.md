@@ -18,6 +18,6 @@ phase while the public packaging and repository boundaries continue to mature.
 - The public distribution, package directory and import surface now use `frankstate`.
 - `pyproject.toml` now uses SPDX-style `license = "MIT"` metadata.
 - Audit updated to remove findings already resolved in the repository root.
-- Installation docs now use the quoted extras form `'.[examples, dev]'` when keeping spaces after the comma.
+- Installation docs now use the standard unquoted extras form `.[examples,dev]`.
 - Release automation now targets setuptools-based builds instead of Poetry.
-- Minor fix base to core
+- Minor fix: requirements reference now points from `requirements-frankstate-base.txt` to `requirements-frankstate-core.txt`.

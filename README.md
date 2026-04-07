@@ -88,57 +88,63 @@ If you are evaluating or reusing Frankenst-AI, start with `src/frankstate`, then
 
 ## Installation
 
-1. Clone the repository
+Choose one of these two installation paths depending on what you need.
+
+### Option A. Install the published package `frankstate`
+
+Use this option when you only want the reusable public package published on PyPI.
+
+- With `pip` installer:
+```pip install frankstate```
+- With `uv` installer:
+```python -m uv pip install frankstate```
+
+
+(Optional) `examples` extra dependencies:
+
+- With `pip` installer:
+```pip install frankstate[examples]```
+- With `uv` installer:
+```python -m uv pip install frankstate[examples]```
+
+
+This option installs only the published `frankstate` wheel.
+It does not install the repository reference package under `src/core_examples`, the service layer under `src/services`, or the repository tests.
+The `examples` extra only adds optional dependencies; it does not install the repository example code.
+
+### Option B. Clone and install the repository
+
+Use this option when you want the full mono-repo, including `src/core_examples`, prompt assets, tests and local development tooling.
+
+1. Clone the repository.
 
 2. Create a virtual environment:
 
-    ```python3 -m venv .venv```
+    ```bash
+    python -m venv .venv
+    ```
 
 3. Activate the virtual environment:
-- On Windows:
-  ```.venv\Scripts\activate```
-- On macOS and Linux:
-  ```source .venv/bin/activate```
+    - On Windows:
+    ```.venv\Scripts\activate```
+    - On macOS and Linux:
+    ```source .venv/bin/activate```
 
-4. Install the project:
-
-    Published package from PyPI:
+4. Install the repository in editable mode:
 
     ```bash
-    pip install frankstate
+    python -m uv pip install -e .
     ```
 
-    Published package with optional dependency profile:
+5. If you also want the repository examples and development dependencies:
 
     ```bash
-    pip install 'frankstate[examples]'
+    python -m uv pip install -e .[examples,dev]
     ```
 
-    Local editable install from the repository:
+6. (Optional) System packages for the example/document-processing stack:
 
-    ```bash
-    python3 -m uv pip install -e .
     ```
-
-    Local editable install with examples and development dependencies:
-
-    ```bash
-    python3 -m uv pip install -e '.[examples, dev]'
-    ```
-
-    `frankstate` is both the distribution name used by `pip` and the public import surface:
-
-    ```python
-    from frankstate import WorkflowBuilder
-    ```
-
-    In this first public packaging phase, the published wheel still contains only `frankstate`.
-    The `examples` extra adds optional dependencies used by the reference assets in this
-    repository; it does not make `core_examples` or `services` part of the base installed
-    wheel from PyPI.
-
-5. (Optional) Install system packages for the example extras:
-    ```bash
     sudo apt update
     sudo apt-get install poppler-utils
     sudo apt install tesseract-ocr
@@ -153,14 +159,10 @@ To run the project locally:
    Choose one of the following options:
 
    #### 1.1 Using a local model with Ollama
-   Start the Ollama service by running:
-   
-   ```ollama run ministral-3:8b```
+   Start the Ollama service: ```ollama run ministral-3:8b```
   
    #### 1.2 Using Azure AI Foundry Deployment
-    Configure your model variables in `.env`:
-
-    ```cp .env.example .env```
+    Configure your model variables in `.env`: ```cp .env.example .env```
 2. Compile Graph Layouts with WorkflowBuilder
     
     The minimal example below uses the reference package under `src/core_examples` to show how `src/frankstate` is consumed in a real project.
@@ -196,17 +198,14 @@ workflow_builder = WorkflowBuilder(
 graph = workflow_builder.compile()
 ```
 
-`graph` is still a LangGraph graph object produced through LangGraph's own runtime.
+The `graph` is still a LangGraph graph object produced through LangGraph's own runtime.
 
 ## Running Tests
 
-Use the root pytest entrypoint:
-
-```bash
-pytest -q
-```
-
-`python -m pytest -q` should behave the same way, but `pytest -q` is the canonical local and CI command.
+- Using the pytest CLI:
+```pytest -q```
+- Using pytest as a Python module:
+```python -m pytest -q```
 
 ## Local Functions Apps Container 
 - `src/services/functions/function_app.py` is an Azure Functions App Containers packaging
@@ -215,22 +214,22 @@ pytest -q
     `/home/site/wwwroot`.
 
 - Start your Function App Container recipes: 
-```bash 
-docker build <build args -> build-and-push-acr.yml> mylocalfunction:0.1 . 
-docker run -d -p 8080:80 mylocalfunction:0.1
-docker logs <container_id>  
-```
+    ```bash 
+    docker build <build args -> build-and-push-acr.yml> mylocalfunction:0.1 . 
+    docker run -d -p 8080:80 mylocalfunction:0.1
+    docker logs <container_id>  
+    ```
 
 - Docker deep debug recipes: 
-```bash 
-docker exec -it <container_id> /bin/bash 
-apt-get update 
-apt-get install azure-functions-core-tools-4 
-apt-get install azure-cli 
-cd /home/site/wwwroot 
-az login 
-func start --verbose
-```
+    ```bash 
+    docker exec -it <container_id> /bin/bash 
+    apt-get update 
+    apt-get install azure-functions-core-tools-4 
+    apt-get install azure-cli 
+    cd /home/site/wwwroot 
+    az login 
+    func start --verbose
+    ```
 
 ## Repository Structure
 
@@ -278,10 +277,6 @@ frankenst-ai/
 └── logs/                    # Log files and runtime logs
 ```
 
-## Notes For Contributors
+## Contributing
 
-- Prefer adding documentation close to the contract it explains: docstrings in `src/frankstate`, comments in YAML and examples in layout classes.
-- When a component reads or writes new state keys, document that change in the state schema and in the component docstring.
-- Keep project abstractions aligned with official LangGraph terminology to avoid confusion in new layouts.
-- Treat `src/core_examples` as the repository's reference package for the project's pattern and `research` as exploratory support material.
-- Treat `src/services` as repository integration code, not as an extension of the public `frankstate` API.
+See `CONTRIBUTING.md` for repository boundaries, local setup, documentation conventions and pull request expectations.

@@ -1,9 +1,35 @@
 import base64
+import binascii
 import io
 from typing import Any
 
 from PIL import Image
 from langchain_core.documents import Document
+
+
+def _extract_base64_image_payload(doc: Any) -> str | None:
+    """Return a normalized base64 payload only when the input is a valid image."""
+
+    if isinstance(doc, bytes):
+        try:
+            candidate = doc.decode("ascii")
+        except UnicodeDecodeError:
+            return None
+    elif isinstance(doc, str):
+        candidate = doc
+    else:
+        return None
+
+    payload = candidate.split(",", 1)[1] if candidate.startswith("data:image") and "," in candidate else candidate
+
+    try:
+        image_data = base64.b64decode(payload, validate=True)
+        with Image.open(io.BytesIO(image_data)) as image:
+            image.verify()
+    except (binascii.Error, ValueError, OSError):
+        return None
+
+    return payload
 
 def parse_docs(docs: list[Any]) -> dict[str, list[Any]]:
     """Split retrieved multimodal documents into image payloads and text payloads."""
@@ -19,10 +45,10 @@ def parse_docs(docs: list[Any]) -> dict[str, list[Any]]:
                 text.append(doc)
             continue
 
-        try:
-            base64.b64decode(doc)
-            b64.append(doc)
-        except Exception:
+        image_payload = _extract_base64_image_payload(doc)
+        if image_payload is not None:
+            b64.append(image_payload)
+        else:
             text.append(doc)
     return {"images": b64, "texts": text}
 

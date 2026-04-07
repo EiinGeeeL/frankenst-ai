@@ -291,7 +291,10 @@ class LangChainMultiVectorDocumentIndexer:
             MultiVectorRetriever: Ready-to-query retriever.
         """
 
-        if any(self.elements['texts']) or any(self.summaries['texts']):
+        has_elements = any(self.elements.get(content_type) for content_type in ("texts", "tables", "images"))
+        has_summaries = any(self.summaries.get(content_type) for content_type in ("texts", "tables", "images"))
+
+        if has_elements or has_summaries:
             return self.retriever
         else:
             raise ValueError("Not chunks detected. If already exist in store/vectorstore please use get_prebuild_retriever.")

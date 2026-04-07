@@ -92,3 +92,7 @@ class HumanReviewSensitiveToolCall(StateCommander):
 
             return Command(goto=self.routes["enhancer"], update={"messages": all_tool_messages})
 
+        raise ValueError(
+            f"Unsupported human review action '{review_action}'. Expected: continue, feedback."
+        )
+
