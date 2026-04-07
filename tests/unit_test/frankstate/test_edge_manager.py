@@ -1,8 +1,8 @@
 import pytest
 
-from frank.entity.edge import ConditionalEdge, SimpleEdge
-from frank.managers.edge_manager import EdgeManager
-from tests.support.frank_doubles.stub import FieldRouteEvaluator
+from frankstate.entity.edge import ConditionalEdge, SimpleEdge
+from frankstate.managers.edge_manager import EdgeManager
+from tests.support.frankstate_doubles.stub import FieldRouteEvaluator
 
 
 @pytest.mark.unit

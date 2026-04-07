@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, Iterable, Tuple, Type, Union
-from frank.entity.edge import SimpleEdge, ConditionalEdge
-from frank.entity.statehandler import StateEvaluator
+from frankstate.entity.edge import SimpleEdge, ConditionalEdge
+from frankstate.entity.statehandler import StateEvaluator
 
 class EdgeManager:
     """Store graph edges and expose them in the format expected by LangGraph.

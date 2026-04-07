@@ -3,9 +3,9 @@ import asyncio
 import pytest
 from langgraph.prebuilt import ToolNode
 
-from frank.entity.node import CommandNode, SimpleNode
-from frank.managers.node_manager import NodeManager
-from tests.support.frank_doubles.stub import (
+from frankstate.entity.node import CommandNode, SimpleNode
+from frankstate.managers.node_manager import NodeManager
+from tests.support.frankstate_doubles.stub import (
     MissingRoutesCommander,
     RoutingCommander,
     StaticMessageEnhancer,

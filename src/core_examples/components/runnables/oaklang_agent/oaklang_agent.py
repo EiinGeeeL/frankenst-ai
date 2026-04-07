@@ -14,7 +14,7 @@ from langchain_core.tools import BaseTool
 from .history_template import history_template
 from .fewshot_examples import few_shot_examples
 
-from frank.entity.runnable_builder import RunnableBuilder
+from frankstate.entity.runnable_builder import RunnableBuilder
 from core_examples.utils.common import load_and_clean_text_file, resolve_package_resource
 
 class OakLangAgent(RunnableBuilder):

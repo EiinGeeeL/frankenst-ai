@@ -4,7 +4,7 @@ from langchain_core.messages import AIMessage
 from langchain_core.tools import tool
 from langgraph.types import Command
 
-from frank.entity.statehandler import StateCommander, StateEnhancer, StateEvaluator
+from frankstate.entity.statehandler import StateCommander, StateEnhancer, StateEvaluator
 
 
 class StaticMessageEnhancer(StateEnhancer):

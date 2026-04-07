@@ -4,7 +4,7 @@ from langchain_core.retrievers import BaseRetriever
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.runnables import Runnable
 
-from frank.entity.runnable_builder import RunnableBuilder
+from frankstate.entity.runnable_builder import RunnableBuilder
 from core_examples.utils.rag.processing import parse_docs, parse_context
 
 

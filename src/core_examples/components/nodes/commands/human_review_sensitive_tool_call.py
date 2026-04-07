@@ -4,7 +4,7 @@ from langchain_core.messages import AnyMessage
 from langchain_core.tools import BaseTool
 from langgraph.types import Command, interrupt
 
-from frank.entity.node import StateCommander
+from frankstate.entity.node import StateCommander
 
 
 class HumanReviewSensitiveToolCall(StateCommander):

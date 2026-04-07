@@ -1,4 +1,4 @@
-from frank.entity.statehandler import StateEnhancer, StateCommander
+from frankstate.entity.statehandler import StateEnhancer, StateCommander
 
 class BaseNode:
     """Base named node definition consumed by GraphLayout and NodeManager.

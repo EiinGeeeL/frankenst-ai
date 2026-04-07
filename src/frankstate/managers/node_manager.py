@@ -2,8 +2,8 @@ import logging
 from typing import Any
 from typing import Iterable, Tuple, Union
 from langgraph.prebuilt import ToolNode
-from frank.entity.node import BaseNode, SimpleNode, CommandNode
-from frank.entity.statehandler import StateCommander, StateEnhancer
+from frankstate.entity.node import BaseNode, SimpleNode, CommandNode
+from frankstate.entity.statehandler import StateCommander, StateEnhancer
 
 class NodeManager:
     """Store graph node definitions and expose them in `StateGraph` format.

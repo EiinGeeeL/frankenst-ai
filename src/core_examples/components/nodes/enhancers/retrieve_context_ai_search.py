@@ -3,7 +3,7 @@ from typing import Any, Union
 from pydantic import BaseModel
 from langchain_core.messages import AnyMessage
 
-from frank.entity.statehandler import StateEnhancer
+from frankstate.entity.statehandler import StateEnhancer
 
 
 class RetrieveContextAISearch(StateEnhancer):

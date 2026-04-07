@@ -4,9 +4,9 @@ from typing import Any, get_type_hints
 
 from langgraph.prebuilt import ToolNode
 
-from frank.entity.edge import BaseEdge
-from frank.entity.node import BaseNode
-from frank.entity.runnable_builder import RunnableBuilder
+from frankstate.entity.edge import BaseEdge
+from frankstate.entity.node import BaseNode
+from frankstate.entity.runnable_builder import RunnableBuilder
 
 class GraphLayout(ABC):
     """Base contract for all Frankenst-AI graph layouts.

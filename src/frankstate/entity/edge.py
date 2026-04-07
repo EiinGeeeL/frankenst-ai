@@ -1,5 +1,5 @@
 from typing import Union, Literal, Dict
-from frank.entity.statehandler import StateEvaluator
+from frankstate.entity.statehandler import StateEvaluator
 
 class BaseEdge():
     """Base edge definition storing the source node name."""

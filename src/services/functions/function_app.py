@@ -1,10 +1,17 @@
 import azure.functions as func
-from get_evolution_mcptool.function import bp_1
-from indexer_pokeseriex_eventgrid.function import bp_2
-from retriever_pokeseriex_mcptool.function import bp_3
-# from example4.function import bp_4
 
-# Define the main app
+try:
+    from get_evolution_mcptool.function import bp_1
+    from indexer_pokeseriex_eventgrid.function import bp_2
+    from retriever_pokeseriex_mcptool.function import bp_3
+except ModuleNotFoundError as exc:
+    raise ModuleNotFoundError(
+        "This module is part of an Azure Functions packaging artifact "
+        "and is not importable directly from the source tree. Use "
+        "the container flow defined in src/services/functions/Dockerfile."
+    ) from exc
+
+
 app = func.FunctionApp()
 
 # Register all the Blueprint apps

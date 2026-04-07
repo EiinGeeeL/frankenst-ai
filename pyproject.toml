@@ -4,9 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 dynamic = ["dependencies", "optional-dependencies"]
-name = "frank"
-version = "0.5.0"
+name = "frankstate"
+version = "0.0.1"
 description = "Frank brings order and helps you build complex LLM workflows using scalable, testable, and reusable components."
+license = "MIT"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.12.3"
 authors = [
@@ -14,7 +15,6 @@ authors = [
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent"
 ]
 keywords = ["LLM", "azure", "langgraph", "langchain", "azure-ai-foundry", "unstructured", "multimodal"]
@@ -22,20 +22,20 @@ keywords = ["LLM", "azure", "langgraph", "langchain", "azure-ai-foundry", "unstr
 [project.urls]
 homepage = "https://github.com/eiingeeel/frankenst-ai"
 issues = "https://github.com/eiingeeel/frankenst-ai/issues"
+repository = "https://github.com/eiingeeel/frankenst-ai"
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements-frank-base.txt"] }
 
 [tool.setuptools.dynamic.optional-dependencies]
-examples-azure = { file = ["requirements-examples-azure.txt"] }
-examples-ollama = { file = ["requirements-examples-ollama.txt"] }
+examples = { file = ["requirements-examples.txt"] }
 dev = { file = ["requirements-dev.txt"] }
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["frank", "frank.*"]
+include = ["frankstate", "frankstate.*"]
 namespaces = false
-# The published base wheel intentionally contains only `frank`.
+# The published base wheel intentionally contains only `frankstate`.
 # `core_examples` remains the documented reference package of this repository.
 
 [tool.pytest.ini_options]
@@ -43,7 +43,7 @@ testpaths = ["tests/unit_test", "tests/integration_test"]
 pythonpath = ["."]
 python_files = ["test_*.py"]
 addopts = "-ra"
-# `tests/unit_test/frank` contains the Frankenst-AI patterns suite.
+# `tests/unit_test/frankstate` contains the Frankstate patterns suite.
 # `tests/unit_test/core_examples` contains example/reference tests for layouts and
 # runnable builders built on top of the Frankenst-AI patterns.
 # `tests/integration_test` contains smoke coverage for compiled workflows and

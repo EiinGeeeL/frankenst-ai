@@ -1,7 +1,7 @@
 from typing import Literal, Any, Union
 from pydantic import BaseModel
 from langchain_core.messages import AnyMessage
-from frank.entity.statehandler import StateEvaluator
+from frankstate.entity.statehandler import StateEvaluator
 from typing import Literal
 
 class RouteHumanNode(StateEvaluator):

@@ -20,8 +20,10 @@ RUN apt-get update -y && \
 ENV PATH="/home/.local/bin:$PATH"
 
 # Install Python requirements
-COPY requirements.txt /requirements.txt
-RUN uv pip install --system -r /requirements.txt
+COPY requirements*.txt /tmp/requirements/
+RUN uv pip install --system -r /tmp/requirements/requirements.txt \
+    && rm -rf /tmp/requirements
+
 
 # Prepare Function App
 COPY . /home/site/wwwroot

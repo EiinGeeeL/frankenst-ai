@@ -3,9 +3,9 @@ from typing import Any
 from langgraph.graph import END, START
 from langgraph.prebuilt import ToolNode
 from services.foundry.llms import LLMServices
-from frank.entity.edge import ConditionalEdge, SimpleEdge
-from frank.entity.graph_layout import GraphLayout
-from frank.entity.node import SimpleNode
+from frankstate.entity.edge import ConditionalEdge, SimpleEdge
+from frankstate.entity.graph_layout import GraphLayout
+from frankstate.entity.node import SimpleNode
 
 from core_examples.components.runnables.oaklang_agent.oaklang_agent import OakLangAgent
 from core_examples.components.edges.evaluators.route_tool_condition import RouteToolCondition

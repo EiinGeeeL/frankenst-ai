@@ -8,9 +8,9 @@ from core_examples.components.nodes.enhancers.simple_messages_ainvoke import Sim
 from core_examples.components.runnables.oaklang_agent.oaklang_agent import OakLangAgent
 from core_examples.config.layouts import simple_oak_config_graph as simple_oak_module
 from core_examples.models.stategraph.stategraph import SharedState
-from frank import WorkflowBuilder
-from frank.entity.edge import ConditionalEdge, SimpleEdge
-from frank.entity.node import SimpleNode
+from frankstate import WorkflowBuilder
+from frankstate.entity.edge import ConditionalEdge, SimpleEdge
+from frankstate.entity.node import SimpleNode
 from tests.support.core_doubles import ToolBindingFakeModel
 
 

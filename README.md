@@ -30,49 +30,58 @@ These names are project abstractions, but the compiled graph still relies on
 
 In other words, Frankenst-AI helps you structure and assemble LangGraph workflows; it does not introduce a separate graph runtime.
 
-## Frank Public API
+## Runtime Support
 
-The root package `frank` intentionally exposes only one shortcut:
+Frankstate currently supports LangGraph as its implemented workflow runtime.
+
+The abstractions in this repository are intentionally being shaped so they can
+grow beyond a single runtime, and Microsoft Agent Framework is a planned future
+integration direction. That future support does not exist yet in the published
+package, examples or tests.
+
+## Frankstate Public API
+
+The root package `frankstate` intentionally exposes only one shortcut:
 
 ```python
-from frank import WorkflowBuilder
+from frankstate import WorkflowBuilder
 ```
 
 That root import is reserved for the main assembly entrypoint.
 
 All other reusable contracts should be imported from their concrete modules,
-not from `frank.__init__`. For example:
+not from `frankstate.__init__`. For example:
 
 ```python
-from frank.entity.graph_layout import GraphLayout
-from frank.entity.node import SimpleNode, CommandNode
-from frank.entity.edge import SimpleEdge, ConditionalEdge
-from frank.entity.statehandler import StateEnhancer, StateEvaluator, StateCommander
-from frank.entity.runnable_builder import RunnableBuilder
-from frank.managers.node_manager import NodeManager
-from frank.managers.edge_manager import EdgeManager
+from frankstate.entity.graph_layout import GraphLayout
+from frankstate.entity.node import SimpleNode, CommandNode
+from frankstate.entity.edge import SimpleEdge, ConditionalEdge
+from frankstate.entity.statehandler import StateEnhancer, StateEvaluator, StateCommander
+from frankstate.entity.runnable_builder import RunnableBuilder
+from frankstate.managers.node_manager import NodeManager
+from frankstate.managers.edge_manager import EdgeManager
 ```
 
-This keeps `frank` root stable and prevents it from turning into an absolute import bucket for every internal type.
+This keeps `frankstate` root stable and prevents it from turning into an absolute import bucket for every internal type.
 
 ## Repository Shape
 
 This mono-repo has four layers with different responsibilities:
 
-- `src/frank` is the reusable pattern layer. It contains the assembly utilities and contracts used to structure LangGraph projects with consistent design rules.
-- `src/core_examples` is the repository's importable reference package. It demonstrates one concrete way to organize layouts, state models, components, YAML configuration and prompt assets on top of `frank`.
+- `src/frankstate` is the reusable pattern layer. It contains the assembly utilities and contracts used to structure LangGraph projects with consistent design rules.
+- `src/core_examples` is the repository's importable reference package. It demonstrates one concrete way to organize layouts, state models, components, YAML configuration and prompt assets on top of `frankstate`.
 - `src/services` is the service and integration layer. It contains runtime-specific entrypoints such as MCP servers, Azure Functions handlers and shared provider adapters used by the repository.
 - `research` is exploratory material. The notebooks are useful to understand how layouts are compiled and exercised, but they are not part of the project's contractual surface.
 
-`src/core_examples` is supported as the repository reference package, but it is not the stable public API of the published base `frank` wheel. `src/services` is repository integration code, not an extension of the `frank` public API.
+`src/core_examples` is supported as the repository reference package, but it is not the stable public API of the published base `frankstate` wheel. `src/services` is repository integration code, not an extension of the `frankstate` public API.
 
-The published base wheel intentionally contains only `frank`. `core_examples` and `services` remain repository-level layers with different responsibilities.
+The published base wheel intentionally contains only `frankstate`. `core_examples` and `services` remain repository-level layers with different responsibilities.
 
-If you are evaluating or reusing Frankenst-AI, start with `src/frank`, then move to `src/core_examples` for the concrete reference package, and only read `src/services` when you need repository runtime entrypoints or shared provider adapters.
+If you are evaluating or reusing Frankenst-AI, start with `src/frankstate`, then move to `src/core_examples` for the concrete reference package, and only read `src/services` when you need repository runtime entrypoints or shared provider adapters.
 
 ## Prerequisites
 
-- Python 3.12.10 or higher
+- Python 3.12.3 or higher
 - Ollama 0.20.2 or higher (free); or an Azure Foundry Deployment (payment)
 - pip (Python package manager)
 - uv (install with pip)
@@ -93,23 +102,40 @@ If you are evaluating or reusing Frankenst-AI, start with `src/frank`, then move
 
 4. Install the project:
 
-    Minimal `frank` install:
+    Published package from PyPI:
 
-    ```python3 -m uv pip install -e .```
+    ```bash
+    pip install frankstate
+    ```
 
-    Reference implementation on Azure:
+    Published package with optional dependency profile:
 
-    ```python3 -m uv pip install -e .[examples-azure]```
+    ```bash
+    pip install 'frankstate[examples]'
+    ```
 
-    Reference implementation with Ollama:
+    Local editable install from the repository:
 
-    ```python3 -m uv pip install -e .[examples-ollama]```
+    ```bash
+    python3 -m uv pip install -e .
+    ```
 
-    Development environment:
+    Local editable install with examples and development dependencies:
 
-    ```python3 -m uv pip install -e .[examples-ollama,dev]```
+    ```bash
+    python3 -m uv pip install -e '.[examples, dev]'
+    ```
 
-    These extras install the dependency profiles used by the `core_examples` reference package and related repo entrypoints. The stable reusable API remains `frank`.
+    `frankstate` is both the distribution name used by `pip` and the public import surface:
+
+    ```python
+    from frankstate import WorkflowBuilder
+    ```
+
+    In this first public packaging phase, the published wheel still contains only `frankstate`.
+    The `examples` extra adds optional dependencies used by the reference assets in this
+    repository; it does not make `core_examples` or `services` part of the base installed
+    wheel from PyPI.
 
 5. (Optional) Install system packages for the example extras:
     ```bash
@@ -137,7 +163,7 @@ To run the project locally:
     ```cp .env.example .env```
 2. Compile Graph Layouts with WorkflowBuilder
     
-    The minimal example below uses the reference package under `src/core_examples` to show how `src/frank` is consumed in a real project.
+    The minimal example below uses the reference package under `src/core_examples` to show how `src/frankstate` is consumed in a real project.
 
     Reference layouts now follow a two-step contract:
 
@@ -149,7 +175,7 @@ To run the project locally:
 
     In that example:
 
-    - `WorkflowBuilder` is part of the reusable pattern in `src/frank`.
+    - `WorkflowBuilder` is part of the reusable pattern in `src/frankstate`.
     - `SimpleOakConfigGraph` and `SharedState` are concrete reference classes from `src/core_examples`.
     - In your own project, those `src/core_examples` imports would be replaced by your own layouts and state schemas.
 
@@ -158,7 +184,7 @@ To run the project locally:
 #### Minimal WorkflowBuilder Example
 
 ```python
-from frank import WorkflowBuilder
+from frankstate import WorkflowBuilder
 from core_examples.config.layouts.simple_oak_config_graph import SimpleOakConfigGraph
 from core_examples.models.stategraph.stategraph import SharedState
 
@@ -183,6 +209,11 @@ pytest -q
 `python -m pytest -q` should behave the same way, but `pytest -q` is the canonical local and CI command.
 
 ## Local Functions Apps Container 
+- `src/services/functions/function_app.py` is an Azure Functions App Containers packaging
+    artifact. It is not a reusable Python module from the source tree and is
+    expected to load only after the container build reshapes the filesystem under
+    `/home/site/wwwroot`.
+
 - Start your Function App Container recipes: 
 ```bash 
 docker build <build args -> build-and-push-acr.yml> mylocalfunction:0.1 . 
@@ -208,12 +239,12 @@ frankenst-ai/
 ├── main.py                  # Local entry point to assemble and compile graph layouts
 ├── app.py                   # Optional deployment-facing wrapper entry point
 ├── requirements.txt         # Aggregate dependency set for the full repository environment
-├── requirements-*.txt       # Dependency profiles split into base frank, example backends and dev
+├── requirements-*.txt       # Dependency profiles split into base frankstate, example backends and dev
 ├── .env                     # Environment variables for local configuration; .env.example for reference
 ├── README.md                # Main project documentation
 ├── src/
 │   ├── services/            # Service entrypoints plus shared provider adapters used by the repository
-│   ├── core_examples/       # Importable reference package showing how to structure a real LangGraph project using `frank` utilities
+│   ├── core_examples/       # Importable reference package showing how to structure a real LangGraph project using `frankstate`
 │   │   ├── components/
 │   │   │   ├── nodes/
 │   │   │   │   ├── enhancers/        # StateEnhancers for simple node logic modifying StateGraph via runnables or custom modules
@@ -230,7 +261,7 @@ frankenst-ai/
 │   │   ├── constants/           
 │   │   ├── models/                   # Structural models: StateGraph, tool properties, structured outputs, etc.
 │   │   └── utils/                  
-│   └── frank/               # Frank utilities for assembling and compiling LangGraph
+│   └── frankstate/          # Frankstate utilities for assembling and compiling LangGraph
 │       ├── entity/
 │       │   ├── graph_layout.py       # Base GraphLayout contract: build runtime first, then declare nodes and edges
 │       │   ├── runnable_builder.py   # Builder class for LangChain Runnable objects
@@ -249,8 +280,8 @@ frankenst-ai/
 
 ## Notes For Contributors
 
-- Prefer adding documentation close to the contract it explains: docstrings in `src/frank`, comments in YAML and examples in layout classes.
+- Prefer adding documentation close to the contract it explains: docstrings in `src/frankstate`, comments in YAML and examples in layout classes.
 - When a component reads or writes new state keys, document that change in the state schema and in the component docstring.
 - Keep project abstractions aligned with official LangGraph terminology to avoid confusion in new layouts.
 - Treat `src/core_examples` as the repository's reference package for the project's pattern and `research` as exploratory support material.
-- Treat `src/services` as repository integration code, not as an extension of the public `frank` API.
+- Treat `src/services` as repository integration code, not as an extension of the public `frankstate` API.

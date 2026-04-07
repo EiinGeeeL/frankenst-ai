@@ -3,12 +3,12 @@ from typing import Any
 from langgraph.graph import END, START, MessagesState
 from langgraph.prebuilt import ToolNode
 
-from frank.entity.edge import ConditionalEdge, SimpleEdge
-from frank.entity.graph_layout import GraphLayout
-from frank.entity.node import CommandNode, SimpleNode
-from frank.entity.runnable_builder import RunnableBuilder
-from tests.support.frank_doubles.spy import SpyRunnable
-from tests.support.frank_doubles.stub import (
+from frankstate.entity.edge import ConditionalEdge, SimpleEdge
+from frankstate.entity.graph_layout import GraphLayout
+from frankstate.entity.node import CommandNode, SimpleNode
+from frankstate.entity.runnable_builder import RunnableBuilder
+from tests.support.frankstate_doubles.spy import SpyRunnable
+from tests.support.frankstate_doubles.stub import (
     AsyncFieldRouteEvaluator,
     FieldRouteEvaluator,
     RoutingCommander,

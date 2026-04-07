@@ -3,7 +3,7 @@ from typing import Any, Optional, Union
 from pydantic import BaseModel
 from langchain_core.messages import AnyMessage
 from langgraph.types import Command
-from frank.entity.runnable_builder import RunnableBuilder
+from frankstate.entity.runnable_builder import RunnableBuilder
 
 class StateEvaluator(ABC):
     """Base contract for conditional routing in a LangGraph StateGraph.

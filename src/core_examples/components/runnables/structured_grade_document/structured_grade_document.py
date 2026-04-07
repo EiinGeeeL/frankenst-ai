@@ -7,7 +7,7 @@ from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.language_models import BaseLanguageModel
 
-from frank.entity.runnable_builder import RunnableBuilder
+from frankstate.entity.runnable_builder import RunnableBuilder
 
 from core_examples.utils.common import load_and_clean_text_file, resolve_package_resource
 

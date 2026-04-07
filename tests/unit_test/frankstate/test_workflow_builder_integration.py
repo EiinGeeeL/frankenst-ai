@@ -1,18 +1,18 @@
 import asyncio
-import frank
+import frankstate
 
 import pytest
 from langchain_core.messages import HumanMessage
 
-from frank import WorkflowBuilder
-from frank.entity.edge import ConditionalEdge, SimpleEdge
-from frank.entity.graph_layout import GraphLayout
-from frank.entity.node import CommandNode, SimpleNode
-from frank.entity.runnable_builder import RunnableBuilder
-from frank.entity.statehandler import StateCommander, StateEnhancer, StateEvaluator
-from frank.managers.edge_manager import EdgeManager
-from frank.managers.node_manager import NodeManager
-from tests.support.frank_doubles.fake import (
+from frankstate import WorkflowBuilder
+from frankstate.entity.edge import ConditionalEdge, SimpleEdge
+from frankstate.entity.graph_layout import GraphLayout
+from frankstate.entity.node import CommandNode, SimpleNode
+from frankstate.entity.runnable_builder import RunnableBuilder
+from frankstate.entity.statehandler import StateCommander, StateEnhancer, StateEvaluator
+from frankstate.managers.edge_manager import EdgeManager
+from frankstate.managers.node_manager import NodeManager
+from tests.support.frankstate_doubles.fake import (
     CommandAsyncLayout,
     ConditionalAsyncEvaluatorLayout,
     ConditionalAsyncLayout,
@@ -29,18 +29,18 @@ def test_public_api_shortcuts_are_importable() -> None:
 
 
 @pytest.mark.unit
-def test_frank_root_only_exposes_workflow_builder_shortcut() -> None:
-    assert frank.__all__ == ["WorkflowBuilder"]
-    assert frank.WorkflowBuilder is WorkflowBuilder
-    assert not hasattr(frank, "GraphLayout")
-    assert not hasattr(frank, "SimpleNode")
-    assert not hasattr(frank, "SimpleEdge")
-    assert not hasattr(frank, "StateEnhancer")
-    assert not hasattr(frank, "NodeManager")
+def test_frankstate_root_only_exposes_workflow_builder_shortcut() -> None:
+    assert frankstate.__all__ == ["WorkflowBuilder"]
+    assert frankstate.WorkflowBuilder is WorkflowBuilder
+    assert not hasattr(frankstate, "GraphLayout")
+    assert not hasattr(frankstate, "SimpleNode")
+    assert not hasattr(frankstate, "SimpleEdge")
+    assert not hasattr(frankstate, "StateEnhancer")
+    assert not hasattr(frankstate, "NodeManager")
 
 
 @pytest.mark.unit
-def test_frank_reusable_contracts_are_imported_from_submodules() -> None:
+def test_frankstate_reusable_contracts_are_imported_from_submodules() -> None:
     assert GraphLayout is not None
     assert SimpleNode is not None
     assert CommandNode is not None

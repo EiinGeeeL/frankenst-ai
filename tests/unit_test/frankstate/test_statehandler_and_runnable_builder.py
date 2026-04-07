@@ -2,8 +2,8 @@ import asyncio
 
 import pytest
 
-from tests.support.frank_doubles.fake import FakeRunnableBuilder, FakeVectorStore
-from tests.support.frank_doubles.stub import (
+from tests.support.frankstate_doubles.fake import FakeRunnableBuilder, FakeVectorStore
+from tests.support.frankstate_doubles.stub import (
     AsyncFieldRouteEvaluator,
     FieldRouteEvaluator,
     RoutingCommander,

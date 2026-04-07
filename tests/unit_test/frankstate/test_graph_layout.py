@@ -1,10 +1,10 @@
 import pytest
 
-from frank.entity.edge import SimpleEdge
-from frank.entity.graph_layout import GraphLayout
-from frank.entity.node import SimpleNode
-from tests.support.frank_doubles.fake import FakeRunnableBuilder
-from tests.support.frank_doubles.stub import StaticMessageEnhancer
+from frankstate.entity.edge import SimpleEdge
+from frankstate.entity.graph_layout import GraphLayout
+from frankstate.entity.node import SimpleNode
+from tests.support.frankstate_doubles.fake import FakeRunnableBuilder
+from tests.support.frankstate_doubles.stub import StaticMessageEnhancer
 
 
 class OrderedLayout(GraphLayout):

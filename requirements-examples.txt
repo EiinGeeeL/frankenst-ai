@@ -10,6 +10,7 @@ langchain-azure-ai[opentelemetry]
 langchain-chroma
 langchain-classic
 langchain_mcp_adapters
+langchain-ollama
 mcp
 Pillow
 tenacity

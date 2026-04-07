@@ -4,9 +4,9 @@ from langchain_core.retrievers import BaseRetriever
 
 from langgraph.graph import END, START
 from services.foundry.llms import LLMServices
-from frank.entity.edge import ConditionalEdge, SimpleEdge
-from frank.entity.graph_layout import GraphLayout
-from frank.entity.node import SimpleNode
+from frankstate.entity.edge import ConditionalEdge, SimpleEdge
+from frankstate.entity.graph_layout import GraphLayout
+from frankstate.entity.node import SimpleNode
 
 from core_examples.components.retrievers.langchain_chroma_multivector_retriever.langchain_chroma_multivector_retriever import LangchainChromaMultiVectorRetriever
 from core_examples.components.runnables.multimodal_retriever.multimodal_retriever import MultimodalRetriever

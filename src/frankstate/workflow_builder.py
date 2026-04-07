@@ -3,9 +3,9 @@ import inspect
 from typing import Type, Any, Optional
 from langgraph.graph import StateGraph
 from langgraph.graph.state import CompiledStateGraph
-from frank.entity.graph_layout import GraphLayout
-from frank.managers.edge_manager import EdgeManager
-from frank.managers.node_manager import NodeManager
+from frankstate.entity.graph_layout import GraphLayout
+from frankstate.managers.edge_manager import EdgeManager
+from frankstate.managers.node_manager import NodeManager
 from langgraph.checkpoint.base import BaseCheckpointSaver
 
 class WorkflowBuilder:

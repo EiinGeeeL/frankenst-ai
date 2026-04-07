@@ -1,4 +1,3 @@
 -r requirements-frank-base.txt
--r requirements-examples-azure.txt
--r requirements-examples-ollama.txt
+-r requirements-examples.txt
 -r requirements-dev.txt
