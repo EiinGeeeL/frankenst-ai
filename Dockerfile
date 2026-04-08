@@ -16,11 +16,10 @@ RUN apt-get update -y && \
 	curl -fsSL https://astral.sh/uv/install.sh | sh && \
 	apt-get purge -y --auto-remove curl && \
 	rm -rf /var/lib/apt/lists/*
-
-ENV PATH="/root/.local/bin:$PATH"
+ENV PATH="/root/.local/bin:/home/.local/bin:$PATH"
 
 COPY requirements*.txt /tmp/requirements/
-RUN uv pip install --system -r /tmp/requirements/requirements.txt \
+RUN uv pip install --system --no-cache -r /tmp/requirements/requirements.txt \
     && rm -rf /tmp/requirements
 
 COPY . /app

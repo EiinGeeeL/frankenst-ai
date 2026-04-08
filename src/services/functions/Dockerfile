@@ -17,18 +17,14 @@ RUN apt-get update -y && \
     curl -fsSL https://astral.sh/uv/install.sh | sh && \
     apt-get purge -y --auto-remove curl && \
     rm -rf /var/lib/apt/lists/*
-ENV PATH="/home/.local/bin:$PATH"
+ENV PATH="/root/.local/bin:/home/.local/bin:$PATH"
 
 # Install Python requirements
 COPY requirements*.txt /tmp/requirements/
-RUN uv pip install --system -r /tmp/requirements/requirements.txt \
+RUN uv pip install --system --no-cache -r /tmp/requirements/requirements.txt \
     && rm -rf /tmp/requirements
 
-
 # Prepare Function App
-COPY . /home/site/wwwroot
-
-# Move src modules and Function App core to the wwwroot and clean up
+COPY src/ /home/site/wwwroot
 RUN mv /home/site/wwwroot/src/services/functions/* /home/site/wwwroot/ && \
-    mv /home/site/wwwroot/src/* /home/site/wwwroot/ && \
-    rm -rf /home/site/wwwroot/src
+    rm -rf /home/site/wwwroot/services/functions
