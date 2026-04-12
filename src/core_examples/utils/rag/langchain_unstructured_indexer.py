@@ -2,7 +2,7 @@ import os
 import base64
 import io
 import uuid
-from typing import Optional, Any
+from typing import Any
 
 from PIL import Image
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
@@ -34,9 +34,9 @@ class LangChainMultiVectorDocumentIndexer:
         llm: BaseLanguageModel,
         llm_multimodal: BaseLanguageModel,
         vectorstore: VectorStore,
-        store: Optional[BaseStore] = None,
+        store: BaseStore | None = None,
         id_key: str = "doc_id",
-        metadata_retriever: Optional[dict] = None
+        metadata_retriever: dict[str, Any] | None = None,
     ):
         """
         Initializes the MultiVectorDocumentIndexer.
@@ -57,8 +57,8 @@ class LangChainMultiVectorDocumentIndexer:
         self.metadata_retriever = metadata_retriever
 
         # Internal state
-        self.retriever: Optional[MultiVectorRetriever] = None
-        self.file_path: Optional[str] = None
+        self.retriever: MultiVectorRetriever | None = None
+        self.file_path: str | None = None
         self.elements: dict[str, list] = {"texts": [], "tables": [], "images": []}
         self.summaries: dict[str, list] = {"texts": [], "tables": [], "images": []}
 
@@ -73,7 +73,7 @@ class LangChainMultiVectorDocumentIndexer:
             metadata=self.metadata_retriever,
         )
 
-    def load_pdf(self, path: str = None, azure_blob: Optional[dict] = None) -> None:
+    def load_pdf(self, path: str | None = None, azure_blob: dict[str, Any] | None = None) -> None:
         """
         Loads a PDF file from a local path or Azure Blob Storage.
 
@@ -93,7 +93,7 @@ class LangChainMultiVectorDocumentIndexer:
         else:
             raise ValueError("Provide a path or azure_blob info.")
 
-    def split_pdf(self, min_image_size: Optional[tuple[int, int]] = None):
+    def split_pdf(self, min_image_size: tuple[int, int] | None = None):
         """
         Splits the loaded PDF into texts, tables, and base64-encoded images.
         Updates internal state.
@@ -141,7 +141,7 @@ class LangChainMultiVectorDocumentIndexer:
     def _should_keep_image(
         self,
         image_base64: str,
-        min_image_size: Optional[tuple[int, int]],
+        min_image_size: tuple[int, int] | None,
     ) -> bool:
         """Return whether an extracted image should be kept for downstream indexing."""
 
@@ -208,7 +208,7 @@ class LangChainMultiVectorDocumentIndexer:
         self,
         chain: RunnableSequence,
         inputs: list[Any],
-        config: Optional[dict[str, Any]] = {"max_concurrency": 3}
+        config: dict[str, Any] | None = None,
     ) -> list[Any]:
         """
         Executes a `.batch()` call with retry on HTTP 429 or transient errors.
@@ -221,7 +221,7 @@ class LangChainMultiVectorDocumentIndexer:
         Returns:
             list: Results from batch execution.
         """
-        return chain.batch(inputs, config)
+        return chain.batch(inputs, config or {"max_concurrency": 3})
 
     def summarize_elements(self):
         """

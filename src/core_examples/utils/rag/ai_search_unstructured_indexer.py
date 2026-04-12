@@ -3,7 +3,7 @@ import base64
 import io
 import uuid
 import datetime as dt
-from typing import Optional, Any, Dict, List, Union
+from typing import Any
 
 from PIL import Image
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
@@ -13,12 +13,8 @@ from azure.core.exceptions import HttpResponseError
 from azure.search.documents import SearchClient
 from azure.search.documents.models import IndexingResult
 from azure.search.documents.indexes import SearchIndexClient
-from azure.search.documents.indexes.models import (
-    SearchIndex, SimpleField, SearchableField, SearchFieldDataType,
-    SearchField, VectorSearch, HnswAlgorithmConfiguration, VectorSearchProfile,
-    SemanticConfiguration, SemanticPrioritizedFields, SemanticField,
-    SemanticSearch, ComplexField, CorsOptions, ScoringProfile
-)
+from azure.search.documents.indexes.models import SearchIndex
+from core_examples.utils.rag.ai_search_schemas import load_registered_ai_search_index_definition
 
 
 from langchain_core.output_parsers import StrOutputParser
@@ -31,8 +27,8 @@ class AISearchMultiVectorDocumentIndexer:
     def __init__(
         self,
         search_client: SearchClient,
-        llm_multimodal: Optional[BaseLanguageModel] = None,
-        embeddings: Optional[Embeddings] = None,
+        llm_multimodal: BaseLanguageModel | None = None,
+        embeddings: Embeddings | None = None,
     ):
         """
         Processes and manages documents for Azure AI Search with multi-vector indexing.
@@ -52,13 +48,13 @@ class AISearchMultiVectorDocumentIndexer:
         self.embeddings = embeddings
         
         # Internal state
-        self.file_path: Optional[str] = None
+        self.file_path: str | None = None
         self.elements: dict[str, list] = {"texts": [], "tables": [], "images": []}
         self.summaries: dict[str, list] = {"texts": [], "tables": [], "images": []}
-        self.documents: List[dict] = []
+        self.documents: list[dict[str, Any]] = []
 
 
-    def load_pdf(self, path: str = None) -> None:
+    def load_pdf(self, path: str) -> None:
         """
         Loads a PDF file from a local or temp path to split, embed and store.
 
@@ -73,7 +69,7 @@ class AISearchMultiVectorDocumentIndexer:
         elif path:
             self.file_path = path
 
-    def split_pdf(self, min_image_size: Optional[tuple[int, int]] = None):
+    def split_pdf(self, min_image_size: tuple[int, int] | None = None):
         """
         Splits the loaded PDF into texts, tables, and base64-encoded images.
         Updates internal state.
@@ -129,7 +125,7 @@ class AISearchMultiVectorDocumentIndexer:
     def _should_keep_image(
         self,
         image_base64: str,
-        min_image_size: Optional[tuple[int, int]],
+        min_image_size: tuple[int, int] | None,
     ) -> bool:
         """Return whether an extracted image should be kept for downstream indexing."""
 
@@ -196,7 +192,7 @@ class AISearchMultiVectorDocumentIndexer:
         self,
         chain: RunnableSequence,
         inputs: list[Any],
-        config: Optional[dict[str, Any]] = {"max_concurrency": 3}
+        config: dict[str, Any] | None = None,
     ) -> list[Any]:
         """
         Executes a `.batch()` call with retry on HTTP 429 or transient errors.
@@ -209,7 +205,7 @@ class AISearchMultiVectorDocumentIndexer:
         Returns:
             list: Results from batch execution.
         """
-        return chain.batch(inputs, config)
+        return chain.batch(inputs, config or {"max_concurrency": 3})
 
     def summarize_elements(self):
         """
@@ -237,8 +233,8 @@ class AISearchMultiVectorDocumentIndexer:
 
         return text_summaries, table_summaries, image_summaries
 
-    def embed_ai_search_index_documents(self) -> List[Dict[str, Any]]:
-        documents = []
+    def embed_ai_search_index_documents(self) -> list[dict[str, Any]]:
+        documents: list[dict[str, Any]] = []
         
         for content_type in ["texts", "tables", "images"]:
             chunks_list = self.elements.get(content_type)
@@ -251,7 +247,7 @@ class AISearchMultiVectorDocumentIndexer:
                     doc_type = content_type
                     summary = summaries_list[i]
                     embeddings_summary = embeddings_summaries_list[i]
-                    metadata: Dict[str, Any] = {}
+                    metadata: dict[str, Any] = {}
 
                     # Metadatos opcionales
                     try:
@@ -285,13 +281,13 @@ class AISearchMultiVectorDocumentIndexer:
 
         return documents
     
-    def upload_documents(self, documents: List[Dict[str, Any]] = None) -> List[IndexingResult]:
+    def upload_documents(self, documents: list[dict[str, Any]] | None = None) -> list[IndexingResult]:
         if documents:
             return self.search_client.upload_documents(documents=documents)
         else:
             return self.search_client.upload_documents(documents=self.documents)
     
-    def delete_document_by_filename(self, filename: str, filter: str = None):
+    def delete_document_by_filename(self, filename: str, filter: str | None = None):
         if not filter:
 
             filter = (
@@ -309,7 +305,7 @@ class AISearchMultiVectorDocumentIndexer:
         if doc_ids_to_delete:
             self.search_client.delete_documents(documents=doc_ids_to_delete)
         else:
-            raise Exception(f"No documents found with filename: {filename}")
+            raise ValueError(f"No documents found with filename: {filename}")
 
 
 class AISearchIndexManager:
@@ -347,46 +343,34 @@ class AISearchIndexManager:
         except Exception:
             return False
     
-    def create_index(self, search_field: Optional[List[Union[SearchField, SimpleField, SearchableField, ComplexField]]] = None):
+    def create_index(self, registered_index_name: str | None = None):
         """
-        Creates a new search index if it does not already exist.
+        Creates a new search index from a registered Azure AI Search name if it does not already exist.
 
         Args:
-            search_field (SearchField, optional): Custom field definition for the index. 
-                If not provided, a default set of fields is used.
+            registered_index_name (str | None): Registered Azure AI Search index
+                name used to resolve the shared schema. Defaults to
+                `self.index_name`.
 
         Raises:
-            Exception: If the index already exists.
+            RuntimeError: If the index already exists.
         """
         if not self.index_exists():
-            index = SearchIndex(
-                name=self.index_name,
-                fields=self._get_basic_fields() if not search_field else search_field,
-                vector_search=self._get_vector_search_config(),
-                semantic_search=self._get_semantic_search_config(),
-                cors_options=CorsOptions(allowed_origins=["*"], max_age_in_seconds=60)
-            )
+            index = self._load_index_definition(registered_index_name)
             self.index_client.create_index(index)
         else:
-            raise Exception(f"The index '{self.index_name}' already exists. Please update it instead.")
+            raise RuntimeError(f"The index '{self.index_name}' already exists. Please update it instead.")
 
-    def update_index(self, search_field: Optional[List[Union[SearchField, SimpleField, SearchableField, ComplexField]]] = None):
+    def update_index(self, registered_index_name: str | None = None):
         """
-        Updates an existing index with new field definitions or scoring profiles.
+        Updates an existing index from a registered Azure AI Search name.
 
         Args:
-            search_field (SearchField, optional): Custom field definition for the index. 
-                If not provided, the default fields are used.
+            registered_index_name (str | None): Registered Azure AI Search index
+                name used to resolve the shared schema. Defaults to
+                `self.index_name`.
         """
-        scoring_profile = ScoringProfile(name="MyProfile")
-
-        index = SearchIndex(
-            name=self.index_name,
-            fields=self._get_basic_fields() if not search_field else search_field,
-            scoring_profiles=[scoring_profile],
-            cors_options=CorsOptions(allowed_origins=["*"], max_age_in_seconds=60)
-        )
-
+        index = self._load_index_definition(registered_index_name)
         self.index_client.create_or_update_index(index=index)
 
     def delete_index(self):
@@ -395,53 +379,10 @@ class AISearchIndexManager:
         """
         self.index_client.delete_index(self.index_name)
 
-    def _get_basic_fields(self) -> List[Union[SearchField, SimpleField, SearchableField, ComplexField]]:
-        """
-        Returns the default set of fields used for semantic embedding and vector search.
+    def _load_index_definition(self, registered_index_name: str | None = None) -> SearchIndex:
+        """Load a registered index definition and bind it to `self.index_name`."""
 
-        Returns:
-            list[SearchField]: A list of predefined search fields.
-        """
-        return [
-            SimpleField(name="id", type=SearchFieldDataType.String, key=True),
-            SimpleField(name="type", type=SearchFieldDataType.String, filterable=True, sortable=True),
-            SearchField(name="content", type=SearchFieldDataType.String, searchable=True, analyzer_name="es.lucene"),
-            SimpleField(name="summary", type=SearchFieldDataType.String, filterable=True),
-            ComplexField(name="metadata", fields=[
-                SimpleField(name="filetype", type=SearchFieldDataType.String, filterable=True),
-                SimpleField(name="languages", type=SearchFieldDataType.String, filterable=True),
-                SimpleField(name="last_modified", type=SearchFieldDataType.DateTimeOffset, filterable=True, sortable=True),
-                SimpleField(name="page_number", type=SearchFieldDataType.Int32, filterable=True),
-                SimpleField(name="file_directory", type=SearchFieldDataType.String, filterable=True),
-                SimpleField(name="filename", type=SearchFieldDataType.String, filterable=True),
-                SimpleField(name="uri", type=SearchFieldDataType.String, filterable=True),
-            ]),
-            SearchField(
-                name="embeddings",
-                type=SearchFieldDataType.Collection(SearchFieldDataType.Single),
-                searchable=True,
-                vector_search_dimensions=1536,
-                vector_search_profile_name="perfilHnsw"
-            )
-        ]
-
-    def _get_vector_search_config(self) -> VectorSearch:
-        """
-        Returns the HNSW vector search configuration.
-        """
-        return VectorSearch(
-            algorithms=[HnswAlgorithmConfiguration(name="hnsw")],
-            profiles=[VectorSearchProfile(name="perfilHnsw", algorithm_configuration_name="hnsw")]
+        return load_registered_ai_search_index_definition(
+            index_name=registered_index_name or self.index_name,
+            runtime_index_name=self.index_name,
         )
-
-    def _get_semantic_search_config(self) -> SemanticSearch:
-        """
-        Returns the semantic search configuration.
-        """
-        semantic_config = SemanticConfiguration(
-            name="default",
-            prioritized_fields=SemanticPrioritizedFields(
-                content_fields=[SemanticField(field_name="content")]
-            )
-        )
-        return SemanticSearch(configurations=[semantic_config])

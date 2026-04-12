@@ -1,6 +1,6 @@
-from typing import Any, Union
+from typing import Any, cast
 from pydantic import BaseModel
-from langchain_core.messages import AnyMessage
+from langchain_core.messages import AnyMessage, AIMessage
 from frankstate.entity.statehandler import StateEnhancer
 
 class RetrieveContextAsyncInvoke(StateEnhancer):
@@ -15,13 +15,18 @@ class RetrieveContextAsyncInvoke(StateEnhancer):
         - `question`: the question that should be used by downstream nodes
     """
 
-    async def enhance(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> dict[str, list]: 
-        
-        if "iterations" in state and state.get("iterations", 0) > 0:
+    async def enhance(self, state: list[AnyMessage] | dict[str, Any] | BaseModel) -> dict[str, Any]:
+        state = cast(dict[str, Any], state)
+        runnable = self.runnable
+        if runnable is None:
+            raise TypeError("RetrieveContextAsyncInvoke requires a runnable_builder at initialization time")
+
+        if state.get("iterations", 0) > 0:
             question = state["question"]
         else:
-            question = state["messages"][-1].content
-        
-        retrieved_docs_context = await self.runnable.ainvoke(question)
+            last_message = cast(AIMessage, state["messages"][-1])
+            question = last_message.content
+
+        retrieved_docs_context = await runnable.ainvoke(question)
 
         return {"context": retrieved_docs_context, "question": question}

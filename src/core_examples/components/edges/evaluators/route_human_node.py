@@ -1,8 +1,7 @@
-from typing import Literal, Any, Union
+from typing import Any, Literal, cast
 from pydantic import BaseModel
-from langchain_core.messages import AnyMessage
+from langchain_core.messages import AIMessage, AnyMessage
 from frankstate.entity.statehandler import StateEvaluator
-from typing import Literal
 
 class RouteHumanNode(StateEvaluator):
     """Route to human review when the latest message contains tool calls.
@@ -15,8 +14,10 @@ class RouteHumanNode(StateEvaluator):
         - `"end"` when the graph can stop without human intervention
     """
 
-    def evaluate(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> Literal["end", "review"]:
-        if len(state["messages"][-1].tool_calls) == 0:
+    def evaluate(self, state: list[AnyMessage] | dict[str, Any] | BaseModel) -> Literal["end", "review"]:
+        state = cast(dict[str, Any], state)
+        last_message = cast(AIMessage, state["messages"][-1])
+        if len(last_message.tool_calls) == 0:
             return "end"
         else:
             return "review"

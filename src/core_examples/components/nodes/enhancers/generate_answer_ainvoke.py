@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, cast
 from pydantic import BaseModel
 from langchain_core.messages import AnyMessage
 from frankstate.entity.statehandler import StateEnhancer
@@ -15,10 +15,15 @@ class GenerateAnswerAsyncInvoke(StateEnhancer):
         - `generation`: the response content stored as a scalar graph field
     """
 
-    async def enhance(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> dict[str, list]: 
-        response = await self.runnable.ainvoke({
+    async def enhance(self, state: list[AnyMessage] | dict[str, Any] | BaseModel) -> dict[str, Any]:
+        state = cast(dict[str, Any], state)
+        runnable = self.runnable
+        if runnable is None:
+            raise TypeError("GenerateAnswerAsyncInvoke requires a runnable_builder at initialization time")
+
+        response = await runnable.ainvoke({
             "context": state["context"],
-            "question": state["question"]
-            })
+            "question": state["question"],
+        })
     
         return {"messages": [response], "generation": response.content}

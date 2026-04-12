@@ -1,12 +1,5 @@
 import logging
-from typing import Optional, Type
-from langchain_core.tools import (
-    BaseTool, 
-    ToolException,
-)
-from langchain_core.callbacks import (
-    CallbackManagerForToolRun,
-)
+from langchain_core.callbacks import CallbackManagerForToolRun
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, SkipValidation
 from .get_evolution_property import GetEvolutionProperty
@@ -15,10 +8,10 @@ from .get_evolution import GetEvolution
 
 class GetEvolutionTool(BaseTool):
     # BaseTool atributes
-    name: str = None
-    description: str = None
-    args_schema: Type[BaseModel] = None
-    return_direct: bool = None
+    name: str | None = None
+    description: str | None = None
+    args_schema: type[BaseModel] | None = None
+    return_direct: bool | None = None
 
     # New BaseTool attributes
     config: SkipValidation[GetEvolutionProperty] = GetEvolutionProperty
@@ -32,7 +25,7 @@ class GetEvolutionTool(BaseTool):
         self.return_direct = self.config.return_direct
         
         
-    def _run(self, pokemon_name: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> list[str]:
+    def _run(self, pokemon_name: str, run_manager: CallbackManagerForToolRun | None = None) -> list[str]:
         """
         Run the tool logic
         """

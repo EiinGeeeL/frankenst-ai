@@ -7,6 +7,9 @@ from core_examples.utils.key_vault import get_secret
 from core_examples.utils.blob_storage import download_pdf_from_blob, parse_blob_subject
 
 
+INDEX_NAME = "pokeseriex-index"
+
+
 class Orchestrator:
     @staticmethod
     def check_index(index_name: str):
@@ -22,6 +25,10 @@ class Orchestrator:
         if not ai_search_index_manager.index_exists():
             # Create index
             ai_search_index_manager.create_index()
+
+    @staticmethod
+    def get_index_name() -> str:
+        return INDEX_NAME
     
     @staticmethod        
     def document_indexing(index_name: str, subject: str):
@@ -42,7 +49,7 @@ class Orchestrator:
         LLMServices.launch()
  
         # Initialize indexer
-        indexer =  AISearchMultiVectorDocumentIndexer(search_client, LLMServices.model, LLMServices.embeddings)
+        indexer = AISearchMultiVectorDocumentIndexer(search_client, LLMServices.model, LLMServices.embeddings)
 
         if filename.endswith('.pdf'):
             indexer.load_pdf(temp_filepath)

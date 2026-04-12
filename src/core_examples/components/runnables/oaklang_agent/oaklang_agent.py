@@ -1,5 +1,4 @@
 import logging
-from typing import List
 from langchain_core.prompts import (
     ChatPromptTemplate, 
     FewShotChatMessagePromptTemplate, 
@@ -7,9 +6,7 @@ from langchain_core.prompts import (
 )
 from langchain_core.runnables import Runnable
 from langchain_core.tools import BaseTool
-from langchain_core.runnables import Runnable
-from langchain_core.language_models import BaseLanguageModel
-from langchain_core.tools import BaseTool
+from langchain_core.language_models.chat_models import BaseChatModel
 
 from .history_template import history_template
 from .fewshot_examples import few_shot_examples
@@ -20,9 +17,9 @@ from core_examples.utils.common import load_and_clean_text_file, resolve_package
 class OakLangAgent(RunnableBuilder):
     logger: logging.Logger = logging.getLogger(__name__.split('.')[-1])
 
-    def __init__(self, model: BaseLanguageModel, tools: List[BaseTool]):
+    def __init__(self, model: BaseChatModel, tools: list[BaseTool]):
         super().__init__(model=model, tools=tools)
-    
+
         self.logger.info("OakLangAgent initialized")
 
     def _build_prompt(self) -> ChatPromptTemplate:
@@ -39,13 +36,14 @@ class OakLangAgent(RunnableBuilder):
         # )
 
         # Prepare the prompt
-        context = load_and_clean_text_file(resolve_package_resource(__package__, 'prompt', 'context.txt'))
-        instructions = load_and_clean_text_file(resolve_package_resource(__package__, 'prompt', 'instructions.txt'))
-        input = load_and_clean_text_file(resolve_package_resource(__package__, 'prompt', 'input.txt'))
-        output_format = load_and_clean_text_file(resolve_package_resource(__package__, 'prompt', 'output_format.txt'))
-        restrictions = load_and_clean_text_file(resolve_package_resource(__package__, 'prompt', 'restrictions.txt'))
-                
-        format_template = load_and_clean_text_file(resolve_package_resource(__package__, 'prompt', 'format_template.txt'))
+        package = __package__ or __name__
+        context = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'context.txt'))
+        instructions = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'instructions.txt'))
+        input = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'input.txt'))
+        output_format = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'output_format.txt'))
+        restrictions = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'restrictions.txt'))
+
+        format_template = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'format_template.txt'))
 
         system_prompt = format_template.format(
             context=context,
@@ -66,7 +64,7 @@ class OakLangAgent(RunnableBuilder):
 
     def _configure_runnable(self) -> Runnable:
         prompt_template = self._build_prompt()
-        model_with_tools = self.model.bind_tools(self.tools)
+        model_with_tools = self.model.bind_tools(self.tools or [])
 
         # Create the chain
         chain = prompt_template | model_with_tools

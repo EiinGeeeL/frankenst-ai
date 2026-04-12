@@ -38,7 +38,9 @@ class SimpleOakConfigGraph(GraphLayout):
 
     def build_runtime(self) -> dict[str, Any]:
         LLMServices.launch()
-
+        if LLMServices.model is None:
+            raise RuntimeError("LLMServices.launch() did not initialize model.")
+        
         return {
             "CONFIG_NODES": load_node_registry(CONFIG_NODES_FILE_PATH),
             "OAKLANG_AGENT": OakLangAgent(
@@ -55,7 +57,7 @@ class SimpleOakConfigGraph(GraphLayout):
             tags=[self.CONFIG_NODES["OAKLANG_NODE"]["description"]],
         )
         self.OAKTOOLS_NODE = ToolNode(
-            tools=self.OAKLANG_AGENT.tools,
+            tools=self.OAKLANG_AGENT.tools or [],
             name=self.CONFIG_NODES["OAKTOOLS_NODE"]["name"],
             tags=[self.CONFIG_NODES["OAKTOOLS_NODE"]["description"]],
         )

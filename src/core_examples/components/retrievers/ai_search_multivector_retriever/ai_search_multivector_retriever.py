@@ -1,5 +1,3 @@
-from typing import Optional, Dict, List
-
 from azure.search.documents import SearchClient
 from azure.search.documents.models import VectorizedQuery
 
@@ -10,17 +8,17 @@ class AISearchMultiVectorRetriever:
     def __init__(
         self,
         search_client: SearchClient,
-        embeddings: Optional[Embeddings] = None
+        embeddings: Embeddings,
     ):
         """
         Args:
             search_client: Azure Search client configured with endpoint, index, and credentials.
-            embeddings (Embeddings, optional): Model used to generate query embeddings.
+            embeddings: Model used to generate query embeddings.
         """
         self.search_client = search_client
         self.embeddings = embeddings
 
-    def _search(self, query: str, k: int = 5, embed: bool = True) -> List[dict]:
+    def _search(self, query: str, k: int = 5, embed: bool = True) -> list[dict]:
         """Performs a vector search with the given query."""
         if embed:
             vector = self.embeddings.embed_query(query)
@@ -46,7 +44,7 @@ class AISearchMultiVectorRetriever:
 
         return list(results)
 
-    def _parse_results(self, results: List[dict], metadata_as_content: bool = True) -> Dict[str, List[str]]:
+    def _parse_results(self, results: list[dict], metadata_as_content: bool = True) -> dict[str, list[str]]:
         """Groups documents by type, optionally appending metadata to content."""
         grouped = {"texts": [], "images": []}
         for doc in results:
@@ -65,7 +63,7 @@ class AISearchMultiVectorRetriever:
 
         return grouped
 
-    def get_context(self, query: str, k: int = 5, embed: bool = True) -> Dict[str, object]:
+    def get_context(self, query: str, k: int = 5, embed: bool = True) -> dict[str, object]:
         """
         Performs the search and builds the context.
 

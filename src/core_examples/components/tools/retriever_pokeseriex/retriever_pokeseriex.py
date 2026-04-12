@@ -1,13 +1,15 @@
-from typing import List
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from services.foundry.llms import LLMServices
 from core_examples.components.retrievers.ai_search_simple_semantic_retriever.ai_search_simple_semantic_retriever import AISearchSimpleSemanticRetriever
 from core_examples.utils.key_vault import get_secret
 
+
+INDEX_NAME = "pokeseriex-index"
+
 class RetrieverPokeSeriex:
     @staticmethod
-    def run(query: str) -> List:
+    def run(query: str) -> list:
         """
         This tool transforms a natural language query into a vector and retrieves context from the content and schemas of a Teradata database.
 
@@ -19,12 +21,13 @@ class RetrieverPokeSeriex:
         """
         
         LLMServices.launch()
+        if LLMServices.embeddings is None:
+            raise RuntimeError("LLMServices.launch() did not initialize embeddings.")
    
         # Create search client
         service_endpoint = get_secret("AZURE_SEARCH_SERVICE_ENDPOINT")
         key = get_secret("AZURE_SEARCH_API_KEY")
-        index_name = "pokeseriex-index"
-        search_client = SearchClient(service_endpoint, index_name, AzureKeyCredential(key))
+        search_client = SearchClient(service_endpoint, INDEX_NAME, AzureKeyCredential(key))
         
         # Use the retriever
         retriever = AISearchSimpleSemanticRetriever(search_client=search_client, embeddings=LLMServices.embeddings)

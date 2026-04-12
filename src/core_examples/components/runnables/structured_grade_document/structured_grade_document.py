@@ -1,11 +1,11 @@
 import logging
-from typing import Dict
+from typing import Any
 from pydantic import BaseModel
 from langchain_core.runnables import Runnable
 from langchain_core.runnables import RunnableLambda
 from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.language_models import BaseLanguageModel
+from langchain_core.language_models.chat_models import BaseChatModel
 
 from frankstate.entity.runnable_builder import RunnableBuilder
 
@@ -14,20 +14,21 @@ from core_examples.utils.common import load_and_clean_text_file, resolve_package
 class StructuredGradeDocument(RunnableBuilder):
     logger: logging.Logger = logging.getLogger(__name__.split('.')[-1])
 
-    def __init__(self, model: BaseLanguageModel, structured_output_schema: BaseModel):
+    def __init__(self, model: BaseChatModel, structured_output_schema: type[BaseModel]):
         super().__init__(model=model, structured_output_schema=structured_output_schema)
 
         self.logger.info("StructuredGradeDocument initialized")
 
-    def _build_prompt(self, kwargs: Dict) -> ChatPromptTemplate:
+    def _build_prompt(self, kwargs: dict[str, Any]) -> ChatPromptTemplate:
         docs_by_type = kwargs["context"]
         question = kwargs["question"]
 
         # Prepare the human_prompt
-        context = load_and_clean_text_file(resolve_package_resource(__package__, 'prompt', 'context.txt'))
-        instructions = load_and_clean_text_file(resolve_package_resource(__package__, 'prompt', 'instructions.txt'))
+        package = __package__ or __name__
+        context = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'context.txt'))
+        instructions = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'instructions.txt'))
 
-        format_template = load_and_clean_text_file(resolve_package_resource(__package__, 'prompt', 'format_template.txt'))
+        format_template = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'format_template.txt'))
 
         prompt_template = format_template.format(
             context=context,
@@ -36,7 +37,7 @@ class StructuredGradeDocument(RunnableBuilder):
             instructions=instructions
         )
         
-        prompt_content = [{"type": "text", "text": prompt_template}]
+        prompt_content: list[str | dict[str, Any]] = [{"type": "text", "text": prompt_template}]
         prompt_content.extend(docs_by_type["images"])
 
         return ChatPromptTemplate.from_messages([

@@ -47,14 +47,18 @@ class AISearchAdaptiveRAGConfigGraph(GraphLayout):
     REWRITE_CHAIN: RewriteQuestion
     RAW_RETRIEVER: AISearchMultiVectorRetriever
 
+    INDEX_NAME = "demo-rag-multimodal-index"
+
     def build_runtime(self) -> dict[str, Any]:
         LLMServices.launch()
+        if LLMServices.model is None or LLMServices.embeddings is None:
+            raise RuntimeError("LLMServices.launch() did not initialize model and embeddings.")
 
         service_endpoint = get_secret("AZURE_SEARCH_SERVICE_ENDPOINT")
         key = get_secret("AZURE_SEARCH_API_KEY")
         search_client = SearchClient(
             service_endpoint,
-            "demo-rag-multimodal-index",
+            self.INDEX_NAME,
             AzureKeyCredential(key),
         )
         raw_retriever = AISearchMultiVectorRetriever(

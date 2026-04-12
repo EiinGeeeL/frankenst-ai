@@ -1,7 +1,7 @@
-from typing import Any, Union
+from typing import Any, cast
 
 from pydantic import BaseModel
-from langchain_core.messages import AnyMessage
+from langchain_core.messages import AnyMessage, AIMessage
 
 from frankstate.entity.statehandler import StateEnhancer
 
@@ -22,11 +22,14 @@ class RetrieveContextAISearch(StateEnhancer):
         - `question`: the question that should be used by downstream nodes
     """
 
-    async def enhance(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> dict[str, Any]:
-        if "iterations" in state and state.get("iterations", 0) > 0:
+    async def enhance(self, state: list[AnyMessage] | dict[str, Any] | BaseModel) -> dict[str, Any]:
+        state = cast(dict[str, Any], state)
+
+        if state.get("iterations", 0) > 0:
             question = state["question"]
         else:
-            question = state["messages"][-1].content
+            last_message = cast(AIMessage, state["messages"][-1])
+            question = last_message.content
 
         retriever = getattr(self, "retriever", None)
         if retriever is None or not callable(getattr(retriever, "get_context", None)):

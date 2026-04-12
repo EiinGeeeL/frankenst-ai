@@ -1,6 +1,5 @@
 from pathlib import Path
-from typing import Callable
-from typing import Tuple
+from collections.abc import Callable
 
 from langchain_chroma.vectorstores import Chroma
 from langchain_classic.storage import LocalFileStore, create_kv_docstore
@@ -106,7 +105,7 @@ def get_local_retriever_storage(
     collection_name: str = LOCAL_CHROMA_COLLECTION_NAME,
     persist_directory: str | Path | None = None,
     docstore_directory: str | Path | None = None,
-) -> Tuple[Chroma, BaseStore]:
+) -> tuple[Chroma, BaseStore]:
     """Open the persistent Chroma collection and companion docstore used by the local retriever."""
 
     vectorstore = get_local_vectorstore(

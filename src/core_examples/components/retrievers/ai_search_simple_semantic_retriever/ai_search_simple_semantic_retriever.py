@@ -1,5 +1,3 @@
-from typing import Optional, Dict, List
-
 from azure.search.documents import SearchClient
 from azure.search.documents.models import VectorizedQuery
 
@@ -10,19 +8,19 @@ class AISearchSimpleSemanticRetriever:
     def __init__(
         self,
         search_client: SearchClient,
-        k : int = 5,
-        embeddings: Optional[Embeddings] = None
+        embeddings: Embeddings,
+        k: int = 5,
     ):
         """
         Args:
             search_client: Azure Search client configured with endpoint, index, and credentials.
-            embeddings (Embeddings, optional): Model used to generate query embeddings.
+            embeddings: Model used to generate query embeddings.
         """
         self.search_client = search_client
         self.k = k
         self.embeddings = embeddings
 
-    def retrieve(self, query: str):
+    def retrieve(self, query: str) -> list[dict]:
         """
         Ejecuta una búsqueda semántica usando embeddings y Azure Cognitive Search.
         """

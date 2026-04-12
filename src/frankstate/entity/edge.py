@@ -1,11 +1,11 @@
 from collections.abc import Hashable
-from typing import Literal, Union
+from typing import Literal
 from frankstate.entity.statehandler import StateEvaluator
 
 class BaseEdge():
     """Base edge definition storing the source node name."""
 
-    def __init__(self, node_source: Union[str, Literal["START", "END"]]):
+    def __init__(self, node_source: str | Literal["START", "END"]):
         self.node_source = node_source
 
 class SimpleEdge(BaseEdge):
@@ -13,8 +13,8 @@ class SimpleEdge(BaseEdge):
 
     def __init__(
         self, 
-        node_source: Union[str, Literal["START", "END"]],
-        node_path: Union[str, Literal["START", "END"]]
+        node_source: str | Literal["START", "END"],
+        node_path: str | Literal["START", "END"],
     ):
         super().__init__(node_source)
         self.node_path = node_path
@@ -25,9 +25,9 @@ class ConditionalEdge(BaseEdge):
 
     def __init__(
         self,
-        node_source: Union[str, Literal["START", "END"]],
-        map_dict: dict[Hashable, Union[str, Literal["START", "END"]]],
-        evaluator: StateEvaluator
+        node_source: str | Literal["START", "END"],
+        map_dict: dict[Hashable, str | Literal["START", "END"]],
+        evaluator: StateEvaluator,
     ):
         super().__init__(node_source)
         self.map_dict = map_dict

@@ -11,7 +11,7 @@ def get_secret(secret_name: str) -> str:
     # Get Key Vault name from environment variable
     key_vault_name = os.getenv("AZURE_KEY_VAULT_NAME")
     if not key_vault_name:
-        raise RuntimeError("AZURE_KEY_VAULT_NAME environment variable is not set")
+        raise EnvironmentError("AZURE_KEY_VAULT_NAME environment variable is not set")
 
     key_vault_uri = f"https://{key_vault_name}.vault.azure.net"
     credential = DefaultAzureCredential()

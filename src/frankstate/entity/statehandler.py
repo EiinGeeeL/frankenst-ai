@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Union
+from typing import Any
 from pydantic import BaseModel
 from langchain_core.messages import AnyMessage
+from langchain_core.runnables import Runnable
 from langgraph.types import Command
 from frankstate.entity.runnable_builder import RunnableBuilder
+
 
 class StateEvaluator(ABC):
     """Base contract for conditional routing in a LangGraph StateGraph.
@@ -24,17 +26,17 @@ class StateEvaluator(ABC):
 
     def __init__(
         self,
-        runnable_builder: Optional[RunnableBuilder] = None,
+        runnable_builder: RunnableBuilder | None = None,
         **kwargs: Any,
 
         ):
-        self.runnable = runnable_builder.get() if runnable_builder else None
+        self.runnable: Runnable[Any, Any] | None = runnable_builder.get() if runnable_builder else None
 
         for key, value in kwargs.items():
             setattr(self, key, value)
 
     @abstractmethod
-    async def evaluate(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> str:
+    async def evaluate(self, state: list[AnyMessage] | dict[str, Any] | BaseModel) -> str:
         """Return the routing key used by a conditional edge path map.
 
         The returned value must match one of the keys declared in the
@@ -66,11 +68,11 @@ class StateEnhancer(ABC):
 
     def __init__(
             self,
-            runnable_builder: Optional[RunnableBuilder] = None,
+            runnable_builder: RunnableBuilder | None = None,
             **kwargs: Any,
         ):
         
-        self.runnable = runnable_builder.get() if runnable_builder else None
+        self.runnable: Runnable[Any, Any] | None = runnable_builder.get() if runnable_builder else None
          
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -78,7 +80,7 @@ class StateEnhancer(ABC):
         
         
     @abstractmethod
-    async def enhance(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> dict[str, list]:
+    async def enhance(self, state: list[AnyMessage] | dict[str, Any] | BaseModel) -> dict[str, Any]:
         """Return a partial state update produced by runnable or custom enhance logic.
 
         The returned mapping is merged by LangGraph into the current state. The
@@ -133,7 +135,7 @@ class StateCommander(ABC):
         )
 
     @abstractmethod
-    def command(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> Command[str]:
+    def command(self, state: list[AnyMessage] | dict[str, Any] | BaseModel) -> Command[str]:
         """Return a `Command` that routes the graph and optionally updates state.
 
         The `goto` value must match a node name registered in the compiled graph.

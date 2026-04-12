@@ -1,8 +1,7 @@
-from typing import Literal, Any, Union
+from typing import Any, Literal, cast
 from pydantic import BaseModel
 from langchain_core.messages import AnyMessage
 from frankstate.entity.statehandler import StateEvaluator
-from typing import Literal
 
 class GradeRewriteGenerate(StateEvaluator):
     """Choose between answer generation and question rewriting.
@@ -19,16 +18,17 @@ class GradeRewriteGenerate(StateEvaluator):
             retrieval attempt
     """
 
-    async def evaluate(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> Literal["generate", "rewrite"]:
-    
-        question = state["question"]
-        context = state["context"]
-        
-        response = await self.runnable.ainvoke({
-            "context": context,
-            "question": question
+    async def evaluate(self, state: list[AnyMessage] | dict[str, Any] | BaseModel) -> Literal["generate", "rewrite"]:
+        state = cast(dict[str, Any], state)
+        runnable = self.runnable
+        if runnable is None:
+            raise TypeError("GradeRewriteGenerate requires a runnable_builder at initialization time")
+
+        response = await runnable.ainvoke({
+            "context": state["context"],
+            "question": state["question"],
         })
-        
+
         score = response.binary_score
 
         if score == "yes" or state.get("iterations", 0) >= 1:

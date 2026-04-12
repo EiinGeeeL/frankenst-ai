@@ -2,7 +2,7 @@ import yaml
 from importlib import import_module, resources
 from importlib.resources.abc import Traversable
 from pathlib import Path
-from typing import Any, Dict, Optional, cast
+from typing import Any, cast
 
 from langgraph.graph.state import CompiledStateGraph
 from langchain_core.runnables.config import RunnableConfig
@@ -87,7 +87,7 @@ def read_yaml(path_to_yaml: str | Path | Traversable) -> dict[str, Any]:
         FileNotFoundError: If the specified YAML file doesn't exist or isn't accessible.
         yaml.YAMLError: If there's an error parsing the YAML content.
         ValueError: If the YAML file is empty or does not contain a mapping.
-        Exception: For any other unexpected errors.
+        RuntimeError: If the file exists but cannot be read.
     """
 
     try:
@@ -110,7 +110,7 @@ def read_yaml(path_to_yaml: str | Path | Traversable) -> dict[str, Any]:
     except OSError as exc:
         raise RuntimeError(f"Unable to read configuration file '{path_to_yaml}'") from exc
     
-def load_node_registry(path_to_yaml: str | Path | Traversable) -> dict[str, dict]:
+def load_node_registry(path_to_yaml: str | Path | Traversable) -> dict[str, dict[str, Any]]:
     """Read config_nodes.yml and return a dict keyed by node ``id``.
 
     The returned structure mirrors the old ``read_yaml`` output so that layout
@@ -122,7 +122,7 @@ def load_node_registry(path_to_yaml: str | Path | Traversable) -> dict[str, dict
             ``nodes`` list where each entry has at least an ``id`` field.
 
     Returns:
-        dict[str, dict]: Mapping from node id to the remaining node fields
+        dict[str, dict[str, Any]]: Mapping from node id to the remaining node fields
             (``name``, ``type``, ``description``, ``route``, …).
 
     Raises:
@@ -236,7 +236,7 @@ def save_text_to_artifact(
 async def print_process_astream(
     graph: CompiledStateGraph,
     message_input: dict[str, Any] | Command[Any] | None,
-    runnable_config: Optional[RunnableConfig] = None,
+    runnable_config: RunnableConfig | None = None,
 ):
     """Print `astream()` updates for any input accepted by the compiled graph.
 

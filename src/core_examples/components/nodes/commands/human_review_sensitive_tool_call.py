@@ -1,4 +1,4 @@
-from typing import Any, cast, Union
+from typing import Any, cast
 from pydantic import BaseModel
 from langchain_core.messages import AIMessage, AnyMessage
 from langchain_core.tools import BaseTool
@@ -30,7 +30,7 @@ class HumanReviewSensitiveToolCall(StateCommander):
         self.sensitive_tool_names = [tool.name for tool in (sensitive_tools or [])]
         self._destinations = destinations or {}
 
-    def command(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> Command[str]:
+    def command(self, state: list[AnyMessage] | dict[str, Any] | BaseModel) -> Command[str]:
         """Return a `Command` based on the human review decision.
 
         Reads:

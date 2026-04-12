@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional, Any
+from typing import Any
 from pydantic import BaseModel
 from langchain_core.runnables import Runnable
-from langchain_core.language_models import BaseLanguageModel
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.retrievers import BaseRetriever
 from langchain_core.vectorstores import VectorStore
@@ -19,11 +19,11 @@ class RunnableBuilder(ABC):
 
     def __init__(
         self,
-        model: BaseLanguageModel,
-        vectordb: Optional[VectorStore] = None,
-        retriever: Optional[BaseRetriever] = None,
-        tools: Optional[List[BaseTool]] = None,
-        structured_output_schema: Optional[BaseModel] = None,
+        model: BaseChatModel,
+        vectordb: VectorStore | None = None,
+        retriever: BaseRetriever | None = None,
+        tools: list[BaseTool] | None = None,
+        structured_output_schema: type[BaseModel] | None = None,
     ):
         self.model = model
         self.vectordb = vectordb
@@ -32,8 +32,8 @@ class RunnableBuilder(ABC):
         self.structured_output_schema = structured_output_schema
 
         # Start the runnable
-        self._runnable: Optional[Runnable] = None
-        self._retriever: Optional[BaseRetriever] = None
+        self._runnable: Runnable | None = None
+        self._retriever: BaseRetriever | None = None
     
     def _build_prompt(self) -> ChatPromptTemplate:
         """Build the prompt runnable chain and return it.
@@ -57,6 +57,16 @@ class RunnableBuilder(ABC):
             raise ValueError(f"{self.__class__.__name__} cannot build a retriever because `vectordb` is None.")
         return self.vectordb.as_retriever(**kwargs)
 
+    def _require_runnable(self) -> Runnable:
+        """Return the configured runnable, initializing it lazily when needed."""
+
+        runnable = self._runnable
+        if runnable is None:
+            runnable = self._configure_runnable()
+            self._runnable = runnable
+
+        return runnable
+
     @abstractmethod
     def _configure_runnable(self) -> Runnable:
         """Configure the main runnable and return it.
@@ -70,9 +80,7 @@ class RunnableBuilder(ABC):
     def _get_runnable(self) -> Runnable:
         """Lazily initialize and return the configured runnable."""
 
-        if self._runnable is None:
-            self._runnable = self._configure_runnable()
-        return self._runnable
+        return self._require_runnable()
     
     @property
     def _get_retriever(self) -> BaseRetriever:
@@ -84,16 +92,18 @@ class RunnableBuilder(ABC):
 
     def invoke(self, input: Any) -> Any:
         """Invoke the configured runnable synchronously."""
-        return self._get_runnable.invoke(input)
+        runnable = self._require_runnable()
+        return runnable.invoke(input)
 
 
     def ainvoke(self, input: Any) -> Any:
         """Invoke the configured runnable asynchronously."""
-        return self._get_runnable.ainvoke(input)
+        runnable = self._require_runnable()
+        return runnable.ainvoke(input)
     
     def get(self) -> Runnable:
         """Return the lazily configured runnable instance."""
-        return self._get_runnable
+        return self._require_runnable()
 
     def get_raw_retriever(self) -> BaseRetriever:
         """Return the lazily configured retriever instance."""

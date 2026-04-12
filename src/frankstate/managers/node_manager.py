@@ -1,6 +1,7 @@
 import logging
+from collections.abc import Iterable
 from typing import Any
-from typing import Iterable, Tuple, Union
+
 from langgraph.prebuilt import ToolNode
 from frankstate.entity.node import BaseNode, CommandNode, SimpleNode
 
@@ -18,17 +19,20 @@ class NodeManager:
     logger: logging.Logger = logging.getLogger(__name__.split('.')[-1])
     
     def __init__(self):
-        self.nodes: dict[str, Union[SimpleNode, CommandNode, ToolNode]] = {}
+        self.nodes: dict[str, SimpleNode | CommandNode | ToolNode] = {}
         self.logger.info("NodeManager initialized")
     
-    def _normalize_nodes(self, nodes: Union[SimpleNode, CommandNode, ToolNode] | Iterable[Union[SimpleNode, CommandNode, ToolNode]]) -> list[Union[SimpleNode, CommandNode, ToolNode]]:
+    def _normalize_nodes(
+        self,
+        nodes: SimpleNode | CommandNode | ToolNode | Iterable[SimpleNode | CommandNode | ToolNode],
+    ) -> list[SimpleNode | CommandNode | ToolNode]:
         """Return nodes as a list while supporting single-node inputs."""
         if isinstance(nodes, (SimpleNode, CommandNode, ToolNode)):
             return [nodes]
 
         return list(nodes)
 
-    def _get_node_value(self, node: Union[SimpleNode, CommandNode, ToolNode]) -> Any:
+    def _get_node_value(self, node: SimpleNode | CommandNode | ToolNode) -> Any:
         """Resolve a node wrapper to the callable or ToolNode added to the graph."""
         if isinstance(node, ToolNode):
             return node
@@ -39,7 +43,7 @@ class NodeManager:
         else:
             raise TypeError(f"Unexpected node type: {type(node)}")
 
-    def _get_node_tags(self, node: Union[SimpleNode, CommandNode, ToolNode]) -> list[str] | None:
+    def _get_node_tags(self, node: SimpleNode | CommandNode | ToolNode) -> list[str] | None:
         """Return node tags for wrappers or native ToolNode instances.
 
         Wrapper nodes expose `tags` directly. Native `ToolNode` already uses the
@@ -47,7 +51,7 @@ class NodeManager:
         """
         return node.tags if isinstance(node, BaseNode) else getattr(node, "tags", None)
 
-    def _get_node_kwargs(self, node: Union[SimpleNode, CommandNode, ToolNode]) -> dict[str, Any]:
+    def _get_node_kwargs(self, node: SimpleNode | CommandNode | ToolNode) -> dict[str, Any]:
         """Return keyword arguments mirrored from `StateGraph.add_node()`.
 
         Frankenst-AI keeps `tags` as the common layout field even though native
@@ -86,7 +90,10 @@ class NodeManager:
 
         return kwargs
 
-    def add_nodes(self, nodes: Union[SimpleNode, CommandNode, ToolNode] | Iterable[Union[SimpleNode, CommandNode, ToolNode]]) -> None:
+    def add_nodes(
+        self,
+        nodes: SimpleNode | CommandNode | ToolNode | Iterable[SimpleNode | CommandNode | ToolNode],
+    ) -> None:
         """
         Add one or more supported node instances to the internal registry.
 
@@ -101,13 +108,13 @@ class NodeManager:
             else:
                 raise TypeError(f"Unexpected node type: {type(node)}")
 
-    def get_nodes(self) -> Tuple[Union[SimpleNode, CommandNode, ToolNode], ...]:
+    def get_nodes(self) -> tuple[SimpleNode | CommandNode | ToolNode, ...]:
         """
         Retrieve all registered nodes preserving insertion order.
         """
         return tuple(self.nodes.values())
 
-    def configs_nodes(self) -> Tuple[Tuple[Tuple[str, Any], dict[str, Any]], ...]:
+    def configs_nodes(self) -> tuple[tuple[tuple[str, Any], dict[str, Any]], ...]:
         """
         Retrieve deterministic `((name, callable), kwargs)` pairs for `add_node()`.
 
@@ -130,7 +137,7 @@ class NodeManager:
             for name, node in self.nodes.items()
         )
 
-    def remove_node(self, node: Union[SimpleNode, CommandNode, ToolNode]) -> None:
+    def remove_node(self, node: SimpleNode | CommandNode | ToolNode) -> None:
         """
         Remove a specific node from the registry by name.
         """

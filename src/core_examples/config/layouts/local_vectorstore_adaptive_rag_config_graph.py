@@ -48,6 +48,8 @@ class LocalVectorStoreAdaptiveRAGConfigGraph(GraphLayout):
 
     def build_runtime(self) -> dict[str, Any]:
         LLMServices.launch()
+        if LLMServices.model is None or LLMServices.embeddings is None:
+            raise RuntimeError("LLMServices.launch() did not initialize model and embeddings.")
 
         raw_retriever = LangchainChromaMultiVectorRetriever(
             embeddings=LLMServices.embeddings,

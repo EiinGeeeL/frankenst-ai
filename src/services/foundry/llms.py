@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_azure_ai.chat_models import AzureAIChatCompletionsModel
 from langchain_azure_ai.embeddings import AzureAIOpenAIApiEmbeddingsModel
-from langchain_core.language_models import BaseLanguageModel
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.embeddings import Embeddings
 
 from core_examples.constants import CONFIG_FILE_PATH
@@ -14,22 +14,22 @@ from core_examples.utils.ollama.ollama_wsl_proxy import resolve_ollama_base_url
 
 @dataclass(frozen=True)
 class LLMRuntime:
-	model: BaseLanguageModel
+	model: BaseChatModel
 	embeddings: Embeddings
-	turbo_model: BaseLanguageModel | None = None
+	turbo_model: BaseChatModel | None = None
 
 
 class LLMServices:
-	model: BaseLanguageModel = None
-	embeddings: Embeddings = None
-	turbo_model: BaseLanguageModel = None
+	model: BaseChatModel | None = None
+	embeddings: Embeddings | None = None
+	turbo_model: BaseChatModel | None = None
 
 	@classmethod
 	def _load_config(cls, config: dict | None = None) -> dict:
 		return config if config is not None else read_yaml(CONFIG_FILE_PATH)
 
 	@classmethod
-	def _get_config(cls, config: dict, provider: str, key: str = None):
+	def _get_config(cls, config: dict, provider: str, key: str | None = None):
 		try:
 			if key:
 				return config[provider][key]

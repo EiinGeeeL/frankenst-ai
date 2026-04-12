@@ -43,6 +43,8 @@ class OakHumanLoopConfigGraph(GraphLayout):
 
     def build_runtime(self) -> dict[str, Any]:
         LLMServices.launch()
+        if LLMServices.model is None:
+            raise RuntimeError("LLMServices.launch() did not initialize model.")
 
         dominate_pokemon_tool = DominatePokemonTool()
 

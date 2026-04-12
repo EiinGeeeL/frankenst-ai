@@ -1,6 +1,6 @@
 import logging
 import inspect
-from typing import Any, Optional, Type
+from typing import Any
 from langgraph.graph import StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from frankstate.entity.graph_layout import GraphLayout
@@ -22,7 +22,14 @@ class WorkflowBuilder:
 
     logger: logging.Logger = logging.getLogger(__name__.split('.')[-1])
     
-    def __init__(self, config: Type[Any], state_schema: Type[Any], checkpointer: Optional[BaseCheckpointSaver] = None, input_schema: Optional[Type[Any]] = None, output_schema: Optional[Type[Any]] = None):
+    def __init__(
+        self,
+        config: type[Any],
+        state_schema: type[Any],
+        checkpointer: BaseCheckpointSaver | None = None,
+        input_schema: type[Any] | None = None,
+        output_schema: type[Any] | None = None,
+    ):
         """Create a workflow builder for a graph layout.
 
         Args:
@@ -33,7 +40,7 @@ class WorkflowBuilder:
             output_schema: Optional output schema forwarded to `StateGraph`.
         """
         self.workflow: StateGraph = StateGraph(state_schema=state_schema, input_schema=input_schema, output_schema=output_schema)
-        self.memory: Optional[BaseCheckpointSaver] = checkpointer
+        self.memory: BaseCheckpointSaver | None = checkpointer
 
         if not inspect.isclass(config) or not issubclass(config, GraphLayout):
             raise TypeError(

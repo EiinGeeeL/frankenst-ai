@@ -22,7 +22,7 @@ def main(event: func.EventGridEvent):
         logging.error("Error processing event data: %s", str(e))
         return
 
-    index_name = "pokeseriex-index"
+    index_name = Orchestrator.get_index_name()
 
     if index_name in event.subject:
         try:

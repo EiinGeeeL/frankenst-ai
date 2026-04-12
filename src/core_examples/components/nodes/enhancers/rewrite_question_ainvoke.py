@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, cast
 from pydantic import BaseModel
 from langchain_core.messages import AnyMessage
 from frankstate.entity.statehandler import StateEnhancer
@@ -16,12 +16,17 @@ class RewriteQuestionAsyncInvoke(StateEnhancer):
         - `iterations`: incremented loop counter
     """
 
-    async def enhance(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> dict[str, list]: 
-        question = state[ "question"]
-        response = await self.runnable.ainvoke(question)
+    async def enhance(self, state: list[AnyMessage] | dict[str, Any] | BaseModel) -> dict[str, Any]:
+        state = cast(dict[str, Any], state)
+        runnable = self.runnable
+        if runnable is None:
+            raise TypeError("RewriteQuestionAsyncInvoke requires a runnable_builder at initialization time")
+
+        question = state["question"]
+        response = await runnable.ainvoke(question)
         better_question = response.content
-        
-        current_iterations = state.get("iterations", 0) # default value: 0
-            
+
+        current_iterations = state.get("iterations", 0)
+
         return {"messages": [response], "question": better_question, "iterations": current_iterations + 1}
         

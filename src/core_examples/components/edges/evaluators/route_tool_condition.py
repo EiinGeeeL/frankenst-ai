@@ -1,4 +1,4 @@
-from typing import Literal, Any, Union
+from typing import Any, Literal
 from pydantic import BaseModel
 from langchain_core.messages import AnyMessage
 from frankstate.entity.statehandler import StateEvaluator
@@ -12,7 +12,11 @@ class RouteToolCondition(StateEvaluator):
     routing keys expected by the surrounding `ConditionalEdge.map_dict`.
     """
 
-    def evaluate(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel], messages_key: str = "messages") -> Literal["end", "tools"]:
+    def evaluate(
+        self,
+        state: list[AnyMessage] | dict[str, Any] | BaseModel,
+        messages_key: str = "messages",
+    ) -> Literal["end", "tools"]:
         if isinstance(state, list):
             ai_message = state[-1]
         elif isinstance(state, dict) and (messages := state.get(messages_key, [])):
