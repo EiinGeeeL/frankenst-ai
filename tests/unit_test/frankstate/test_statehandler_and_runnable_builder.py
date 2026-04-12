@@ -58,7 +58,7 @@ def test_state_evaluator_supports_async_handlers() -> None:
 
 @pytest.mark.unit
 def test_state_commander_returns_command_with_update() -> None:
-    commander = RoutingCommander(routes={"accept": "accept_node", "reject": "reject_node"})
+    commander = RoutingCommander(destinations={"accept": "accept_node", "reject": "reject_node"})
 
     command = commander.command({"decision": "reject"})
 

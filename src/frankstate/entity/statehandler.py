@@ -106,13 +106,31 @@ class StateCommander(ABC):
     information (e.g. via constructor arguments) rather than reading the node
     registry directly.
 
-    Convention — ``routes`` attribute:
-        Subclasses must expose a ``self.routes: dict[str, str]`` attribute
-        mapping semantic keys (e.g. ``"tools"``, ``"enhancer"``) to the
+    Convention — ``destinations`` property:
+        Subclasses should expose a ``destinations: dict[str, str]`` mapping
+        semantic keys (e.g. ``"tools"``, ``"enhancer"``) to the
         ``BaseNode.name`` values of the destination nodes.
-        ``CommandNode`` enforces this at construction time and reads
-        ``routes`` to populate ``StateGraph.add_node(destinations=...)``.
+
+        `CommandNode` reads this property to populate
+        ``StateGraph.add_node(destinations=...)`` without depending on dynamic
+        attribute access.
     """
+
+    @property
+    def destinations(self) -> dict[str, str]:
+        """Return the semantic route map used by CommandNode and LangGraph.
+
+        Subclasses may override this property directly, or populate a backing
+        ``_destinations`` attribute from their constructor.
+        """
+        destinations = getattr(self, "_destinations", None)
+        if isinstance(destinations, dict):
+            return destinations
+
+        raise AttributeError(
+            f"{type(self).__name__} must expose a 'destinations: dict[str, str]' property "
+            "or a '_destinations' attribute populated by the constructor."
+        )
 
     @abstractmethod
     def command(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> Command[str]:

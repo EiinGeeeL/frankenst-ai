@@ -1,10 +1,10 @@
-from typing import Any, Union
+from typing import Any, cast, Union
 from pydantic import BaseModel
-from langchain_core.messages import AnyMessage
+from langchain_core.messages import AIMessage, AnyMessage
 from langchain_core.tools import BaseTool
 from langgraph.types import Command, interrupt
 
-from frankstate.entity.node import StateCommander
+from frankstate.entity.statehandler import StateCommander
 
 
 class HumanReviewSensitiveToolCall(StateCommander):
@@ -17,7 +17,7 @@ class HumanReviewSensitiveToolCall(StateCommander):
 
     Args:
         sensitive_tools: Tool instances that require explicit human approval.
-        routes: Mapping of semantic keys to concrete node names. Expected keys
+        destinations: Mapping of semantic keys to concrete node names. Expected keys
             are ``"tools"`` and ``"enhancer"``. Injected by the layout so that
             this class stays free of registry reads.
     """
@@ -25,10 +25,10 @@ class HumanReviewSensitiveToolCall(StateCommander):
     def __init__(
         self,
         sensitive_tools: list[BaseTool] | None = None,
-        routes: dict[str, str] | None = None,
+        destinations: dict[str, str] | None = None,
     ):
         self.sensitive_tool_names = [tool.name for tool in (sensitive_tools or [])]
-        self.routes = routes or {}
+        self._destinations = destinations or {}
 
     def command(self, state: Union[list[AnyMessage], dict[str, Any], BaseModel]) -> Command[str]:
         """Return a `Command` based on the human review decision.
@@ -40,16 +40,19 @@ class HumanReviewSensitiveToolCall(StateCommander):
             - `Command(goto=...)` to continue directly with tools
             - `Command(goto=..., update={...})` to send feedback back to the agent
         """
-        last_message = state["messages"][-1]
+        state = cast(dict[str, Any], state)
+        last_message = cast(AIMessage, state["messages"][-1])
+        tool_calls = last_message.tool_calls
+
         # Separate sensitive and non-sensitive tool calls
         sensitive_calls = [
-            tool_call for tool_call in last_message.tool_calls
+            tool_call for tool_call in tool_calls
             if tool_call["name"] in self.sensitive_tool_names
         ]
         
         # If no sensitive tools, run all tools immediately
         if not sensitive_calls:
-            return Command(goto=self.routes["tools"])
+            return Command(goto=self.destinations["tools"])
 
         # Get the *first* sensitive tool call to ask for review and update
         tool_call = sensitive_calls[0]
@@ -64,7 +67,7 @@ class HumanReviewSensitiveToolCall(StateCommander):
         review_data = human_review.get("data")
 
         if review_action == "continue":
-            return Command(goto=self.routes["tools"])
+            return Command(goto=self.destinations["tools"])
 
         elif review_action == "feedback":
             # ToolMessage for sensitive tool feedback
@@ -78,7 +81,7 @@ class HumanReviewSensitiveToolCall(StateCommander):
             # Return in same order as original tool_calls
             all_tool_messages = []
 
-            for call in last_message.tool_calls:
+            for call in tool_calls:
                 if call["id"] == tool_call["id"]:
                     all_tool_messages.append(feedback_tool_message)
                 else:
@@ -90,7 +93,7 @@ class HumanReviewSensitiveToolCall(StateCommander):
                         "tool_call_id": call["id"],
                     })
 
-            return Command(goto=self.routes["enhancer"], update={"messages": all_tool_messages})
+            return Command(goto=self.destinations["enhancer"], update={"messages": all_tool_messages})
 
         raise ValueError(
             f"Unsupported human review action '{review_action}'. Expected: continue, feedback."

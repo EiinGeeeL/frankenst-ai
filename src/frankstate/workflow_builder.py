@@ -1,6 +1,6 @@
 import logging
 import inspect
-from typing import Type, Any, Optional
+from typing import Any, Optional, Type
 from langgraph.graph import StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from frankstate.entity.graph_layout import GraphLayout
@@ -82,19 +82,18 @@ class WorkflowBuilder:
     def _configure_workflow(self) -> None:
         """Assemble the workflow from the nodes and edges discovered in the layout."""
         self._configure_nodes()
-        for name, action, tags, destinations in self.node_manager.configs_nodes():
-            self.workflow.add_node(
-                name,
-                action,
-                metadata={"tags": tags} if tags else None, # NOTE: cant be matadata due ToolNode uses tags.
-                destinations=destinations,
-            )
+        for node_args, node_kwargs in self.node_manager.configs_nodes():
+            self.workflow.add_node(*node_args, **node_kwargs)
 
         self._configure_edges()
         for config in self.edge_manager.configs_edges():
             self.workflow.add_edge(*config)
-        for config in self.edge_manager.configs_conditional_edges():
-            self.workflow.add_conditional_edges(*config)
+        for node_source, router, path_map in self.edge_manager.configs_conditional_edges():
+            self.workflow.add_conditional_edges(
+                node_source,
+                router,
+                path_map=path_map,
+            )
 
         self._workflow_configured = True
     

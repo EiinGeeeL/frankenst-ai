@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 dynamic = ["dependencies", "optional-dependencies"]
 name = "frankstate"
-version = "0.0.2"
+version = "0.0.3"
 description = "Frank brings order and helps you build complex LLM workflows using scalable, testable, and reusable components."
 license = "MIT"
 readme = { file = "README.md", content-type = "text/markdown" }
@@ -21,6 +21,7 @@ keywords = ["LLM", "azure", "langgraph", "langchain", "azure-ai-foundry", "unstr
 
 [project.urls]
 homepage = "https://github.com/eiingeeel/frankenst-ai"
+changelog = "https://github.com/eiingeeel/frankenst-ai/blob/main/CHANGELOG.md"
 issues = "https://github.com/eiingeeel/frankenst-ai/issues"
 repository = "https://github.com/eiingeeel/frankenst-ai"
 

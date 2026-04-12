@@ -6,7 +6,7 @@ from langgraph.prebuilt import ToolNode
 from frankstate.entity.node import CommandNode, SimpleNode
 from frankstate.managers.node_manager import NodeManager
 from tests.support.frankstate_doubles.stub import (
-    MissingRoutesCommander,
+    MissingDestinationsCommander,
     RoutingCommander,
     StaticMessageEnhancer,
     uppercase_text,
@@ -46,9 +46,9 @@ def test_add_nodes_rejects_invalid_types() -> None:
 
 
 @pytest.mark.unit
-def test_command_node_requires_routes_attribute() -> None:
-    with pytest.raises(ValueError, match="routes"):
-        CommandNode(commander=MissingRoutesCommander(), name="invalid")
+def test_command_node_requires_destinations_attribute() -> None:
+    with pytest.raises(ValueError, match="destinations"):
+        CommandNode(commander=MissingDestinationsCommander(), name="invalid")
 
 
 @pytest.mark.unit
@@ -58,9 +58,10 @@ def test_configs_nodes_resolve_wrapper_callables_tags_and_destinations() -> None
         enhancer=StaticMessageEnhancer("simple"),
         name="simple_node",
         tags=["simple"],
+        kwargs={"defer": True, "metadata": {"owner": "simple"}},
     )
     command = CommandNode(
-        commander=RoutingCommander(routes={"accept": "final_node"}),
+        commander=RoutingCommander(destinations={"accept": "final_node"}),
         name="command_node",
         tags=["command"],
     )
@@ -69,24 +70,46 @@ def test_configs_nodes_resolve_wrapper_callables_tags_and_destinations() -> None
     manager.add_nodes([simple, command, tool_node])
     configs = manager.configs_nodes()
 
-    simple_name, simple_action, simple_tags, simple_destinations = configs[0]
-    command_name, command_action, command_tags, command_destinations = configs[1]
-    tool_name, tool_action, tool_tags, tool_destinations = configs[2]
+    simple_args, simple_kwargs = configs[0]
+    command_args, command_kwargs = configs[1]
+    tool_args, tool_kwargs = configs[2]
+
+    simple_name, simple_action = simple_args
+    command_name, command_action = command_args
+    tool_name, tool_action = tool_args
 
     assert simple_name == "simple_node"
-    assert simple_tags == ["simple"]
-    assert simple_destinations is None
+    assert simple_kwargs == {
+        "defer": True,
+        "metadata": {"owner": "simple", "tags": ["simple"]},
+    }
     assert asyncio.run(simple_action({"messages": []}))["messages"][-1].content == "simple"
 
     assert command_name == "command_node"
-    assert command_tags == ["command"]
-    assert command_destinations == ("final_node",)
+    assert command_kwargs == {
+        "metadata": {"tags": ["command"]},
+        "destinations": ("final_node",),
+    }
     assert command_action({"decision": "accept"}).goto == "final_node"
 
     assert tool_name == "tool_node"
     assert tool_action is tool_node
-    assert tool_tags == ["tool"]
-    assert tool_destinations is None
+    assert tool_kwargs == {"metadata": {"tags": ["tool"]}}
+
+
+@pytest.mark.unit
+def test_configs_nodes_reject_conflicting_command_destinations_in_kwargs() -> None:
+    manager = NodeManager()
+    command = CommandNode(
+        commander=RoutingCommander(destinations={"accept": "final_node"}),
+        name="command_node",
+        kwargs={"destinations": ("other_node",)},
+    )
+
+    manager.add_nodes(command)
+
+    with pytest.raises(ValueError, match="destinations both in commander and kwargs"):
+        manager.configs_nodes()
 
 
 @pytest.mark.unit

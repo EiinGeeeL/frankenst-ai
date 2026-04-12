@@ -2,12 +2,13 @@ import yaml
 from importlib import import_module, resources
 from importlib.resources.abc import Traversable
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 from langgraph.graph.state import CompiledStateGraph
-from langgraph.types import RunnableConfig
+from langchain_core.runnables.config import RunnableConfig
+from langgraph.types import Command
 
-def _parse_yaml(data: Dict) -> Dict:
+def _parse_yaml(data: dict[str, Any]) -> dict[str, Any]:
     """
     Replace $() expressions in a dictionary with their resolved values.
 
@@ -62,7 +63,7 @@ def _parse_yaml(data: Dict) -> Dict:
             data = data[key]
         return data
 
-    return resolve_value(data, data)
+    return cast(dict[str, Any], resolve_value(data, data))
 
 
 def _read_text_resource(resource_path: str | Path | Traversable, encoding: str = "utf-8") -> str:
@@ -72,7 +73,7 @@ def _read_text_resource(resource_path: str | Path | Traversable, encoding: str =
     return Path(resource_path).expanduser().read_text(encoding=encoding)
 
 
-def read_yaml(path_to_yaml: str | Path | Traversable) -> Optional[Dict]:
+def read_yaml(path_to_yaml: str | Path | Traversable) -> dict[str, Any]:
     """
     Read and parse a YAML file.
 
@@ -80,17 +81,24 @@ def read_yaml(path_to_yaml: str | Path | Traversable) -> Optional[Dict]:
         path_to_yaml (Path): A Path object representing the location of the YAML file.
 
     Returns:
-        Optional[Dict]: A dictionary containing the parsed YAML data if successful,
-                        or None if the file is empty or contains invalid YAML.
+        dict[str, Any]: A dictionary containing the parsed YAML data.
 
     Raises:
         FileNotFoundError: If the specified YAML file doesn't exist or isn't accessible.
         yaml.YAMLError: If there's an error parsing the YAML content.
+        ValueError: If the YAML file is empty or does not contain a mapping.
         Exception: For any other unexpected errors.
     """
 
     try:
         yaml_content = yaml.safe_load(_read_text_resource(path_to_yaml))
+        if yaml_content is None:
+            raise ValueError(f"The configuration file '{path_to_yaml}' is empty.")
+        if not isinstance(yaml_content, dict):
+            raise ValueError(
+                f"The configuration file '{path_to_yaml}' must contain a YAML mapping at the root."
+            )
+
         parsed_yaml_context = _parse_yaml(yaml_content)
         return parsed_yaml_context
     except FileNotFoundError:
@@ -225,7 +233,17 @@ def save_text_to_artifact(
 
     return file_path
 
-async def print_process_astream(graph: CompiledStateGraph, message_input: dict, runnable_config: Optional[RunnableConfig] = None):
+async def print_process_astream(
+    graph: CompiledStateGraph,
+    message_input: dict[str, Any] | Command[Any] | None,
+    runnable_config: Optional[RunnableConfig] = None,
+):
+    """Print `astream()` updates for any input accepted by the compiled graph.
+
+    In Frankenst-AI notebooks this is typically a state dictionary keyed by
+    graph field names, but LangGraph
+    also allows resuming execution with a `Command` or passing `None`.
+    """
     events = []
     async for event in graph.astream(message_input, runnable_config, stream_mode="updates"):
         events.append(event)

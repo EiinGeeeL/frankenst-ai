@@ -32,7 +32,7 @@ class RunnableBuilder(ABC):
         self.structured_output_schema = structured_output_schema
 
         # Start the runnable
-        self._runnable: Runnable = None
+        self._runnable: Optional[Runnable] = None
         self._retriever: Optional[BaseRetriever] = None
     
     def _build_prompt(self) -> ChatPromptTemplate:

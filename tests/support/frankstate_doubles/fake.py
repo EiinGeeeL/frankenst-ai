@@ -181,7 +181,7 @@ class CommandAsyncLayout(GraphLayout):
         self.layout_calls += 1
         self.COMMAND_NODE = CommandNode(
             commander=RoutingCommander(
-                routes={
+                destinations={
                     "accept": "accept_node",
                     "reject": "reject_node",
                 }

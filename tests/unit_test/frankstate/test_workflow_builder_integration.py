@@ -3,6 +3,7 @@ import frankstate
 
 import pytest
 from langchain_core.messages import HumanMessage
+from langgraph.graph import END, START
 
 from frankstate import WorkflowBuilder
 from frankstate.entity.edge import ConditionalEdge, SimpleEdge
@@ -21,6 +22,7 @@ from tests.support.frankstate_doubles.fake import (
     LinearSyncLayout,
     ToolLoopLayout,
 )
+from tests.support.frankstate_doubles.stub import StaticMessageEnhancer
 
 
 @pytest.mark.unit
@@ -75,6 +77,32 @@ def test_workflow_builder_compiles_linear_layout_once_and_runs_async_enhancer() 
     assert builder.config.layout_calls == 1
     assert result["messages"][-1].content == "linear-response"
     assert first_compiled.get_graph().nodes["linear_node"].metadata == {"tags": ["linear"]}
+
+
+@pytest.mark.unit
+def test_workflow_builder_passes_node_kwargs_through_add_node() -> None:
+    class NodeKwargsLayout(GraphLayout):
+        def build_runtime(self) -> dict[str, object]:
+            return {}
+
+        def layout(self) -> None:
+            self.KWARGS_NODE = SimpleNode(
+                enhancer=StaticMessageEnhancer("kwargs-response"),
+                name="kwargs_node",
+                tags=["kwargs"],
+                kwargs={"defer": True, "metadata": {"owner": "core"}},
+            )
+            self.START_EDGE = SimpleEdge(node_source=START, node_path=self.KWARGS_NODE.name)
+            self.END_EDGE = SimpleEdge(node_source=self.KWARGS_NODE.name, node_path=END)
+
+    builder = WorkflowBuilder(config=NodeKwargsLayout, state_schema=FrankTestState)
+    compiled = builder.compile()
+
+    assert compiled.get_graph().nodes["kwargs_node"].metadata == {
+        "owner": "core",
+        "tags": ["kwargs"],
+        "defer": True,
+    }
 
 
 @pytest.mark.unit

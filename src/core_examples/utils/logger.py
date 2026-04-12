@@ -1,6 +1,7 @@
 import sys
 import logging
 from pathlib import Path
+from typing import Any
 
 from core_examples.utils.common import (
     get_default_logs_directory,
@@ -8,7 +9,7 @@ from core_examples.utils.common import (
     resolve_configured_path,
 )
 
-def setup_logging(config: dict, log_dir: str | Path | None = None) -> Path:
+def setup_logging(config: dict[str, Any], log_dir: str | Path | None = None) -> Path:
     project_root_path = get_project_root_path()
     log_dir = resolve_configured_path(
         log_dir if log_dir is not None else get_default_logs_directory(),

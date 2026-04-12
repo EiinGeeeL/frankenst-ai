@@ -1,4 +1,5 @@
-from typing import Union, Literal, Dict
+from collections.abc import Hashable
+from typing import Literal, Union
 from frankstate.entity.statehandler import StateEvaluator
 
 class BaseEdge():
@@ -25,7 +26,7 @@ class ConditionalEdge(BaseEdge):
     def __init__(
         self,
         node_source: Union[str, Literal["START", "END"]],
-        map_dict: Dict[str, Union[str, Literal["START", "END"]]],
+        map_dict: dict[Hashable, Union[str, Literal["START", "END"]]],
         evaluator: StateEvaluator
     ):
         super().__init__(node_source)

@@ -63,14 +63,14 @@ class OakHumanLoopConfigGraph(GraphLayout):
             tags=[self.CONFIG_NODES["OAKLANG_NODE"]["description"]],
         )
         self.OAKTOOLS_NODE = ToolNode(
-            tools=self.OAKLANG_AGENT.tools,
+            tools=self.OAKLANG_AGENT.tools or [],
             name=self.CONFIG_NODES["OAKTOOLS_NODE"]["name"],
             tags=[self.CONFIG_NODES["OAKTOOLS_NODE"]["description"]],
         )
         self.HUMAN_REVIEW_NODE = CommandNode(
             commander=HumanReviewSensitiveToolCall(
                 sensitive_tools=self.SENSITIVE_TOOLS,
-                routes=self.CONFIG_NODES["HUMAN_REVIEW_NODE"]["routes"],
+                destinations=self.CONFIG_NODES["HUMAN_REVIEW_NODE"]["destinations"],
             ),
             name=self.CONFIG_NODES["HUMAN_REVIEW_NODE"]["name"],
             tags=[self.CONFIG_NODES["HUMAN_REVIEW_NODE"]["description"]],

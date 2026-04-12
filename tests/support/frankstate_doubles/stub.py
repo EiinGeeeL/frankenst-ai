@@ -65,13 +65,13 @@ class ToolCallEvaluator(StateEvaluator):
 
 
 class RoutingCommander(StateCommander):
-    def __init__(self, routes: dict[str, str]):
-        self.routes = routes
+    def __init__(self, destinations: dict[str, str]):
+        self._destinations = destinations
 
     def command(self, state: Any) -> Command[str]:
         decision = state.get("decision", "accept")
         return Command(
-            goto=self.routes[decision],
+            goto=self.destinations[decision],
             update={
                 "messages": [AIMessage(content=f"command:{decision}")],
                 "decision": decision,
@@ -79,7 +79,7 @@ class RoutingCommander(StateCommander):
         )
 
 
-class MissingRoutesCommander(StateCommander):
+class MissingDestinationsCommander(StateCommander):
     def command(self, state: Any) -> Command[str]:
         return Command(goto="nowhere")
 

@@ -4,8 +4,8 @@ from typing import Any, get_type_hints
 
 from langgraph.prebuilt import ToolNode
 
-from frankstate.entity.edge import BaseEdge
-from frankstate.entity.node import BaseNode
+from frankstate.entity.edge import ConditionalEdge, SimpleEdge
+from frankstate.entity.node import CommandNode, SimpleNode
 from frankstate.entity.runnable_builder import RunnableBuilder
 
 class GraphLayout(ABC):
@@ -93,13 +93,13 @@ class GraphLayout(ABC):
             if isinstance(attr_value, expected_type)
         ]
 
-    def get_nodes(self) -> list[BaseNode | ToolNode]:
+    def get_nodes(self) -> list[SimpleNode | CommandNode | ToolNode]:
         """Return concrete nodes preserving the layout declaration order."""
-        return self._filter_attributes((BaseNode, ToolNode))
+        return self._filter_attributes((SimpleNode, CommandNode, ToolNode))
 
-    def get_edges(self) -> list[BaseEdge]:
+    def get_edges(self) -> list[SimpleEdge | ConditionalEdge]:
         """Return concrete edges for the current layout instance."""
-        return self._filter_attributes(BaseEdge)
+        return self._filter_attributes((SimpleEdge, ConditionalEdge))
 
     def get_runnable_builders(self) -> list[RunnableBuilder]:
         """Return runnable builders exposed by the layout."""

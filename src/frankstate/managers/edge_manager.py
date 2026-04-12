@@ -1,7 +1,7 @@
 import logging
-from typing import Any, Dict, Iterable, Tuple, Type, Union
-from frankstate.entity.edge import SimpleEdge, ConditionalEdge
-from frankstate.entity.statehandler import StateEvaluator
+from collections.abc import Hashable
+from typing import Any, Iterable, Literal, Tuple, Type, Union
+from frankstate.entity.edge import ConditionalEdge, SimpleEdge
 
 class EdgeManager:
     """Store graph edges and expose them in the format expected by LangGraph.
@@ -57,12 +57,9 @@ class EdgeManager:
             for edge in self.edges if isinstance(edge, SimpleEdge)
         )
     
-    def configs_conditional_edges(self) -> Tuple[Tuple[str, Any, Dict[str, str]], ...]:
+    def configs_conditional_edges(self) -> Tuple[Tuple[str, Any, dict[Hashable, Union[str, Literal["START", "END"]]]], ...]:
         """
-        Return ordered tuples for `StateGraph.add_conditional_edges()` containing:
-        - the source node name
-        - the evaluator callable
-        - the path map from routing keys to target nodes
+        Return ordered tuples for `StateGraph.add_conditional_edges()`.
 
         The evaluator callable may be synchronous or asynchronous.
         """

@@ -1,9 +1,12 @@
+import asyncio
 import logging
 from pathlib import Path
 
 import core_examples.utils.common as common_module
 import core_examples.utils.logger as logger_module
 import core_examples.utils.rag.local_chroma as local_chroma_module
+import pytest
+from langgraph.types import Command
 
 
 def test_resolve_configured_path_uses_base_dir_for_relative_paths(tmp_path: Path) -> None:
@@ -103,3 +106,42 @@ def test_local_chroma_resolves_relative_paths_against_project_root(tmp_path: Pat
     )
 
     assert resolved == project_root / "custom" / "chroma"
+
+
+def test_print_process_astream_accepts_command_input() -> None:
+    class FakeCompiledGraph:
+        def __init__(self) -> None:
+            self.seen_input = None
+            self.seen_config = None
+            self.seen_stream_mode = None
+
+        async def astream(self, message_input, runnable_config, stream_mode="updates"):
+            self.seen_input = message_input
+            self.seen_config = runnable_config
+            self.seen_stream_mode = stream_mode
+            yield {"messages": ["ok"]}
+
+    graph = FakeCompiledGraph()
+    command_input = Command(goto=())
+
+    result = asyncio.run(common_module.print_process_astream(graph, command_input))
+
+    assert graph.seen_input is command_input
+    assert graph.seen_stream_mode == "updates"
+    assert result == {"messages": ["ok"]}
+
+
+def test_read_yaml_raises_for_empty_yaml(tmp_path: Path) -> None:
+    yaml_path = tmp_path / "empty.yml"
+    yaml_path.write_text("", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="is empty"):
+        common_module.read_yaml(yaml_path)
+
+
+def test_read_yaml_raises_for_non_mapping_root(tmp_path: Path) -> None:
+    yaml_path = tmp_path / "list-root.yml"
+    yaml_path.write_text("- item\n- another\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="must contain a YAML mapping at the root"):
+        common_module.read_yaml(yaml_path)
