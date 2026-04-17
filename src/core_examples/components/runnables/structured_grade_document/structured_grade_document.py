@@ -12,7 +12,7 @@ from frankstate.entity.runnable_builder import RunnableBuilder
 from core_examples.utils.common import load_and_clean_text_file, resolve_package_resource
 
 class StructuredGradeDocument(RunnableBuilder):
-    logger: logging.Logger = logging.getLogger(__name__.split('.')[-1])
+    logger: logging.Logger = logging.getLogger(__name__)
 
     def __init__(self, model: BaseChatModel, structured_output_schema: type[BaseModel]):
         super().__init__(model=model, structured_output_schema=structured_output_schema)

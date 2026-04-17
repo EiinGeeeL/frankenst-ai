@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format follows Keep a Changelog and the project currently stays in the `0.x`
 phase while the public packaging and repository boundaries continue to mature.
 
+## [0.0.5] - 2026-04-17
+
+### Added
+
+- Environment-driven logging controls through `LOG_LEVEL` and `LOG_TO_FILE`, plus a dedicated `config_logging.yml` template for repository defaults.
+
+### Changed
+
+- Repository logging now uses `configure_logging()` plus `logging.config.dictConfig()` instead of embedding logging settings in `config.yml`.
+- The local MCP server and notebook examples now target `fastmcp` over HTTP, expose both Oak and adaptive RAG tools from the same entrypoint, and make header/auth testing an explicit part of the research demo flow.
+- Module loggers across `frankstate`, example runnables and tools now use full module names via `logging.getLogger(__name__)` for clearer traces and filtering.
+- Release automation now uses the current major versions of the GitHub Actions involved in build, artifact upload/download and Python setup.
+
 ## [0.0.4] - 2026-04-12
 
 ### Changed

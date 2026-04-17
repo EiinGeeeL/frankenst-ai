@@ -20,7 +20,7 @@ class WorkflowBuilder:
     3. Invoke the returned compiled graph from notebooks, services or apps.
     """
 
-    logger: logging.Logger = logging.getLogger(__name__.split('.')[-1])
+    logger: logging.Logger = logging.getLogger(__name__)
     
     def __init__(
         self,

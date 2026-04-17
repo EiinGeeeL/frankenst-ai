@@ -16,7 +16,7 @@ class NodeManager:
     insertion order and rejects duplicate names before delegating to LangGraph.
     """
 
-    logger: logging.Logger = logging.getLogger(__name__.split('.')[-1])
+    logger: logging.Logger = logging.getLogger(__name__)
     
     def __init__(self):
         self.nodes: dict[str, SimpleNode | CommandNode | ToolNode] = {}

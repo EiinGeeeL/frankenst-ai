@@ -200,6 +200,21 @@ graph = workflow_builder.compile()
 
 The `graph` is still a LangGraph graph object produced through LangGraph's own runtime.
 
+## Logging
+
+The repository now configures application logging through `configure_logging()` and the
+`src/core_examples/config/config_logging.yml` template.
+
+- `LOG_LEVEL` controls the root log level. Default: `INFO`.
+- `LOG_TO_FILE` controls whether logs are also persisted under `logs/application.log`. Default: `false`.
+
+Examples:
+
+```bash
+LOG_LEVEL=DEBUG python app.py
+LOG_LEVEL=DEBUG LOG_TO_FILE=true python app.py
+```
+
 ## Running Tests
 
 - Using the pytest CLI:

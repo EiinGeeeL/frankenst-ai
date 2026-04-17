@@ -15,7 +15,7 @@ class GetEvolutionTool(BaseTool):
 
     # New BaseTool attributes
     config: SkipValidation[GetEvolutionProperty] = GetEvolutionProperty
-    logger: SkipValidation[logging.Logger] = logging.getLogger(__name__.split('.')[-1])
+    logger: SkipValidation[logging.Logger] = logging.getLogger(__name__)
      
     def __init__(self, **data):
         super().__init__(**data)

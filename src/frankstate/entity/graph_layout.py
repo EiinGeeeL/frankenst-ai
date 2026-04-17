@@ -19,7 +19,7 @@ class GraphLayout(ABC):
     existing managers.
     """
 
-    logger: logging.Logger = logging.getLogger(__name__.split('.')[-1])
+    logger: logging.Logger = logging.getLogger(__name__)
 
     def __init__(self):
         self.runtime: dict[str, Any] | None = None

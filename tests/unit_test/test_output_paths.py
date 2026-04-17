@@ -39,28 +39,31 @@ def test_save_text_to_artifact_uses_default_directory_without_constants_or_cwd(t
     assert artifact_path.read_text(encoding="utf-8") == "hello"
 
 
-def test_setup_logging_uses_default_directory_without_constants_or_cwd(tmp_path: Path, monkeypatch) -> None:
-    project_root = tmp_path / "template-root"
-    other_dir = tmp_path / "elsewhere"
-    project_root.mkdir()
-    other_dir.mkdir()
-    monkeypatch.chdir(other_dir)
-    monkeypatch.setattr(logger_module, "get_project_root_path", lambda: project_root)
-    monkeypatch.setattr(logger_module, "get_default_logs_directory", lambda: project_root / "logs")
+def test_configure_logging_does_not_create_a_log_file_by_default(tmp_path: Path, monkeypatch) -> None:
+    log_path = tmp_path / "logs" / "application.log"
+    monkeypatch.delenv("LOG_TO_FILE", raising=False)
+    monkeypatch.setenv("LOG_LEVEL", "INFO")
+    monkeypatch.setattr(logger_module, "DEFAULT_LOG_FILE_PATH", log_path)
+    monkeypatch.setattr(logger_module, "_LOGGING_CONFIGURED", False)
 
-    config = {
-        "logging": {
-            "format": "%(message)s",
-            "datefmt": "%Y-%m-%d %H:%M:%S",
-            "log_file": "graph.log",
-        },
-    }
+    logger_module.configure_logging()
+    logging.getLogger("frank-tests").info("console only")
+    logging.shutdown()
 
-    log_path = logger_module.setup_logging(config)
+    assert not log_path.exists()
+
+
+def test_configure_logging_creates_a_log_file_when_enabled(tmp_path: Path, monkeypatch) -> None:
+    log_path = tmp_path / "logs" / "application.log"
+    monkeypatch.setenv("LOG_TO_FILE", "true")
+    monkeypatch.setenv("LOG_LEVEL", "INFO")
+    monkeypatch.setattr(logger_module, "DEFAULT_LOG_FILE_PATH", log_path)
+    monkeypatch.setattr(logger_module, "_LOGGING_CONFIGURED", False)
+
+    logger_module.configure_logging()
     logging.getLogger("frank-tests").info("configured log path")
     logging.shutdown()
 
-    assert log_path == project_root / "logs" / "graph.log"
     assert log_path.exists()
     assert "configured log path" in log_path.read_text(encoding="utf-8")
 

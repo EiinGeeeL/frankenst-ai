@@ -9,7 +9,7 @@ from core_examples.utils.rag.processing import parse_docs, parse_context
 
 
 class MultimodalRetriever(RunnableBuilder):
-    logger: logging.Logger = logging.getLogger(__name__.split('.')[-1])
+    logger: logging.Logger = logging.getLogger(__name__)
 
     def __init__(self, model: BaseChatModel, retriever: BaseRetriever) -> None:
         """Compose a multimodal retrieval runnable from a pre-built retriever."""
