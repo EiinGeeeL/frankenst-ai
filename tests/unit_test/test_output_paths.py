@@ -148,3 +148,22 @@ def test_read_yaml_raises_for_non_mapping_root(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="must contain a YAML mapping at the root"):
         common_module.read_yaml(yaml_path)
+
+
+def test_read_yaml_raises_for_empty_mapping(tmp_path: Path) -> None:
+    yaml_path = tmp_path / "empty-mapping.yml"
+    yaml_path.write_text("{}\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="must not be an empty mapping"):
+        common_module.read_yaml(yaml_path)
+
+
+def test_load_node_registry_validates_required_node_fields(tmp_path: Path) -> None:
+    yaml_path = tmp_path / "nodes.yml"
+    yaml_path.write_text(
+        "nodes:\n  - id: OAKLANG_NODE\n    type: enhancer\n    description: missing name\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="missing required node fields"):
+        common_module.load_node_registry(yaml_path)

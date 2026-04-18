@@ -7,51 +7,50 @@ from core_examples.utils.key_vault import get_secret
 def upload_file_to_blob(blob_path: str, content: str, container_name: str):
     connection_string = get_secret('AzureWebJobsStorage')
     if not connection_string:
-        raise ValueError("La variable de entorno 'AzureWebJobsStorage' no está configurada")
+        raise ValueError("The 'AzureWebJobsStorage' secret is not configured")
 
-    # Crear cliente del servicio Blob
+    # Create the blob service client.
     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
 
-    # Crear el contenedor si no existe
+    # Create the container when it does not exist yet.
     try:
         blob_service_client.create_container(container_name)
     except ResourceExistsError:
         pass
 
-    # Subir contenido directamente
+    # Upload the content directly.
     blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_path)
     blob_client.upload_blob(content, overwrite=True)
 
-    return f"Archivo '{blob_path}' cargado correctamente en el contenedor '{container_name}'."
+    return f"File '{blob_path}' uploaded successfully to container '{container_name}'."
 
 def load_text_from_blob(blob_path: str, container_name: str) -> str:
     connection_string = get_secret('AzureWebJobsStorage')
     if not connection_string:
-        raise ValueError("La variable de entorno 'AzureWebJobsStorage' no está configurada")
+        raise ValueError("The 'AzureWebJobsStorage' secret is not configured")
 
-    # Crear cliente del servicio Blob
+    # Create the blob service client.
     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
 
-    # Obtener el cliente del blob
+    # Get the blob client.
     blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_path)
 
     try:
-        # Descargar el contenido del blob
+        # Download the blob content.
         download_stream = blob_client.download_blob()
-        content = download_stream.readall().decode("utf-8")  # Asumimos que el contenido es texto
+        content = download_stream.readall().decode("utf-8")
         return content
 
     except ResourceNotFoundError:
-        raise FileNotFoundError(f"No se encontró el blob '{blob_path}' en el contenedor '{container_name}'")
+        raise FileNotFoundError(
+            f"Blob '{blob_path}' was not found in container '{container_name}'"
+        )
 
 def download_pdf_from_blob(blob_path: str, container_name: str) -> str:
-    """
-    Descarga un archivo PDF desde Azure Blob Storage y lo guarda en un archivo temporal local.
-    Retorna la ruta del archivo temporal.
-    """
+    """Download a PDF from Azure Blob Storage into a local temporary file."""
     connection_string = get_secret('AzureWebJobsStorage')
     if not connection_string:
-        raise ValueError("La variable de entorno 'AzureWebJobsStorage' no está configurada")
+        raise ValueError("The 'AzureWebJobsStorage' secret is not configured")
 
     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
     blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_path)
@@ -69,7 +68,9 @@ def download_pdf_from_blob(blob_path: str, container_name: str) -> str:
         return temp_path
     
     except ResourceNotFoundError:
-        raise FileNotFoundError(f"No se encontró el blob '{blob_path}' en el contenedor '{container_name}'")
+        raise FileNotFoundError(
+            f"Blob '{blob_path}' was not found in container '{container_name}'"
+        )
 
 
 def parse_blob_subject(subject: str):

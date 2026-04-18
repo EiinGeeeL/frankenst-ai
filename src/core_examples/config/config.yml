@@ -6,7 +6,7 @@
 
 ollama:
   # Example: make sure the selected Ollama model is available locally.
-  model: ministral-3:8b # gemma4:e4b
+  model: gemma4:e4b # ministral-3:8b
   temperature: 0
   embeddings_model: embeddinggemma
 

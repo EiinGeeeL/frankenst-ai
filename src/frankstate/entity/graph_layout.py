@@ -8,8 +8,9 @@ from frankstate.entity.edge import ConditionalEdge, SimpleEdge
 from frankstate.entity.node import CommandNode, SimpleNode
 from frankstate.entity.runnable_builder import RunnableBuilder
 
+
 class GraphLayout(ABC):
-    """Base contract for all Frankenst-AI graph layouts.
+    """Base contract for all `frankstate` graph layouts.
 
     A layout is responsible for two concerns only:
     - build runtime dependencies without doing work at import time
@@ -102,5 +103,23 @@ class GraphLayout(ABC):
         return self._filter_attributes((SimpleEdge, ConditionalEdge))
 
     def get_runnable_builders(self) -> list[RunnableBuilder]:
-        """Return runnable builders exposed by the layout."""
+        """Return runnable builders exposed by the layout.
+
+        Builders are returned in the same declaration order in which the layout
+        projected them onto the instance during `build_runtime()`.
+        """
         return self._filter_attributes(RunnableBuilder)
+
+    def get_runnable_builder(self, attribute_name: str) -> RunnableBuilder:
+        """Return a named runnable builder exposed by the layout.
+
+        Use this helper when the caller wants an explicit builder by attribute
+        name instead of relying on declaration order.
+        """
+        self._build_layout()
+        builder = getattr(self, attribute_name, None)
+        if not isinstance(builder, RunnableBuilder):
+            raise KeyError(
+                f"{self.__class__.__name__} does not expose a RunnableBuilder named '{attribute_name}'"
+            )
+        return builder

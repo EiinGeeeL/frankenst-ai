@@ -100,6 +100,9 @@ def read_yaml(path_to_yaml: str | Path | Traversable) -> dict[str, Any]:
             )
 
         parsed_yaml_context = _parse_yaml(yaml_content)
+        if not parsed_yaml_context:
+            raise ValueError(f"The configuration file '{path_to_yaml}' must not be an empty mapping.")
+
         return parsed_yaml_context
     except FileNotFoundError:
         raise FileNotFoundError(f"The configuration file '{path_to_yaml}' does not exist.")
@@ -132,9 +135,43 @@ def load_node_registry(path_to_yaml: str | Path | Traversable) -> dict[str, dict
     """
     try:
         data = yaml.safe_load(_read_text_resource(path_to_yaml))
+        if data is None:
+            raise ValueError(f"The configuration file '{path_to_yaml}' is empty.")
+
+        if not isinstance(data, dict):
+            raise ValueError(f"The node registry '{path_to_yaml}' must contain a YAML mapping at the root.")
+
+        nodes = data.get("nodes")
+        if not isinstance(nodes, list) or not nodes:
+            raise ValueError(f"The node registry '{path_to_yaml}' must define a non-empty top-level 'nodes' list.")
+
+        validated_nodes: list[dict[str, Any]] = []
+        required_fields = {"id", "name", "type", "description"}
+        for entry in nodes:
+            if not isinstance(entry, dict):
+                raise ValueError(f"The node registry '{path_to_yaml}' must contain only mapping entries inside 'nodes'.")
+
+            missing_fields = sorted(field for field in required_fields if not entry.get(field))
+            if missing_fields:
+                raise ValueError(
+                    f"The node registry '{path_to_yaml}' is missing required node fields: {missing_fields}"
+                )
+
+            destinations = entry.get("destinations")
+            if destinations is not None:
+                if not isinstance(destinations, dict) or not all(
+                    isinstance(key, str) and isinstance(value, str)
+                    for key, value in destinations.items()
+                ):
+                    raise ValueError(
+                        f"The node registry '{path_to_yaml}' must define 'destinations' as a string-to-string mapping."
+                    )
+
+            validated_nodes.append(entry)
+
         return {
             node["id"]: {k: v for k, v in node.items() if k != "id"}
-            for node in data["nodes"]
+            for node in validated_nodes
         }
     except FileNotFoundError:
         raise FileNotFoundError(f"The configuration file '{path_to_yaml}' does not exist.")

@@ -12,7 +12,7 @@ class NodeManager:
     LangGraph `ToolNode` instances. During configuration it resolves each node
     to the callable consumed by `StateGraph.add_node()`.
 
-    Node names are treated as a Frankenst-AI contract invariant: registration keeps
+    Node names are treated as a LangGraph contract invariant: registration keeps
     insertion order and rejects duplicate names before delegating to LangGraph.
     """
 
@@ -54,7 +54,7 @@ class NodeManager:
     def _get_node_kwargs(self, node: SimpleNode | CommandNode | ToolNode) -> dict[str, Any]:
         """Return keyword arguments mirrored from `StateGraph.add_node()`.
 
-        Frankenst-AI keeps `tags` as the common layout field even though native
+        `frankstate` keeps `tags` as the common layout field even though native
         `StateGraph.add_node()` expects `metadata`. This helper normalizes that
         discrepancy by merging wrapper/tool tags into `metadata["tags"]` so the
         layout API stays uniform across `SimpleNode`, `CommandNode`, and native
@@ -120,11 +120,11 @@ class NodeManager:
 
         The first tuple mirrors the positional part of `StateGraph.add_node()`.
         The kwargs dictionary mirrors keyword arguments forwarded to LangGraph,
-        including Frankenst-AI-managed `metadata` and `destinations`.
+        including `frankstate`-managed `metadata` and `destinations`.
 
         This keeps the wrapper close to LangGraph's native calling convention:
         edges stay positional, while nodes can evolve with additional kwargs
-        without requiring a new Frankenst-AI config class for every upstream change.
+        without requiring a new `frankstate` config class for every upstream change.
 
         The returned callable may be synchronous or asynchronous. LangGraph
         accepts both forms for node execution.
@@ -137,11 +137,15 @@ class NodeManager:
             for name, node in self.nodes.items()
         )
 
-    def remove_node(self, node: SimpleNode | CommandNode | ToolNode) -> None:
+    def remove_node(self, node: str | SimpleNode | CommandNode | ToolNode) -> None:
+        """Remove a registered node by its runtime name.
+
+        The removal contract is name-based, not object-identity-based. Callers
+        may pass either the node instance or the registered node name.
         """
-        Remove a specific node from the registry by name.
-        """
-        if node.name in self.nodes:
-            self.nodes.pop(node.name)
+        node_name = node if isinstance(node, str) else node.name
+
+        if node_name in self.nodes:
+            self.nodes.pop(node_name)
         else:
-            raise ValueError(f"Node name '{node.name}' is not registered")
+            raise ValueError(f"Node name '{node_name}' is not registered")

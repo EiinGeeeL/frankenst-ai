@@ -3,6 +3,9 @@
 
 It is not a framework that replaces LangGraph. It is a reusable project layer that helps you organize components, layouts and runtime assembly so you can build LangGraph workflows with less duplication and stronger boundaries.
 
+This README describes the repository as a whole.
+The published package in this mono-repo is `frankstate`; package-focused installation and API notes live in `README-pypi.md`.
+
 This project aims to improve **scalability**, **reusability**, **testability**, and **maintainability** through reusable, configurable, and highly decoupled components designed to assemble complex LLM workflows.
 
 By leveraging a well-organized structure, the project enables the creation of composable and extensible AI systems (agent patterns, RAG patterns, MCPs, etc.) while still returning official LangGraph graphs at the end of the build process.
@@ -15,12 +18,23 @@ The project has been designed with the following goals:
 
 - Use of YAML, **centralized configurations**, and explicit layout classes managed with builders and managers to define, **modify**, and **scale** different graph architectures **without duplicating logic**.
 
+## Repository Shape
+
+This repository is a mono-repo with four layers and different expectations of stability:
+
+- `src/frankstate` is the reusable pattern layer and the only code published in the base `frankstate` wheel.
+- `src/core_examples` is the repository reference package. It shows one concrete way to consume `frankstate`, but it is not the stable public API of the published package. Inside this mono-repo it may reuse shared adapters from `src/services/foundry` to keep example runtime bootstrap centralized.
+- `src/services` is the integration layer for repository-specific runtimes and deployment entrypoints such as MCP servers or Azure Functions.
+- `research` contains exploratory notebooks and experiments. It is useful context, but it is not part of the repository's contractual surface.
+
+If you are evaluating the repository, start with `src/frankstate`, then move to `src/core_examples`, and only read `src/services` when you need integration-specific entrypoints.
+
 ## How Frankenst-AI Maps to LangGraph
 
 Frankenst-AI keeps the official LangGraph runtime model and adds a small layer
 of project-specific naming around it:
 
-- **StateEnhancer** wraps the async node callable that reads the current state and returns a partial update.
+- **StateEnhancer** wraps the node callable that reads the current state and returns a partial update.
 - **StateEvaluator** wraps the callable passed to conditional edges and returns the routing key used in the path map.
 - **StateCommander** wraps nodes that return an official LangGraph `Command` when routing and state updates must happen in the same step.
 
@@ -41,7 +55,7 @@ package, examples or tests.
 
 ## Frankstate Public API
 
-The root package `frankstate` intentionally exposes only one shortcut:
+The published package keeps a very small root API:
 
 ```python
 from frankstate import WorkflowBuilder
@@ -49,35 +63,16 @@ from frankstate import WorkflowBuilder
 
 That root import is reserved for the main assembly entrypoint.
 
-All other reusable contracts should be imported from their concrete modules,
-not from `frankstate.__init__`. For example:
+All other reusable contracts should be imported from subpackages,
+not from `frankstate.__init__`.
 
-```python
-from frankstate.entity.graph_layout import GraphLayout
-from frankstate.entity.node import SimpleNode, CommandNode
-from frankstate.entity.edge import SimpleEdge, ConditionalEdge
-from frankstate.entity.statehandler import StateEnhancer, StateEvaluator, StateCommander
-from frankstate.entity.runnable_builder import RunnableBuilder
-from frankstate.managers.node_manager import NodeManager
-from frankstate.managers.edge_manager import EdgeManager
-```
+Most of those contracts still come from concrete modules, while
+`frankstate.managers` exposes a small curated shortcut surface.
+
+This repository README keeps only that summary so it stays focused on the mono-repo.
+For the package-oriented import guide, installation path, and public API framing, see `README-pypi.md`.
 
 This keeps `frankstate` root stable and prevents it from turning into an absolute import bucket for every internal type.
-
-## Repository Shape
-
-This mono-repo has four layers with different responsibilities:
-
-- `src/frankstate` is the reusable pattern layer. It contains the assembly utilities and contracts used to structure LangGraph projects with consistent design rules.
-- `src/core_examples` is the repository's importable reference package. It demonstrates one concrete way to organize layouts, state models, components, YAML configuration and prompt assets on top of `frankstate`.
-- `src/services` is the service and integration layer. It contains runtime-specific entrypoints such as MCP servers, Azure Functions handlers and shared provider adapters used by the repository.
-- `research` is exploratory material. The notebooks are useful to understand how layouts are compiled and exercised, but they are not part of the project's contractual surface.
-
-`src/core_examples` is supported as the repository reference package, but it is not the stable public API of the published base `frankstate` wheel. `src/services` is repository integration code, not an extension of the `frankstate` public API.
-
-The published base wheel intentionally contains only `frankstate`. `core_examples` and `services` remain repository-level layers with different responsibilities.
-
-If you are evaluating or reusing Frankenst-AI, start with `src/frankstate`, then move to `src/core_examples` for the concrete reference package, and only read `src/services` when you need repository runtime entrypoints or shared provider adapters.
 
 ## Prerequisites
 
@@ -93,6 +88,8 @@ Choose one of these two installation paths depending on what you need.
 ### Option A. Install the published package `frankstate`
 
 Use this option when you only want the reusable public package published on PyPI.
+
+For package-only documentation, examples, and API framing, prefer `README-pypi.md`.
 
 - With `pip` installer:
 ```pip install frankstate```
@@ -150,9 +147,9 @@ Use this option when you want the full mono-repo, including `src/core_examples`,
     sudo apt install tesseract-ocr
     ```
 
-## Running the Project Locally
+## Running the Repository Locally
 
-To run the project locally:
+The steps below are for running the mono-repo reference stack locally, not just the published package:
 
 1. Choose an LLM Services backend
 
@@ -163,9 +160,9 @@ To run the project locally:
   
    #### 1.2 Using Azure AI Foundry Deployment
     Configure your model variables in `.env`: ```cp .env.example .env```
-2. Compile Graph Layouts with WorkflowBuilder
+2. Compile graph layouts with `WorkflowBuilder`
     
-    The minimal example below uses the reference package under `src/core_examples` to show how `src/frankstate` is consumed in a real project.
+    The minimal example below uses the reference package under `src/core_examples` to show how the published `frankstate` package is consumed in a real repository.
 
     Reference layouts now follow a two-step contract:
 
@@ -200,7 +197,7 @@ graph = workflow_builder.compile()
 
 The `graph` is still a LangGraph graph object produced through LangGraph's own runtime.
 
-## Logging
+## Repository Logging
 
 The repository now configures application logging through `configure_logging()` and the
 `src/core_examples/config/config_logging.yml` template.
@@ -217,12 +214,16 @@ LOG_LEVEL=DEBUG LOG_TO_FILE=true python app.py
 
 ## Running Tests
 
+These commands validate the repository, including the `frankstate` core tests, the reference package, and repository-level integrations covered by the current suite.
+
 - Using the pytest CLI:
 ```pytest -q```
 - Using pytest as a Python module:
 ```python -m pytest -q```
 
 ## Local Functions Apps Container 
+
+This section is repository-specific and does not describe behavior of the published `frankstate` wheel.
 - `src/services/functions/function_app.py` is an Azure Functions App Containers packaging
     artifact. It is not a reusable Python module from the source tree and is
     expected to load only after the container build reshapes the filesystem under

@@ -1,4 +1,7 @@
 import asyncio
+from pathlib import Path
+import sys
+import types
 import frankstate
 
 import pytest
@@ -54,6 +57,36 @@ def test_frankstate_reusable_contracts_are_imported_from_submodules() -> None:
     assert RunnableBuilder is not None
     assert NodeManager is not None
     assert EdgeManager is not None
+
+
+@pytest.mark.unit
+def test_display_graph_saves_png_with_optional_notebook_dependencies(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    builder = WorkflowBuilder(config=LinearSyncLayout, state_schema=FrankTestState)
+    output_path = tmp_path / "graph.png"
+
+    fake_ipython = types.ModuleType("IPython")
+    fake_display_module = types.ModuleType("IPython.display")
+    fake_display_module.Image = lambda data: data
+    fake_display_module.display = lambda image: None
+    fake_ipython.display = fake_display_module
+
+    monkeypatch.setitem(sys.modules, "IPython", fake_ipython)
+    monkeypatch.setitem(sys.modules, "IPython.display", fake_display_module)
+
+    class FakeDrawableGraph:
+        def draw_mermaid_png(self, draw_method: object) -> bytes:
+            assert draw_method is not None
+            return b"png-bytes"
+
+    class FakeCompiledGraph:
+        def get_graph(self) -> FakeDrawableGraph:
+            return FakeDrawableGraph()
+
+    monkeypatch.setattr(builder, "compile", lambda: FakeCompiledGraph())
+
+    builder.display_graph(save=True, filepath=str(output_path))
+
+    assert output_path.read_bytes() == b"png-bytes"
 
 
 @pytest.mark.unit

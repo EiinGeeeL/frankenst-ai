@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections.abc import Awaitable
 from typing import Any
 from pydantic import BaseModel
 from langchain_core.runnables import Runnable
@@ -91,20 +92,34 @@ class RunnableBuilder(ABC):
         return self._retriever
 
     def invoke(self, input: Any) -> Any:
-        """Invoke the configured runnable synchronously."""
+        """Invoke the configured runnable synchronously.
+
+        Use this convenience method when callers want to treat the builder
+        itself as the execution surface. Use `get()` when another object needs
+        the runnable instance directly for composition.
+        """
         runnable = self._require_runnable()
         return runnable.invoke(input)
 
 
-    def ainvoke(self, input: Any) -> Any:
-        """Invoke the configured runnable asynchronously."""
+    def ainvoke(self, input: Any) -> Awaitable[Any]:
+        """Invoke the configured runnable asynchronously.
+
+        Use this convenience method when callers want to treat the builder
+        itself as the execution surface. Use `get()` when another object needs
+        the runnable instance directly for composition.
+        """
         runnable = self._require_runnable()
         return runnable.ainvoke(input)
     
     def get(self) -> Runnable:
-        """Return the lazily configured runnable instance."""
+        """Return the lazily configured runnable instance.
+
+        This is the preferred accessor when another object, such as a state
+        handler, needs the runnable itself rather than an immediate invocation.
+        """
         return self._require_runnable()
 
-    def get_raw_retriever(self) -> BaseRetriever:
+    def get_retriever(self) -> BaseRetriever:
         """Return the lazily configured retriever instance."""
         return self._get_retriever

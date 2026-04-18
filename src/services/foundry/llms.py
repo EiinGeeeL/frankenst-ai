@@ -26,7 +26,16 @@ class LLMServices:
 
 	@classmethod
 	def _load_config(cls, config: dict | None = None) -> dict:
-		return config if config is not None else read_yaml(CONFIG_FILE_PATH)
+		resolved_config = config if config is not None else read_yaml(CONFIG_FILE_PATH)
+		launch_config = resolved_config.get("launch")
+		if not isinstance(launch_config, dict):
+			raise RuntimeError("Missing config section for: launch")
+
+		for key in ("model", "embeddings"):
+			if key not in launch_config:
+				raise RuntimeError(f"Missing config entry for: launch.{key}")
+
+		return resolved_config
 
 	@classmethod
 	def _get_config(cls, config: dict, provider: str, key: str | None = None):

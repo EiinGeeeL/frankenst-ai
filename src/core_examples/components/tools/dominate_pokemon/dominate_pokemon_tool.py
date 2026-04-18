@@ -13,7 +13,7 @@ class DominatePokemonTool(BaseTool):
     return_direct: bool | None = None
 
     # New BaseTool attributes
-    config: SkipValidation[DominatePokemonProperty] = DominatePokemonProperty
+    config: SkipValidation[DominatePokemonProperty] = DominatePokemonProperty()
     logger: SkipValidation[logging.Logger] = logging.getLogger(__name__)
      
     def __init__(self, **data):

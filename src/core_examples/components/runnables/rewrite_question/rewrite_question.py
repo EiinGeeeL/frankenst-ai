@@ -22,7 +22,7 @@ class RewriteQuestion(RunnableBuilder):
 
         # Prepare the human_prompt
         package = __package__ or __name__
-        format_template = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'format_template.txt'))
+        format_template = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'format_template.md'))
 
         prompt_template = format_template.format(
             question=question

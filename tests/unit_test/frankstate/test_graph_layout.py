@@ -121,3 +121,20 @@ def test_getters_preserve_order_and_build_once() -> None:
         ("second_node", "END"),
     ]
     assert builders == [layout.PRIMARY_BUILDER, layout.SECONDARY_BUILDER]
+
+
+@pytest.mark.unit
+def test_get_runnable_builder_returns_named_builder() -> None:
+    layout = OrderedLayout()
+
+    builder = layout.get_runnable_builder("PRIMARY_BUILDER")
+
+    assert builder is layout.PRIMARY_BUILDER
+
+
+@pytest.mark.unit
+def test_get_runnable_builder_rejects_unknown_name() -> None:
+    layout = OrderedLayout()
+
+    with pytest.raises(KeyError, match="does not expose a RunnableBuilder"):
+        layout.get_runnable_builder("MISSING_BUILDER")

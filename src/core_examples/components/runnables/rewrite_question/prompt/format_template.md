@@ -1,6 +1,12 @@
+# Task
 Look at the input and try to reason about the underlying semantic intent / meaning.
-Here is the initial question:
--------
+
+---
+
+# Initial Question
 {question}
--------
+
+---
+
+# Output
 Formulate an improved question with no comments:

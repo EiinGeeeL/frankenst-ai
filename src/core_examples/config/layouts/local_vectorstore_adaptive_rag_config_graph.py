@@ -40,7 +40,6 @@ class LocalVectorStoreAdaptiveRAGConfigGraph(GraphLayout):
     """
 
     CONFIG_NODES: dict[str, Any]
-    RAW_RETRIEVER: BaseRetriever
     RETRIEVER_CHAIN: MultimodalRetriever
     GENERARION_CHAIN: MultimodalGeneration
     GRADE_STRUCTURED_CHAIN: StructuredGradeDocument
@@ -57,7 +56,6 @@ class LocalVectorStoreAdaptiveRAGConfigGraph(GraphLayout):
 
         return {
             "CONFIG_NODES": load_node_registry(CONFIG_NODES_FILE_PATH),
-            "RAW_RETRIEVER": raw_retriever,
             "RETRIEVER_CHAIN": MultimodalRetriever(
                 model=LLMServices.model,
                 retriever=raw_retriever,

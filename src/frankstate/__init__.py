@@ -2,8 +2,9 @@
 
 Only `WorkflowBuilder` is re-exported from the package root.
 
-All other reusable building blocks must be imported from their concrete
-submodules so that `frankstate` does not become an absolute import bucket. Examples:
+All other reusable building blocks must be imported from subpackages so that
+`frankstate` does not become an absolute import bucket. Reusable contracts come
+from their concrete modules. Examples:
 
 - `from frankstate.entity.graph_layout import GraphLayout`
 - `from frankstate.entity.node import SimpleNode, CommandNode`

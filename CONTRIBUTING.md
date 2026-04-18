@@ -5,7 +5,7 @@
 This repository contains three different layers:
 
 - `src/frankstate`: reusable public package surface.
-- `src/core_examples`: reference package showing how to consume `frankstate`.
+- `src/core_examples`: reference package showing how to consume `frankstate`. It may reuse `src/services/foundry` as a repository adapter for shared runtime bootstrap, but should avoid depending on other service entrypoints.
 - `src/services`: runtime integrations and deployment-facing adapters.
 - `research`: exploratory material that can inform future work but is not part of the repository's contractual surface.
 
@@ -34,6 +34,25 @@ If you touch packaging, also validate the distributions:
 ```bash
 python -m build --wheel --sdist --no-isolation
 ```
+
+## Dependency policy
+
+- `src/frankstate` is a published library, so its runtime dependencies should use compatible version ranges, not exact `==` pins.
+- The runtime floor should reflect versions exercised by the repository test suite.
+- The runtime ceiling should stay conservative around fast-moving dependencies such as LangGraph and LangChain so `frankstate` does not claim untested compatibility.
+- Exact pins or lock-style constraints are appropriate for repository development and CI environments, not for the published core wheel.
+
+Current core policy:
+
+- `langchain-core>=1.3.0,<1.4`
+- `langgraph>=1.1.8,<1.2`
+- `pydantic>=2.12.5,<3`
+
+## Versioning policy
+
+- `0.1.x` is for backward-compatible fixes, documentation updates, packaging adjustments, test improvements and compatibility maintenance that do not require user code changes.
+- `0.2.0` should be used when the public `frankstate` contract changes in a meaningful way: import paths, required conventions, signatures, behavior of core abstractions or supported dependency families.
+- Before any minor bump such as `0.2.0`, document the user-facing change in `CHANGELOG.md` and update package-facing documentation when the recommended usage changes.
 
 ## Pull requests
 

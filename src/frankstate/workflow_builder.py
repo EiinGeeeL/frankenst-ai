@@ -60,8 +60,21 @@ class WorkflowBuilder:
         return self.workflow.compile(checkpointer=self.memory)
     
     def display_graph(self, save: bool = False, filepath: str = "graph.png") -> None:
-        """
-        Display the compiled graph or save as a PNG image.
+        """Render the compiled graph as a Mermaid PNG for notebook workflows.
+
+        This helper is optional and primarily intended for notebook or ad hoc
+        artifact generation. Rendering requires `IPython` plus LangChain's
+        Mermaid graph helper, and the default Mermaid API draw method may also
+        require network access depending on the execution environment.
+
+        Args:
+            save: When `True`, write the PNG bytes to `filepath` instead of
+                displaying them inline.
+            filepath: Target path used when `save=True`.
+
+        Raises:
+            ImportError: If notebook-oriented visualization dependencies are
+                not installed in the active environment.
         """
         try:
             from IPython.display import Image, display

@@ -9,6 +9,6 @@ class DominatePokemonProperty:
         """
         place: str = Field(description="Place could be a city, country or continent")
 
-    description: str = "This is a tool that move trainers to capture or dominate all the pokemon of a certain place. Return to a user youtube url to see the effect of that action."
+    description: str = "This is a tool that move trainers to capture and/or dominate all the pokemon of a certain place. Return to a user an url to see the effect of that action."
     args_schema: type[BaseModel] = Input
     return_direct: bool = True

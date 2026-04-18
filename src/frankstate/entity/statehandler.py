@@ -36,16 +36,15 @@ class StateEvaluator(ABC):
             setattr(self, key, value)
 
     @abstractmethod
-    async def evaluate(self, state: list[AnyMessage] | dict[str, Any] | BaseModel) -> str:
+    def evaluate(self, state: list[AnyMessage] | dict[str, Any] | BaseModel) -> str:
         """Return the routing key used by a conditional edge path map.
 
         The returned value must match one of the keys declared in the
         `ConditionalEdge.map_dict` for the edge that uses this evaluator.
 
-        Although this abstract signature is declared as async for clarity,
-        concrete evaluators in Frankenst-AI may be implemented as synchronous
-        (`def evaluate`) or asynchronous (`async def evaluate`) handlers
-        depending on whether they use `invoke()` or `ainvoke()`.
+        Concrete evaluators may be implemented as synchronous (`def evaluate`)
+        or asynchronous (`async def evaluate`) handlers depending on whether
+        they use `invoke()` or `ainvoke()`.
         """
         pass
 
@@ -80,17 +79,16 @@ class StateEnhancer(ABC):
         
         
     @abstractmethod
-    async def enhance(self, state: list[AnyMessage] | dict[str, Any] | BaseModel) -> dict[str, Any]:
+    def enhance(self, state: list[AnyMessage] | dict[str, Any] | BaseModel) -> dict[str, Any]:
         """Return a partial state update produced by runnable or custom enhance logic.
 
         The returned mapping is merged by LangGraph into the current state. The
         exact keys must be compatible with the graph state schema used when the
         workflow is compiled.
 
-        Although this abstract signature is declared as async for clarity,
-        concrete enhancers in Frankenst-AI may be implemented as synchronous
-        (`def enhance`) or asynchronous (`async def enhance`) handlers
-        depending on whether they use `invoke()` or `ainvoke()`.
+        Concrete enhancers may be implemented as synchronous (`def enhance`)
+        or asynchronous (`async def enhance`) handlers depending on whether
+        they use `invoke()` or `ainvoke()`.
         """
         pass
 

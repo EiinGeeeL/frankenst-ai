@@ -130,3 +130,14 @@ def test_remove_node_rejects_unknown_node() -> None:
 
     with pytest.raises(ValueError, match="not registered"):
         manager.remove_node(node)
+
+
+@pytest.mark.unit
+def test_remove_node_accepts_registered_name() -> None:
+    manager = NodeManager()
+    node = SimpleNode(StaticMessageEnhancer("simple"), name="simple_node")
+    manager.add_nodes(node)
+
+    manager.remove_node("simple_node")
+
+    assert manager.get_nodes() == ()

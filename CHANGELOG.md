@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format follows Keep a Changelog and the project currently stays in the `0.x`
 phase while the public packaging and repository boundaries continue to mature.
 
+## [0.1.0] - 2026-04-18
+
+### Added
+
+- A package-focused release narrative for `frankstate`, including clearer public API boundaries and a dedicated published-package README.
+
+### Changed
+
+- The `frankstate` root API remains intentionally small, while reusable contracts continue to live in their concrete submodules instead of shortcut barrels.
+- Core runtime dependency metadata now uses bounded compatibility ranges for `langchain-core`, `langgraph`, and `pydantic`.
+- Structured prompt resources in `src/core_examples` now use Markdown `.md` files and Markdown sectioning instead of legacy `.txt` templates with XML-like tags.
+- `display_graph()` and other package-facing docs now describe optional behavior and repository/package boundaries more explicitly.
+
+### Fixed
+
+- Internal and public documentation now consistently distinguish the published `frankstate` package from the broader `Frankenst-AI` repository.
+- Runnable/retriever examples and related tests now align with the simplified retriever contract and current prompt resource layout.
+
 ## [0.0.5] - 2026-04-17
 
 ### Added

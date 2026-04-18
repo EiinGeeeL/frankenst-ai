@@ -37,13 +37,13 @@ class OakLangAgent(RunnableBuilder):
 
         # Prepare the prompt
         package = __package__ or __name__
-        context = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'context.txt'))
-        instructions = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'instructions.txt'))
-        input = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'input.txt'))
-        output_format = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'output_format.txt'))
-        restrictions = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'restrictions.txt'))
+        context = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'context.md'))
+        instructions = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'instructions.md'))
+        input = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'input.md'))
+        output_format = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'output_format.md'))
+        restrictions = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'restrictions.md'))
 
-        format_template = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'format_template.txt'))
+        format_template = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'format_template.md'))
 
         system_prompt = format_template.format(
             context=context,

@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 
 import pytest
 
@@ -57,6 +58,14 @@ def test_state_evaluator_supports_async_handlers() -> None:
 
 
 @pytest.mark.unit
+def test_statehandler_base_contracts_are_not_async_only() -> None:
+    from frankstate.entity.statehandler import StateEnhancer, StateEvaluator
+
+    assert not inspect.iscoroutinefunction(StateEvaluator.evaluate)
+    assert not inspect.iscoroutinefunction(StateEnhancer.enhance)
+
+
+@pytest.mark.unit
 def test_state_commander_returns_command_with_update() -> None:
     commander = RoutingCommander(destinations={"accept": "accept_node", "reject": "reject_node"})
 
@@ -82,7 +91,7 @@ def test_runnable_builder_prefers_explicit_retriever() -> None:
     retriever = object()
     builder = FakeRunnableBuilder(retriever=retriever)
 
-    assert builder.get_raw_retriever() is retriever
+    assert builder.get_retriever() is retriever
 
 
 @pytest.mark.unit

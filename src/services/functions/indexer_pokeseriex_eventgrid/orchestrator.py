@@ -11,13 +11,35 @@ INDEX_NAME = "pokeseriex-index"
 
 
 class Orchestrator:
-    @staticmethod
-    def check_index(index_name: str):
+    """Coordinate Azure EventGrid indexing flows for the repository example.
 
-        # Initialize index client
+    The trigger handler may inject pre-built Azure Search clients so a single
+    invocation does not repeat Key Vault lookups for every orchestrator step.
+    """
+
+    @staticmethod
+    def create_search_clients(index_name: str) -> tuple[SearchIndexClient, SearchClient]:
+        """Create the Azure Search clients used by the EventGrid flow."""
         service_endpoint = get_secret("AZURE_SEARCH_SERVICE_ENDPOINT")
         key = get_secret("AZURE_SEARCH_API_KEY")
-        index_client = SearchIndexClient(service_endpoint, AzureKeyCredential(key))
+        credential = AzureKeyCredential(key)
+        return (
+            SearchIndexClient(service_endpoint, credential),
+            SearchClient(service_endpoint, index_name, credential),
+        )
+
+    @staticmethod
+    def _ensure_llm_runtime() -> None:
+        if LLMServices.model is None or LLMServices.embeddings is None:
+            LLMServices.launch()
+
+        if LLMServices.model is None or LLMServices.embeddings is None:
+            raise RuntimeError("LLMServices.launch() did not initialize model and embeddings.")
+
+    @staticmethod
+    def check_index(index_name: str, index_client: SearchIndexClient | None = None):
+        if index_client is None:
+            index_client, _ = Orchestrator.create_search_clients(index_name)
 
         # Initialize ai_search_index_manager
         ai_search_index_manager = AISearchIndexManager(index_name=index_name, index_client=index_client)
@@ -31,12 +53,9 @@ class Orchestrator:
         return INDEX_NAME
     
     @staticmethod        
-    def document_indexing(index_name: str, subject: str):
-    
-        # Initialize search client
-        service_endpoint = get_secret("AZURE_SEARCH_SERVICE_ENDPOINT")
-        key = get_secret("AZURE_SEARCH_API_KEY")
-        search_client = SearchClient(service_endpoint, index_name, AzureKeyCredential(key))
+    def document_indexing(index_name: str, subject: str, search_client: SearchClient | None = None):
+        if search_client is None:
+            _, search_client = Orchestrator.create_search_clients(index_name)
 
         # Parse the subject
         blob_path, container_name = parse_blob_subject(subject=subject)
@@ -46,7 +65,7 @@ class Orchestrator:
         temp_filepath = download_pdf_from_blob(blob_path=blob_path, container_name=container_name)
 
         # Prepare the document
-        LLMServices.launch()
+        Orchestrator._ensure_llm_runtime()
  
         # Initialize indexer
         indexer = AISearchMultiVectorDocumentIndexer(search_client, LLMServices.model, LLMServices.embeddings)
@@ -61,12 +80,9 @@ class Orchestrator:
             raise ValueError("Provide a pdf file")
 
     @staticmethod        
-    def delete_document_by_filename(index_name: str, subject: str):
-
-        # Initialize search client
-        service_endpoint = get_secret("AZURE_SEARCH_SERVICE_ENDPOINT")
-        key = get_secret("AZURE_SEARCH_API_KEY")
-        search_client = SearchClient(service_endpoint, index_name, AzureKeyCredential(key))
+    def delete_document_by_filename(index_name: str, subject: str, search_client: SearchClient | None = None):
+        if search_client is None:
+            _, search_client = Orchestrator.create_search_clients(index_name)
 
         # Parse the subject
         blob_path, _ = parse_blob_subject(subject=subject)

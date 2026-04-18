@@ -25,10 +25,10 @@ class StructuredGradeDocument(RunnableBuilder):
 
         # Prepare the human_prompt
         package = __package__ or __name__
-        context = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'context.txt'))
-        instructions = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'instructions.txt'))
+        context = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'context.md'))
+        instructions = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'instructions.md'))
 
-        format_template = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'format_template.txt'))
+        format_template = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'format_template.md'))
 
         prompt_template = format_template.format(
             context=context,
