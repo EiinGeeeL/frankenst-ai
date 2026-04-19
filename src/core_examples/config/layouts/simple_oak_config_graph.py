@@ -12,7 +12,7 @@ from core_examples.components.edges.evaluators.route_tool_condition import Route
 from core_examples.components.nodes.enhancers.simple_messages_ainvoke import SimpleMessagesAsyncInvoke
 from core_examples.components.tools.get_evolution.get_evolution_tool import GetEvolutionTool
 from core_examples.components.tools.random_movements.random_movements_tool import RandomMovementsTool
-from core_examples.utils.common import load_node_registry
+from core_examples.utils.config_loader import load_node_registry
 from core_examples.constants import CONFIG_NODES_FILE_PATH
 
 

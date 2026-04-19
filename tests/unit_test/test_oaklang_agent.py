@@ -5,9 +5,10 @@ from langchain_core.messages import AIMessage, HumanMessage
 
 from core_examples.constants import CONFIG_FILE_PATH
 from core_examples.components.runnables.oaklang_agent.oaklang_agent import OakLangAgent
+from core_examples.utils.config_loader import read_yaml
 from core_examples.components.tools.get_evolution.get_evolution_tool import GetEvolutionTool
 from core_examples.components.tools.random_movements.random_movements_tool import RandomMovementsTool
-from core_examples.utils.common import read_yaml, resolve_package_resource, load_and_clean_text_file
+from core_examples.utils.common import resolve_package_resource, load_and_clean_text_file
 from tests.support.core_doubles import ToolBindingFakeModel
 
 
@@ -58,7 +59,7 @@ def test_core_config_can_be_read_as_package_resource_outside_repo_root(monkeypat
     config = read_yaml(CONFIG_FILE_PATH)
 
     assert config["launch"]["model"] == "ollama"
-    assert config["ollama"]["model"] == "gemma4:e4b"
+    assert config["ollama"]["model"]["model"] == "gemma4:e4b"
 
 
 def test_oaklang_prompt_resource_can_be_loaded_without_module_file_paths(monkeypatch, tmp_path) -> None:

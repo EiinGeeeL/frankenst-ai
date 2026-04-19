@@ -1,17 +1,40 @@
 # Global runtime configuration shared by notebooks, scripts and services.
 #
-# `launch.model` and `launch.embeddings` select the backend family to use.
-# The provider-specific sections below define the defaults consumed by
-# `LLMServices.launch()`.
+# `launch.model` and `launch.embeddings` select the provider family used by
+# `LLMServices.build_runtime()` and `LLMServices.launch()`.
+# The provider-specific sections below define the constructor kwargs passed to
+# each backend client after resolving any `secret:` through `get_secret()`, which 
+# checks the environment first and then Azure Key Vault.
 
 ollama:
-  # Example: make sure the selected Ollama model is available locally.
-  model: gemma4:e4b # ministral-3:8b
-  temperature: 0
-  embeddings_model: embeddinggemma
+  model:
+    model: gemma4:e4b # ministral-3:8b
+    temperature: 0
+  embeddings:
+    model: embeddinggemma
+
+azureai:
+  model:
+    endpoint:
+      secret: AZURE_INFERENCE_ENDPOINT
+    credential:
+      secret: AZURE_INFERENCE_CREDENTIAL
+    model:
+      secret: AZURE_INFERENCE_MODEL_NAME
+    api_version:
+      secret: AZURE_INFERENCE_API_VERSION
+    temperature: 0
+  embeddings:
+    endpoint:
+      secret: AZURE_EMBEDDINGS_ENDPOINT
+    credential:
+      secret: AZURE_EMBEDDINGS_CREDENTIAL
+    model:
+      secret: AZURE_EMBEDDINGS_MODEL_NAME
+    api_version:
+      secret: AZURE_EMBEDDINGS_API_VERSION
 
 launch:
-  # Supported values in the current project are `ollama` and `azureai`.
   model: ollama # azureai
   embeddings: ollama # azureai
   turbo_model: None

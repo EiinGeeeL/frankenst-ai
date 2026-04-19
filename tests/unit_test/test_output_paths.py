@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 
 import core_examples.utils.common as common_module
+import core_examples.utils.config_loader as config_loader_module
 import core_examples.utils.logger as logger_module
 import core_examples.utils.rag.local_chroma as local_chroma_module
 import pytest
@@ -139,7 +140,7 @@ def test_read_yaml_raises_for_empty_yaml(tmp_path: Path) -> None:
     yaml_path.write_text("", encoding="utf-8")
 
     with pytest.raises(ValueError, match="is empty"):
-        common_module.read_yaml(yaml_path)
+        config_loader_module.read_yaml(yaml_path)
 
 
 def test_read_yaml_raises_for_non_mapping_root(tmp_path: Path) -> None:
@@ -147,7 +148,7 @@ def test_read_yaml_raises_for_non_mapping_root(tmp_path: Path) -> None:
     yaml_path.write_text("- item\n- another\n", encoding="utf-8")
 
     with pytest.raises(ValueError, match="must contain a YAML mapping at the root"):
-        common_module.read_yaml(yaml_path)
+        config_loader_module.read_yaml(yaml_path)
 
 
 def test_read_yaml_raises_for_empty_mapping(tmp_path: Path) -> None:
@@ -155,7 +156,7 @@ def test_read_yaml_raises_for_empty_mapping(tmp_path: Path) -> None:
     yaml_path.write_text("{}\n", encoding="utf-8")
 
     with pytest.raises(ValueError, match="must not be an empty mapping"):
-        common_module.read_yaml(yaml_path)
+        config_loader_module.read_yaml(yaml_path)
 
 
 def test_load_node_registry_validates_required_node_fields(tmp_path: Path) -> None:
@@ -166,4 +167,4 @@ def test_load_node_registry_validates_required_node_fields(tmp_path: Path) -> No
     )
 
     with pytest.raises(ValueError, match="missing required node fields"):
-        common_module.load_node_registry(yaml_path)
+        config_loader_module.load_node_registry(yaml_path)

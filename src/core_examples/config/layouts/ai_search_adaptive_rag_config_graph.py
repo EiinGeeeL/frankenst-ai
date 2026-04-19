@@ -18,7 +18,7 @@ from core_examples.components.nodes.enhancers.generate_answer_ainvoke import Gen
 from core_examples.components.nodes.enhancers.retrieve_context_ai_search import RetrieveContextAISearch
 from core_examples.components.nodes.enhancers.rewrite_question_ainvoke import RewriteQuestionAsyncInvoke
 from core_examples.models.structured_output.grade_documents import GradeDocuments
-from core_examples.utils.common import load_node_registry
+from core_examples.utils.config_loader import load_node_registry
 from core_examples.utils.key_vault import get_secret
 from core_examples.constants import CONFIG_NODES_FILE_PATH
 
