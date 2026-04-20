@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from dataclasses import dataclass
+from threading import Lock
 from typing import Any
 
 from azure.identity import DefaultAzureCredential
@@ -36,6 +37,7 @@ class LLMServices:
 	model: BaseChatModel | None = None
 	embeddings: Embeddings | None = None
 	turbo_model: BaseChatModel | None = None
+	_launch_lock = Lock()
 
 	@classmethod
 	def _model_providers(cls) -> dict[str, Callable[[dict[str, Any]], BaseChatModel]]:
@@ -196,6 +198,15 @@ class LLMServices:
 		return loader(config)
 
 	@classmethod
+	def _current_runtime(cls) -> LLMRuntime | None:
+		"""Return the current shared runtime from class-level state if initialized."""
+
+		if cls.model is None or cls.embeddings is None:
+			return None
+
+		return LLMRuntime(cls.model, cls.embeddings, cls.turbo_model)
+
+	@classmethod
 	def build_runtime(cls, config: dict[str, Any] | None = None) -> LLMRuntime:
 		"""Build a fresh runtime from config without mutating class attributes."""
 
@@ -204,14 +215,27 @@ class LLMServices:
 		embeddings_provider = cls._require(resolved_config, "launch.embeddings")
 		model = cls._load_model(resolved_config, model_provider)
 		embeddings = cls._load_embeddings(resolved_config, embeddings_provider)
-		return LLMRuntime(model=model, embeddings=embeddings, turbo_model=None)
+		return LLMRuntime(model, embeddings, None)
 
 	@classmethod
-	def launch(cls, config: dict[str, Any] | None = None) -> LLMRuntime:
-		"""Build the runtime and publish it through the class-level shared state."""
+	def launch(cls, config: dict[str, Any] | None = None, *, force_reload: bool = False) -> LLMRuntime:
+		"""Publish one shared runtime per process unless an explicit reload is requested.
 
-		runtime = cls.build_runtime(config)
-		cls.model = runtime.model
-		cls.embeddings = runtime.embeddings
-		cls.turbo_model = runtime.turbo_model
-		return runtime
+		When the shared runtime is already available, repeated calls reuse it.
+		Pass `force_reload=True` to rebuild the published runtime.
+		"""
+
+		current_runtime = None if force_reload else cls._current_runtime()
+		if current_runtime is not None:
+			return current_runtime
+
+		with cls._launch_lock:
+			current_runtime = None if force_reload else cls._current_runtime()
+			if current_runtime is not None:
+				return current_runtime
+
+			runtime = cls.build_runtime(config)
+			cls.model = runtime.model
+			cls.embeddings = runtime.embeddings
+			cls.turbo_model = runtime.turbo_model
+			return runtime
