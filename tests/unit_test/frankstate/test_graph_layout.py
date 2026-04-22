@@ -3,7 +3,7 @@ import pytest
 from frankstate.entity.edge import SimpleEdge
 from frankstate.entity.graph_layout import GraphLayout
 from frankstate.entity.node import SimpleNode
-from tests.support.frankstate_doubles.fake import FakeRunnableBuilder
+from tests.support.frankstate_doubles.builders import FakeRunnableBuilder
 from tests.support.frankstate_doubles.stub import StaticMessageEnhancer
 
 

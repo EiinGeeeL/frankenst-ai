@@ -1,4 +1,4 @@
-# frankstate
+# 🧟 frankstate
 
 `frankstate` is a lightweight pattern layer for assembling LangGraph workflows with clearer structure, stronger boundaries, and less duplicated graph wiring.
 

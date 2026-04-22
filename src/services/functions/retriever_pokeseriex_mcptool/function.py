@@ -7,12 +7,11 @@ from .properties import tool_properties
 bp_3 = func.Blueprint()
 
 @bp_3.function_name(name="retriever_pokeseriex_mcptool")
-@bp_3.generic_trigger(
+@bp_3.mcp_tool_trigger(
     arg_name="context",
-    type="mcpToolTrigger",
-    toolName="retriever_pokeseriex",
+    tool_name="retriever_pokeseriex",
     description="Esta herramienta transforma una consulta en lenguaje natural en un vector y recupera contexto del contenido y los esquemas de una base de datos, Teradata.",
-    toolProperties=json.dumps([prop.to_dict() for prop in tool_properties])
+    tool_properties=json.dumps([prop.to_dict() for prop in tool_properties])
 )
 def main(context) -> str:
     content = json.loads(context)

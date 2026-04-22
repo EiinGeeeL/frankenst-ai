@@ -147,6 +147,8 @@ Use this option when you want the full mono-repo, including `src/core_examples`,
     sudo apt install tesseract-ocr
     ```
 
+Check optional root shortcuts with `make help`
+
 ## Running the Repository Locally
 
 The steps below are for running the mono-repo reference stack locally, not just the published package:
@@ -220,6 +222,11 @@ These commands validate the repository, including the `frankstate` core tests, t
 ```pytest -q```
 - Using pytest as a Python module:
 ```python -m pytest -q```
+
+If you prefer root shortcuts:
+
+- `make test` runs the full repository suite.
+- `make test-frankstate` runs only the installable package suite under `tests/unit_test/frankstate`.
 
 ## Local Functions Apps Container 
 

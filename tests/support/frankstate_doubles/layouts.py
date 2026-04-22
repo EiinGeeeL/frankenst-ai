@@ -6,8 +6,7 @@ from langgraph.prebuilt import ToolNode
 from frankstate.entity.edge import ConditionalEdge, SimpleEdge
 from frankstate.entity.graph_layout import GraphLayout
 from frankstate.entity.node import CommandNode, SimpleNode
-from frankstate.entity.runnable_builder import RunnableBuilder
-from tests.support.frankstate_doubles.spy import SpyRunnable
+from tests.support.frankstate_doubles.builders import FakeRunnableBuilder
 from tests.support.frankstate_doubles.stub import (
     AsyncFieldRouteEvaluator,
     FieldRouteEvaluator,
@@ -26,38 +25,6 @@ class FrankTestState(MessagesState):
     route: str
     decision: str
     tool_text: str
-
-
-class FakeVectorStore:
-    def __init__(self, retriever: Any = None):
-        self.retriever = retriever if retriever is not None else object()
-        self.calls: list[dict[str, Any]] = []
-
-    def as_retriever(self, **kwargs: Any) -> Any:
-        self.calls.append(kwargs)
-        return self.retriever
-
-
-class FakeRunnableBuilder(RunnableBuilder):
-    def __init__(
-        self,
-        sync_result: Any = "sync-result",
-        async_result: Any = "async-result",
-        retriever: Any = None,
-        vectordb: Any = None,
-    ):
-        self.sync_result = sync_result
-        self.async_result = async_result
-        self.configure_calls = 0
-        super().__init__(
-            model=object(),
-            retriever=retriever,
-            vectordb=vectordb,
-        )
-
-    def _configure_runnable(self) -> SpyRunnable:
-        self.configure_calls += 1
-        return SpyRunnable(sync_result=self.sync_result, async_result=self.async_result)
 
 
 class LinearAsyncLayout(GraphLayout):

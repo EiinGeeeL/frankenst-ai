@@ -16,7 +16,7 @@ from frankstate.entity.runnable_builder import RunnableBuilder
 from frankstate.entity.statehandler import StateCommander, StateEnhancer, StateEvaluator
 from frankstate.managers.edge_manager import EdgeManager
 from frankstate.managers.node_manager import NodeManager
-from tests.support.frankstate_doubles.fake import (
+from tests.support.frankstate_doubles.layouts import (
     CommandAsyncLayout,
     ConditionalAsyncEvaluatorLayout,
     ConditionalAsyncLayout,

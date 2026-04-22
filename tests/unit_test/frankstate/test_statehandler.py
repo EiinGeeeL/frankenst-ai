@@ -3,10 +3,12 @@ import inspect
 
 import pytest
 
-from tests.support.frankstate_doubles.fake import FakeRunnableBuilder, FakeVectorStore
+from frankstate.entity.statehandler import StateEnhancer, StateEvaluator
+from tests.support.frankstate_doubles.builders import FakeRunnableBuilder
 from tests.support.frankstate_doubles.stub import (
     AsyncFieldRouteEvaluator,
     FieldRouteEvaluator,
+    MissingDestinationsCommander,
     RoutingCommander,
     RunnableMessageEnhancer,
     SyncRunnableMessageEnhancer,
@@ -20,8 +22,9 @@ def test_state_enhancer_injects_runnable_and_kwargs() -> None:
 
     result = asyncio.run(enhancer.enhance({"messages": []}))
 
-    assert enhancer.runnable is builder.get()
+    assert enhancer.runnable is not None
     assert enhancer.marker == "seen"
+    assert builder.configure_calls == 1
     assert result["messages"][-1].content == "from-runnable"
 
 
@@ -32,8 +35,9 @@ def test_state_enhancer_supports_sync_handlers() -> None:
 
     result = enhancer.enhance({"messages": []})
 
-    assert enhancer.runnable is builder.get()
+    assert enhancer.runnable is not None
     assert enhancer.marker == "seen"
+    assert builder.configure_calls == 1
     assert result["messages"][-1].content == "from-sync-runnable"
 
 
@@ -59,8 +63,6 @@ def test_state_evaluator_supports_async_handlers() -> None:
 
 @pytest.mark.unit
 def test_statehandler_base_contracts_are_not_async_only() -> None:
-    from frankstate.entity.statehandler import StateEnhancer, StateEvaluator
-
     assert not inspect.iscoroutinefunction(StateEvaluator.evaluate)
     assert not inspect.iscoroutinefunction(StateEnhancer.enhance)
 
@@ -77,38 +79,15 @@ def test_state_commander_returns_command_with_update() -> None:
 
 
 @pytest.mark.unit
-def test_runnable_builder_configures_runnable_once_and_delegates_calls() -> None:
-    builder = FakeRunnableBuilder(sync_result="sync-result", async_result="async-result")
+def test_state_commander_destinations_returns_backing_mapping() -> None:
+    commander = RoutingCommander(destinations={"accept": "accept_node"})
 
-    assert builder.get() is builder.get()
-    assert builder.configure_calls == 1
-    assert builder.invoke("payload") == "sync-result"
-    assert asyncio.run(builder.ainvoke("payload")) == "async-result"
+    assert commander.destinations == {"accept": "accept_node"}
 
 
 @pytest.mark.unit
-def test_runnable_builder_prefers_explicit_retriever() -> None:
-    retriever = object()
-    builder = FakeRunnableBuilder(retriever=retriever)
+def test_state_commander_destinations_requires_property_or_backing_attr() -> None:
+    commander = MissingDestinationsCommander()
 
-    assert builder.get_retriever() is retriever
-
-
-@pytest.mark.unit
-def test_runnable_builder_builds_retriever_from_vectordb() -> None:
-    retriever = object()
-    vectordb = FakeVectorStore(retriever=retriever)
-    builder = FakeRunnableBuilder(vectordb=vectordb)
-
-    built = builder._build_retriever(search_type="mmr")
-
-    assert built is retriever
-    assert vectordb.calls == [{"search_type": "mmr"}]
-
-
-@pytest.mark.unit
-def test_runnable_builder_requires_retriever_source() -> None:
-    builder = FakeRunnableBuilder(retriever=None, vectordb=None)
-
-    with pytest.raises(ValueError, match="cannot build a retriever"):
-        builder._build_retriever()
+    with pytest.raises(AttributeError, match=r"must expose a 'destinations: dict\[str, str\]' property"):
+        _ = commander.destinations

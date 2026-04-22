@@ -1,2 +1,4 @@
 pytest
 streamlit
+build
+twine

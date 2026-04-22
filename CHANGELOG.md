@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format follows Keep a Changelog and the project currently stays in the `0.x`
 phase while the public packaging and repository boundaries continue to mature.
 
+## [0.1.1] - 2026-04-22
+
+### Added
+
+- Root `make` shortcuts for editable installs, package-scoped `frankstate` tests, packaging validation, the local MCP server and Azure Functions container workflows.
+- Dedicated `frankstate` test modules for `StateEnhancer` / `StateEvaluator` / `StateCommander` and `RunnableBuilder`, plus purpose-specific test doubles modules for builder infrastructure and workflow layout fixtures.
+
+### Changed
+
+- Azure Functions MCP entrypoints now use the dedicated `mcp_tool_trigger(...)` decorator instead of the generic trigger surface.
+- Repository docs now advertise the root development shortcuts and the distinction between the full repository suite and the package-scoped `frankstate` suite.
+- `frankstate` test support is now organized by responsibility: builder doubles live separately from workflow layout fixtures, and the old mixed `fake.py` / `spy.py` structure is removed.
+- Repository development requirements now include `build` and `twine` so the packaging validation flow can run from the local dev environment.
+
+### Fixed
+
+- Package-scoped `frankstate` tests now reflect the package boundary more cleanly by separating state-handler and runnable-builder concerns.
+
 ## [0.1.0] - 2026-04-18
 
 ### Added
