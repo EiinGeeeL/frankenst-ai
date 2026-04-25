@@ -26,5 +26,5 @@ RUN uv pip install --system --no-cache -r /tmp/requirements/requirements.txt \
 
 # Prepare Function App
 COPY src/ /home/site/wwwroot
-RUN mv /home/site/wwwroot/src/services/functions/* /home/site/wwwroot/ && \
+RUN mv /home/site/wwwroot/services/functions/* /home/site/wwwroot/ && \
     rm -rf /home/site/wwwroot/services/functions
