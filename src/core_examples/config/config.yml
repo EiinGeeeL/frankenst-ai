@@ -16,9 +16,9 @@ ollama:
 azureai:
   model:
     endpoint:
-      secret: AZURE_INFERENCE_ENDPOINT
-    credential:
-      secret: AZURE_INFERENCE_CREDENTIAL
+      secret: AZURE_FOUNDRY_PROJECT_ENDPOINT
+    # credential: Not needed if using DefaultAzureCredential and the environment is configured correctly
+    #   secret: AZURE_INFERENCE_CREDENTIAL
     model:
       secret: AZURE_INFERENCE_MODEL_NAME
     api_version:
@@ -26,9 +26,9 @@ azureai:
     temperature: 0
   embeddings:
     endpoint:
-      secret: AZURE_EMBEDDINGS_ENDPOINT
-    credential:
-      secret: AZURE_EMBEDDINGS_CREDENTIAL
+      secret: AZURE_FOUNDRY_PROJECT_ENDPOINT
+    # credential: Not needed if using DefaultAzureCredential and the environment is configured correctly
+    #   secret: AZURE_EMBEDDINGS_CREDENTIAL
     model:
       secret: AZURE_EMBEDDINGS_MODEL_NAME
     api_version:
