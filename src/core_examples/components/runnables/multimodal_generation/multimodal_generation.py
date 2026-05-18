@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import Any, cast
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage
@@ -21,9 +21,11 @@ class MultimodalGeneration(PromptMixin, RunnableBuilder):
 
         self.logger.info("MultimodalGeneration initialized")
 
-    def _build_prompt(self, kwargs: dict[str, Any]) -> ChatPromptTemplate:
-        docs_by_type = kwargs["context"]
-        question = kwargs["question"]
+    def _build_prompt(self, **kwargs: Any) -> ChatPromptTemplate:
+        docs_by_type = kwargs.get("context")
+        question = kwargs.get("question")
+        if not question or not isinstance(docs_by_type, dict):
+            raise ValueError("Missing required keys 'question' and 'context' in kwargs")
 
         package = __package__ or __name__
         instructions = load_and_clean_text_file(resolve_package_resource(package, 'prompt', 'instructions.md'))
@@ -45,8 +47,8 @@ class MultimodalGeneration(PromptMixin, RunnableBuilder):
 
     def _configure_runnable(self) -> Runnable:
         rag_chain = {
-            "context": RunnableLambda(lambda kwargs: kwargs["context"]),
-            "question": RunnableLambda(lambda kwargs: kwargs["question"]),
-        } | RunnableLambda(self._build_prompt) | self.model
+            "context": RunnableLambda(lambda kwargs: cast(dict[str, Any], kwargs)["context"]),
+            "question": RunnableLambda(lambda kwargs: cast(dict[str, Any], kwargs)["question"]),
+        } | RunnableLambda(lambda kwargs: self._build_prompt(**kwargs)) | self.model
 
         return rag_chain

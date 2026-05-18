@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import Any, cast
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage
@@ -23,9 +23,11 @@ class StructuredGradeDocument(PromptMixin, RunnableBuilder):
 
         self.logger.info("StructuredGradeDocument initialized")
 
-    def _build_prompt(self, kwargs: dict[str, Any]) -> ChatPromptTemplate:
-        docs_by_type = kwargs["context"]
-        question = kwargs["question"]
+    def _build_prompt(self, **kwargs: Any) -> ChatPromptTemplate:
+        docs_by_type = kwargs.get("context")
+        question = kwargs.get("question")
+        if not question or not isinstance(docs_by_type, dict):
+            raise ValueError("Missing required keys 'question' and 'context' in kwargs")
 
         # Prepare the human_prompt
         package = __package__ or __name__
@@ -50,8 +52,8 @@ class StructuredGradeDocument(PromptMixin, RunnableBuilder):
 
     def _configure_runnable(self) -> Runnable:
         structured_grade_document_chain = {
-            "context": RunnableLambda(lambda kwargs: kwargs["context"]),
-            "question": RunnableLambda(lambda kwargs: kwargs["question"]),
-        } | RunnableLambda(self._build_prompt) | self.model.with_structured_output(schema=self.structured_output_schema, method="json_schema")
+            "context": RunnableLambda( lambda kwargs: cast(dict[str, Any], kwargs)["context"]),
+            "question": RunnableLambda(lambda kwargs: cast(dict[str, Any], kwargs)["question"]),
+        } | RunnableLambda(lambda kwargs: self._build_prompt(**kwargs)) | self.model.with_structured_output(schema=self.structured_output_schema, method="json_schema")
 
         return structured_grade_document_chain
